@@ -1,7 +1,7 @@
 package com.visvise.sdk.options;
 
 import com.visvise.sdk.enums.MeshRefineMode;
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 
 /**
  * GenMeshRefineOptions defines optional parameters for GenMeshRefine
@@ -12,7 +12,7 @@ public class GenMeshRefineOptions {
     /** optional, algorithm model name */
     private String algorithmModel;
     /** optional, input model format (default fbx) */
-    private OutputModelFormat inputModelFormat = OutputModelFormat.FBX;
+    private ModelFormat inputModelFormat = ModelFormat.FBX;
     /** optional, MeshRefineMode.OPTIMIZE(1) or MeshRefineMode.DENSIFY(2) */
     private MeshRefineMode mode;
     /** optional, color model for texture preservation */
@@ -39,11 +39,11 @@ public class GenMeshRefineOptions {
         return this;
     }
 
-    public OutputModelFormat getInputModelFormat() {
+    public ModelFormat getInputModelFormat() {
         return inputModelFormat;
     }
 
-    public GenMeshRefineOptions setInputModelFormat(OutputModelFormat inputModelFormat) {
+    public GenMeshRefineOptions setInputModelFormat(ModelFormat inputModelFormat) {
         this.inputModelFormat = inputModelFormat;
         return this;
     }

@@ -1,7 +1,6 @@
 package com.visvise.sdk;
 
 import com.visvise.sdk.enums.*;
-import com.visvise.sdk.models.ModelInfo;
 import com.visvise.sdk.models.ReduceFace;
 import com.visvise.sdk.models.View;
 import com.visvise.sdk.options.*;
@@ -91,7 +90,7 @@ public class AutoAlgorithmModelTest {
 
         try {
             GenHighModelOptions opts = GenHighModelOptions.create()
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.TRIANGLE);
 
             String modelId = client.genHighModel(mainViewFile.getAbsolutePath(), opts);
@@ -122,7 +121,7 @@ public class AutoAlgorithmModelTest {
 
         try {
             GenMidModelOptions opts = GenMidModelOptions.create()
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.TRIANGLE);
 
             String modelId = client.genMidModel(
@@ -155,7 +154,7 @@ public class AutoAlgorithmModelTest {
 
         try {
             GenLowModelOptions opts = GenLowModelOptions.create()
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.TRIANGLE);
 
             String modelId = client.genLowModel(mainViewFile.getAbsolutePath(), opts);
@@ -209,7 +208,7 @@ public class AutoAlgorithmModelTest {
 
         try {
             GenRetopologyOptions opts = GenRetopologyOptions.create()
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.QUAD)
                     .setDetailLevel(DetailLevel.MEDIUM);
 
@@ -240,7 +239,7 @@ public class AutoAlgorithmModelTest {
             List<ReduceFace> reduceFaces = Arrays.asList(
                     new ReduceFace(1, 50, FaceType.QUAD));
             GenLODOptions opts = GenLODOptions.create()
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setGenTimes(1);
 
             List<String> modelIds = client.genLOD(modelFile.getAbsolutePath(), reduceFaces, opts);
@@ -383,7 +382,7 @@ public class AutoAlgorithmModelTest {
 
         try {
             GenVideoMotionOptions opts = GenVideoMotionOptions.create()
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setWithHand(false)
                     .setMultipleTrack(false);
 

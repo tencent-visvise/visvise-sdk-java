@@ -1,7 +1,7 @@
 package com.visvise.sdk.options;
 
 import com.visvise.sdk.enums.FaceType;
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 
 /**
  * GenLowModelOptions defines optional parameters for GenLowModel
@@ -12,7 +12,7 @@ public class GenLowModelOptions {
     /** optional, algorithm model name */
     private String algorithmModel;
     /** optional, output format (default fbx) */
-    private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    private ModelFormat modelFormat = ModelFormat.FBX;
     /** optional, face type (default triangle) */
     private FaceType faceType = FaceType.TRIANGLE;
     /** optional, back view */
@@ -43,12 +43,12 @@ public class GenLowModelOptions {
         return this;
     }
 
-    public OutputModelFormat getOutputModelFormat() {
-        return outputModelFormat;
+    public ModelFormat getOutputModelFormat() {
+        return modelFormat;
     }
 
-    public GenLowModelOptions setOutputModelFormat(OutputModelFormat outputModelFormat) {
-        this.outputModelFormat = outputModelFormat;
+    public GenLowModelOptions setOutputModelFormat(ModelFormat modelFormat) {
+        this.modelFormat = modelFormat;
         return this;
     }
 

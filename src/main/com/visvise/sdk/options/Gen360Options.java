@@ -1,7 +1,7 @@
 package com.visvise.sdk.options;
 
 import com.visvise.sdk.enums.FaceType;
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 
 /**
  * Gen360Options defines optional parameters for Gen360
@@ -12,7 +12,7 @@ public class Gen360Options {
     /** optional, algorithm model name; auto-selected if empty */
     private String algorithmModel;
     /** optional, output format (default fbx) */
-    private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    private ModelFormat modelFormat = ModelFormat.FBX;
     /** optional, face type (default triangle) */
     private FaceType faceType = FaceType.TRIANGLE;
     /** optional, enable A-Pose */
@@ -47,12 +47,12 @@ public class Gen360Options {
         return this;
     }
 
-    public OutputModelFormat getOutputModelFormat() {
-        return outputModelFormat;
+    public ModelFormat getOutputModelFormat() {
+        return modelFormat;
     }
 
-    public Gen360Options setOutputModelFormat(OutputModelFormat outputModelFormat) {
-        this.outputModelFormat = outputModelFormat;
+    public Gen360Options setOutputModelFormat(ModelFormat modelFormat) {
+        this.modelFormat = modelFormat;
         return this;
     }
 

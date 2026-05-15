@@ -1,6 +1,6 @@
 package com.visvise.sdk.options;
 
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 
 /**
  * GenVideoMotionOptions defines optional parameters for GenVideoMotion
@@ -11,7 +11,7 @@ public class GenVideoMotionOptions {
     /** optional, algorithm model name */
     private String algorithmModel;
     /** optional, output format (default fbx) */
-    private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    private ModelFormat modelFormat = ModelFormat.FBX;
     /** optional, enable hand capture */
     private Boolean withHand;
     /** optional, enable multi-person capture */
@@ -40,12 +40,12 @@ public class GenVideoMotionOptions {
         return this;
     }
 
-    public OutputModelFormat getOutputModelFormat() {
-        return outputModelFormat;
+    public ModelFormat getOutputModelFormat() {
+        return modelFormat;
     }
 
-    public GenVideoMotionOptions setOutputModelFormat(OutputModelFormat outputModelFormat) {
-        this.outputModelFormat = outputModelFormat;
+    public GenVideoMotionOptions setOutputModelFormat(ModelFormat modelFormat) {
+        this.modelFormat = modelFormat;
         return this;
     }
 

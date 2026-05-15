@@ -4,7 +4,7 @@ import com.visvise.sdk.models.ModelInfo;
 import com.visvise.sdk.options.GenVideoMotionOptions;
 import com.visvise.sdk.options.GenTextMotionOptions;
 import com.visvise.sdk.options.WaitOptions;
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -157,7 +157,7 @@ public class Batch3Test {
         try {
             GenTextMotionOptions opts = GenTextMotionOptions.create()
                     .setAlgorithmModel("VISVISE-TextMotion-V1.1.0")
-                    .setOutputModelFormat(OutputModelFormat.GLB);
+                    .setOutputModelFormat(ModelFormat.GLB);
 
             List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), "一个人在原地踏步", opts);
             assertNotNull("Model IDs should not be null", modelIds);

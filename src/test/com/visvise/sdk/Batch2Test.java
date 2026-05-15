@@ -3,7 +3,7 @@ package com.visvise.sdk;
 import com.visvise.sdk.models.ModelInfo;
 import com.visvise.sdk.models.View;
 import com.visvise.sdk.options.*;
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 import com.visvise.sdk.enums.FaceType;
 import com.visvise.sdk.enums.DetailLevel;
 import com.visvise.sdk.enums.MeshRefineMode;
@@ -54,7 +54,7 @@ public class Batch2Test {
         try {
             GenMidModelOptions opts = GenMidModelOptions.create()
                     .setAlgorithmModel("VISVISE-MeshGen-V1.0.0")
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.TRIANGLE);
 
             String modelId = client.genMidModel(
@@ -85,7 +85,7 @@ public class Batch2Test {
         try {
             GenMidModelOptions opts = GenMidModelOptions.create()
                     .setAlgorithmModel("VISVISE-MeshGen-V1.0.0")
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.QUAD);
 
             String modelId = client.genMidModel(
@@ -123,7 +123,7 @@ public class Batch2Test {
         try {
             GenRetopologyOptions opts = GenRetopologyOptions.create()
                     .setAlgorithmModel("hunyuan3D-RTP-v1.5")
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.QUAD)
                     .setDetailLevel(DetailLevel.MEDIUM);
 
@@ -157,7 +157,7 @@ public class Batch2Test {
         try {
             GenRetopologyOptions opts = GenRetopologyOptions.create()
                     .setAlgorithmModel("hunyuan3D-RTP-v1.5")
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.TRIANGLE)
                     .setDetailLevel(DetailLevel.HIGH);
 

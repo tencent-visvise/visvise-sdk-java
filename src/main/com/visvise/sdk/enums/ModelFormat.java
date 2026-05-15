@@ -3,7 +3,7 @@ package com.visvise.sdk.enums;
 /**
  * OutputModelFormat represents the output model format
  */
-public enum OutputModelFormat {
+public enum ModelFormat {
     FBX("fbx", "FBX format"),
     OBJ("obj", "OBJ format"),
     GLB("glb", "GLB format");
@@ -11,7 +11,7 @@ public enum OutputModelFormat {
     private final String value;
     private final String description;
 
-    OutputModelFormat(String value, String description) {
+    ModelFormat(String value, String description) {
         this.value = value;
         this.description = description;
     }
@@ -24,8 +24,8 @@ public enum OutputModelFormat {
         return description;
     }
 
-    public static OutputModelFormat fromValue(String value) {
-        for (OutputModelFormat format : values()) {
+    public static ModelFormat fromValue(String value) {
+        for (ModelFormat format : values()) {
             if (format.value.equals(value)) {
                 return format;
             }

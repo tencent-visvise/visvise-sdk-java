@@ -1,8 +1,6 @@
 package com.visvise.sdk;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.ClientConfig;
 import com.qcloud.cos.auth.BasicCOSCredentials;
@@ -16,10 +14,8 @@ import com.visvise.sdk.enums.Environment;
 import com.visvise.sdk.enums.ModelStatus;
 import com.visvise.sdk.enums.AnimationSubType;
 import com.visvise.sdk.enums.NodeType;
-import com.visvise.sdk.enums.OutputModelFormat;
 import com.visvise.sdk.exceptions.ErrorFactory;
 import com.visvise.sdk.exceptions.WeaverError;
-import com.visvise.sdk.http.HTTPClient;
 import com.visvise.sdk.http.SSEIterator;
 import com.visvise.sdk.models.*;
 import com.visvise.sdk.models.ModelInfo;

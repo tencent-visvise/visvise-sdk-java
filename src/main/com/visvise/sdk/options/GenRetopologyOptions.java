@@ -2,7 +2,7 @@ package com.visvise.sdk.options;
 
 import com.visvise.sdk.enums.DetailLevel;
 import com.visvise.sdk.enums.FaceType;
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 
 /**
  * GenRetopologyOptions defines optional parameters for GenRetopology
@@ -13,7 +13,7 @@ public class GenRetopologyOptions {
     /** optional, algorithm model name */
     private String algorithmModel;
     /** optional, output format (default fbx) */
-    private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    private ModelFormat modelFormat = ModelFormat.FBX;
     /** optional, face type (default quad) */
     private FaceType faceType = FaceType.QUAD;
     /** optional, for Hunyuan models: DetailLevel.LOW/MEDIUM/HIGH */
@@ -42,12 +42,12 @@ public class GenRetopologyOptions {
         return this;
     }
 
-    public OutputModelFormat getOutputModelFormat() {
-        return outputModelFormat;
+    public ModelFormat getOutputModelFormat() {
+        return modelFormat;
     }
 
-    public GenRetopologyOptions setOutputModelFormat(OutputModelFormat outputModelFormat) {
-        this.outputModelFormat = outputModelFormat;
+    public GenRetopologyOptions setOutputModelFormat(ModelFormat modelFormat) {
+        this.modelFormat = modelFormat;
         return this;
     }
 

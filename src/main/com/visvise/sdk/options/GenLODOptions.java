@@ -1,6 +1,6 @@
 package com.visvise.sdk.options;
 
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 
 /**
  * GenLODOptions defines optional parameters for GenLOD
@@ -11,7 +11,7 @@ public class GenLODOptions {
     /** optional, algorithm model name */
     private String algorithmModel;
     /** optional, output format (default fbx) */
-    private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    private ModelFormat modelFormat = ModelFormat.FBX;
     /** optional, number of generations (default 3) */
     private int genTimes = 3;
 
@@ -36,12 +36,12 @@ public class GenLODOptions {
         return this;
     }
 
-    public OutputModelFormat getOutputModelFormat() {
-        return outputModelFormat;
+    public ModelFormat getOutputModelFormat() {
+        return modelFormat;
     }
 
-    public GenLODOptions setOutputModelFormat(OutputModelFormat outputModelFormat) {
-        this.outputModelFormat = outputModelFormat;
+    public GenLODOptions setOutputModelFormat(ModelFormat modelFormat) {
+        this.modelFormat = modelFormat;
         return this;
     }
 

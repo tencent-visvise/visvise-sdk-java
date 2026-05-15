@@ -1,6 +1,6 @@
 package com.visvise.sdk.options;
 
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 
 /**
  * GenPoseOptions defines optional parameters for GenPose
@@ -11,7 +11,7 @@ public class GenPoseOptions {
     /** optional, algorithm model name */
     private String algorithmModel;
     /** optional, output format (default fbx) */
-    private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    private ModelFormat modelFormat = ModelFormat.FBX;
 
     public GenPoseOptions() {
     }
@@ -34,12 +34,12 @@ public class GenPoseOptions {
         return this;
     }
 
-    public OutputModelFormat getOutputModelFormat() {
-        return outputModelFormat;
+    public ModelFormat getOutputModelFormat() {
+        return modelFormat;
     }
 
-    public GenPoseOptions setOutputModelFormat(OutputModelFormat outputModelFormat) {
-        this.outputModelFormat = outputModelFormat;
+    public GenPoseOptions setOutputModelFormat(ModelFormat modelFormat) {
+        this.modelFormat = modelFormat;
         return this;
     }
 

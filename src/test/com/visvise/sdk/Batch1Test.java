@@ -7,7 +7,7 @@ import com.visvise.sdk.options.GenHighModelOptions;
 import com.visvise.sdk.options.GenLowModelOptions;
 import com.visvise.sdk.options.GenLODOptions;
 import com.visvise.sdk.options.WaitOptions;
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 import com.visvise.sdk.enums.FaceType;
 import org.junit.Before;
 import org.junit.Test;
@@ -126,7 +126,7 @@ public class Batch1Test {
         try {
             GenHighModelOptions opts = GenHighModelOptions.create()
                     .setAlgorithmModel("Tripo-v3.1-ultra")
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.TRIANGLE)
                     .setFaceNum(100000);
 
@@ -160,7 +160,7 @@ public class Batch1Test {
         try {
             GenHighModelOptions opts = GenHighModelOptions.create()
                     .setAlgorithmModel("Tripo-v3.1-ultra")
-                    .setOutputModelFormat(OutputModelFormat.GLB)
+                    .setOutputModelFormat(ModelFormat.GLB)
                     .setFaceType(FaceType.QUAD);
 
             String modelId = client.genHighModel(mainViewFile.getAbsolutePath(), opts);
@@ -194,7 +194,7 @@ public class Batch1Test {
         try {
             GenLowModelOptions opts = GenLowModelOptions.create()
                     .setAlgorithmModel("Tripo-v1.0-快速生成")
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.TRIANGLE);
             if (backViewFile.exists()) {
                 opts.setBackView(backViewFile.getAbsolutePath());
@@ -230,7 +230,7 @@ public class Batch1Test {
         try {
             GenLowModelOptions opts = GenLowModelOptions.create()
                     .setAlgorithmModel("Tripo-v1.0-快速生成")
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.QUAD);
 
             String modelId = client.genLowModel(mainViewFile.getAbsolutePath(), opts);
@@ -265,7 +265,7 @@ public class Batch1Test {
                     new ReduceFace(1, 50, FaceType.QUAD));
             GenLODOptions opts = GenLODOptions.create()
                     .setAlgorithmModel("VISVISE-LOD-V1.0.0")
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setGenTimes(1);
 
             java.util.List<String> modelIds = client.genLOD(modelFile.getAbsolutePath(), reduceFaces, opts);

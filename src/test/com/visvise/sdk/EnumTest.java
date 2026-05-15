@@ -75,14 +75,14 @@ public class EnumTest {
 
     @Test
     public void testOutputModelFormat() {
-        assertEquals("fbx", OutputModelFormat.FBX.getValue());
-        assertEquals("obj", OutputModelFormat.OBJ.getValue());
-        assertEquals("glb", OutputModelFormat.GLB.getValue());
+        assertEquals("fbx", ModelFormat.FBX.getValue());
+        assertEquals("obj", ModelFormat.OBJ.getValue());
+        assertEquals("glb", ModelFormat.GLB.getValue());
 
-        assertEquals(OutputModelFormat.FBX, OutputModelFormat.fromValue("fbx"));
-        assertEquals(OutputModelFormat.OBJ, OutputModelFormat.fromValue("obj"));
-        assertEquals(OutputModelFormat.GLB, OutputModelFormat.fromValue("glb"));
-        assertThrows(IllegalArgumentException.class, () -> OutputModelFormat.fromValue("unknown"));
+        assertEquals(ModelFormat.FBX, ModelFormat.fromValue("fbx"));
+        assertEquals(ModelFormat.OBJ, ModelFormat.fromValue("obj"));
+        assertEquals(ModelFormat.GLB, ModelFormat.fromValue("glb"));
+        assertThrows(IllegalArgumentException.class, () -> ModelFormat.fromValue("unknown"));
 
         System.out.println("PASS: OutputModelFormat enum works correctly");
     }

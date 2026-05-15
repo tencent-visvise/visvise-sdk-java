@@ -1,7 +1,7 @@
 package com.visvise.sdk.options;
 
 import com.visvise.sdk.enums.FaceType;
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 
 /**
  * GenHighModelOptions defines optional parameters for GenHighModel
@@ -12,7 +12,7 @@ public class GenHighModelOptions {
     /** optional, algorithm model name; auto-selected if empty */
     private String algorithmModel;
     /** optional, output format (default fbx) */
-    private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    private ModelFormat modelFormat = ModelFormat.FBX;
     /** optional, face type (default triangle) */
     private FaceType faceType = FaceType.TRIANGLE;
     /** optional, target face count (1000-1500000) */
@@ -45,12 +45,12 @@ public class GenHighModelOptions {
         return this;
     }
 
-    public OutputModelFormat getOutputModelFormat() {
-        return outputModelFormat;
+    public ModelFormat getOutputModelFormat() {
+        return modelFormat;
     }
 
-    public GenHighModelOptions setOutputModelFormat(OutputModelFormat outputModelFormat) {
-        this.outputModelFormat = outputModelFormat;
+    public GenHighModelOptions setOutputModelFormat(ModelFormat modelFormat) {
+        this.modelFormat = modelFormat;
         return this;
     }
 

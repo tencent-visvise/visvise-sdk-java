@@ -104,7 +104,7 @@ public class WorkflowTest {
 
         GenLODOptions opts = GenLODOptions.create()
                 .setAlgorithmModel("VISVISE-LOD-V1.0.0")
-                .setOutputModelFormat(OutputModelFormat.FBX)
+                .setOutputModelFormat(ModelFormat.FBX)
                 .setGenTimes(3);
 
         assertNotNull(opts);
@@ -118,7 +118,7 @@ public class WorkflowTest {
         // Hunyuan model workflow
         GenRetopologyOptions hunyuanOpts = GenRetopologyOptions.create()
                 .setAlgorithmModel("hunyuan3D-RTP-v1.5")
-                .setOutputModelFormat(OutputModelFormat.FBX)
+                .setOutputModelFormat(ModelFormat.FBX)
                 .setFaceType(FaceType.QUAD)
                 .setDetailLevel(DetailLevel.MEDIUM);
 

@@ -18,14 +18,14 @@ public class OptionalParamsTest {
         Gen360Options opts = Gen360Options.create()
                 .setName("my_360")
                 .setAlgorithmModel("VISVISE-MultiView-V1.0.0")
-                .setOutputModelFormat(OutputModelFormat.FBX)
+                .setOutputModelFormat(ModelFormat.FBX)
                 .setFaceType(FaceType.TRIANGLE)
                 .setEnableAPose(true)
                 .setStyle("anime");
 
         assertEquals("my_360", opts.getName());
         assertEquals("VISVISE-MultiView-V1.0.0", opts.getAlgorithmModel());
-        assertEquals(OutputModelFormat.FBX, opts.getOutputModelFormat());
+        assertEquals(ModelFormat.FBX, opts.getOutputModelFormat());
         assertEquals(FaceType.TRIANGLE, opts.getFaceType());
         assertTrue(opts.getEnableAPose());
         assertEquals("anime", opts.getStyle());
@@ -38,7 +38,7 @@ public class OptionalParamsTest {
         GenHighModelOptions opts = GenHighModelOptions.create()
                 .setName("my_high_model")
                 .setAlgorithmModel("hunyuan3D-v3.1")
-                .setOutputModelFormat(OutputModelFormat.FBX)
+                .setOutputModelFormat(ModelFormat.FBX)
                 .setFaceType(FaceType.TRIANGLE)
                 .setFaceNum(500000);
 
@@ -53,12 +53,12 @@ public class OptionalParamsTest {
         GenMidModelOptions opts = GenMidModelOptions.create()
                 .setName("my_mid_model")
                 .setAlgorithmModel("VISVISE-MeshGen-V1.0.0")
-                .setOutputModelFormat(OutputModelFormat.OBJ)
+                .setOutputModelFormat(ModelFormat.OBJ)
                 .setFaceType(FaceType.QUAD)
                 .setSegmentModelId("Model2026...");
 
         assertEquals("my_mid_model", opts.getName());
-        assertEquals(OutputModelFormat.OBJ, opts.getOutputModelFormat());
+        assertEquals(ModelFormat.OBJ, opts.getOutputModelFormat());
         assertEquals(FaceType.QUAD, opts.getFaceType());
         assertEquals("Model2026...", opts.getSegmentModelId());
 
@@ -70,11 +70,11 @@ public class OptionalParamsTest {
         GenLowModelOptions opts = GenLowModelOptions.create()
                 .setName("my_low_model")
                 .setAlgorithmModel("Tripo-v1.0-fast")
-                .setOutputModelFormat(OutputModelFormat.GLB)
+                .setOutputModelFormat(ModelFormat.GLB)
                 .setFaceType(FaceType.TRIANGLE);
 
         assertEquals("my_low_model", opts.getName());
-        assertEquals(OutputModelFormat.GLB, opts.getOutputModelFormat());
+        assertEquals(ModelFormat.GLB, opts.getOutputModelFormat());
 
         System.out.println("PASS: GenLowModelOptions chain builder works");
     }
@@ -84,7 +84,7 @@ public class OptionalParamsTest {
         GenMeshRefineOptions opts = GenMeshRefineOptions.create()
                 .setName("my_mesh_refine")
                 .setAlgorithmModel("VISVISE-MeshRefine-V1.0.0")
-                .setInputModelFormat(OutputModelFormat.FBX)
+                .setInputModelFormat(ModelFormat.FBX)
                 .setMode(MeshRefineMode.OPTIMIZE);
 
         assertEquals("my_mesh_refine", opts.getName());
@@ -103,7 +103,7 @@ public class OptionalParamsTest {
         GenRetopologyOptions opts = GenRetopologyOptions.create()
                 .setName("my_retopo")
                 .setAlgorithmModel("hunyuan3D-RTP-v1.5")
-                .setOutputModelFormat(OutputModelFormat.FBX)
+                .setOutputModelFormat(ModelFormat.FBX)
                 .setFaceType(FaceType.QUAD)
                 .setDetailLevel(DetailLevel.MEDIUM);
 
@@ -129,7 +129,7 @@ public class OptionalParamsTest {
         GenLODOptions opts = GenLODOptions.create()
                 .setName("my_lod")
                 .setAlgorithmModel("VISVISE-LOD-V1.0.0")
-                .setOutputModelFormat(OutputModelFormat.FBX)
+                .setOutputModelFormat(ModelFormat.FBX)
                 .setGenTimes(3);
 
         assertEquals("my_lod", opts.getName());
@@ -217,7 +217,7 @@ public class OptionalParamsTest {
         GenVideoMotionOptions opts = GenVideoMotionOptions.create()
                 .setName("my_video_motion")
                 .setAlgorithmModel("VISVISE-FramingAI-Base-V1.5.0")
-                .setOutputModelFormat(OutputModelFormat.FBX)
+                .setOutputModelFormat(ModelFormat.FBX)
                 .setWithHand(true)
                 .setMultipleTrack(false)
                 .setRotateAxisAngle(0, 0, 0);
@@ -235,10 +235,10 @@ public class OptionalParamsTest {
         GenTextMotionOptions opts = GenTextMotionOptions.create()
                 .setName("my_text_motion")
                 .setAlgorithmModel("VISVISE-TextMotion-V1.1.0")
-                .setOutputModelFormat(OutputModelFormat.FBX);
+                .setOutputModelFormat(ModelFormat.FBX);
 
         assertEquals("my_text_motion", opts.getName());
-        assertEquals(OutputModelFormat.FBX, opts.getOutputModelFormat());
+        assertEquals(ModelFormat.FBX, opts.getOutputModelFormat());
 
         System.out.println("PASS: GenTextMotionOptions chain builder works");
     }
@@ -248,7 +248,7 @@ public class OptionalParamsTest {
         GenPoseOptions opts = GenPoseOptions.create()
                 .setName("my_pose")
                 .setAlgorithmModel("VISVISE-PosingAI-V1.0.0")
-                .setOutputModelFormat(OutputModelFormat.FBX);
+                .setOutputModelFormat(ModelFormat.FBX);
 
         assertEquals("my_pose", opts.getName());
 

@@ -3,7 +3,7 @@ package com.visvise.sdk;
 import com.visvise.sdk.api.VisviseAPI;
 import com.visvise.sdk.enums.DetailLevel;
 import com.visvise.sdk.enums.FaceType;
-import com.visvise.sdk.enums.OutputModelFormat;
+import com.visvise.sdk.enums.ModelFormat;
 import com.visvise.sdk.models.ModelInfo;
 import com.visvise.sdk.models.ReduceFace;
 import com.visvise.sdk.models.View;
@@ -101,7 +101,7 @@ public class FinalTest {
         try {
             GenMidModelOptions opts = GenMidModelOptions.create()
                     .setAlgorithmModel("VISVISE-MeshGen-V1.0.0")
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.QUAD)
                     .setName("opt_mid_b_final");
 
@@ -128,7 +128,7 @@ public class FinalTest {
         try {
             GenRetopologyOptions opts2 = GenRetopologyOptions.create()
                     .setAlgorithmModel("hunyuan3D-RTP-v1.5")
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.TRIANGLE)
                     .setName("opt_rtp_b_final")
                     .setDetailLevel(DetailLevel.HIGH);
@@ -186,7 +186,7 @@ public class FinalTest {
 
             GenLODOptions opts5 = GenLODOptions.create()
                     .setAlgorithmModel("VISVISE-LOD-V1.0.0")
-                    .setOutputModelFormat(OutputModelFormat.FBX)
+                    .setOutputModelFormat(ModelFormat.FBX)
                     .setName("opt_lod_a_final")
                     .setGenTimes(1);
 
@@ -271,7 +271,7 @@ public class FinalTest {
         try {
             GenTextMotionOptions opts4 = GenTextMotionOptions.create()
                     .setAlgorithmModel("VISVISE-TextMotion-V1.1.0")
-                    .setOutputModelFormat(OutputModelFormat.GLB)
+                    .setOutputModelFormat(ModelFormat.GLB)
                     .setName("opt_tm_b_final");
 
             List<String> modelIds = client.genTextMotion(
