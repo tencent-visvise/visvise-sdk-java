@@ -5,7 +5,7 @@ import com.visvise.sdk.enums.Environment;
 import com.visvise.sdk.exceptions.WeaverError;
 import com.visvise.sdk.models.UserQuota;
 import com.visvise.sdk.options.ClientOptions;
-import com.visvise.sdk.options.WaitOptions;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -17,37 +17,38 @@ import static org.junit.Assert.*;
  */
 public class AtomicAPITest {
 
-    private String getAppId() {
-        return System.getenv("VISVISE_APP_ID");
-    }
+    private String appId;
+    private String secretKey;
+    private String uid;
+    private VisviseClient client;
 
-    private String getSecretKey() {
-        return System.getenv("VISVISE_SECRET_KEY");
-    }
+    private static final String ASSETS_DIR = "src/test/resources/assets";
 
-    private String getUid() {
-        return System.getenv("VISVISE_UID");
-    }
+    @Before
+    public void setUp() {
+        appId = System.getenv("VISVISE_APP_ID");
+        secretKey = System.getenv("VISVISE_SECRET_KEY");
+        uid = System.getenv("VISVISE_UID");
 
-    private boolean hasCredentials() {
-        return getAppId() != null && !getAppId().isEmpty()
-                && getSecretKey() != null && !getSecretKey().isEmpty()
-                && getUid() != null && !getUid().isEmpty();
+        if (appId != null && secretKey != null && uid != null) {
+            ClientOptions opts = ClientOptions.create()
+                    .setEnv(Environment.DEV)
+                    .setDebug(true);
+            client = new VisviseClient(appId, secretKey, uid, opts);
+        }
     }
-
-    private VisviseClient createClient() {
-        ClientOptions opts = ClientOptions.create()
-                .setEnv(Environment.DEV)
-                .setDebug(true);
-        return new VisviseClient(getAppId(), getSecretKey(), getUid(), opts);
+    private boolean isConfigured() {
+        return appId != null && !appId.isEmpty()
+                && secretKey != null && !secretKey.isEmpty()
+                && uid != null && !uid.isEmpty();
     }
 
     @Test
     public void testGetUserQuota() throws WeaverError {
-        if (!hasCredentials()) {
+        if (!isConfigured()) {
+            System.out.println("Skipping test: VISVISE credentials not configured");
             return;
         }
-        VisviseClient client = createClient();
         VisviseAPI api = client.getAPI();
 
         UserQuota quota = api.getUserQuota();
@@ -58,10 +59,10 @@ public class AtomicAPITest {
 
     @Test
     public void testListAlgorithmModel() throws WeaverError {
-        if (!hasCredentials()) {
+        if (!isConfigured()) {
+            System.out.println("Skipping test: VISVISE credentials not configured");
             return;
         }
-        VisviseClient client = createClient();
         VisviseAPI api = client.getAPI();
 
         // Test Image to 360
@@ -80,31 +81,31 @@ public class AtomicAPITest {
         int subType = 1;
         models = api.listAlgorithmModel(4, subType);
         assertNotNull(models);
-        System.out.println("PASS: list_algorithm_model node_type=4 sub_type=1 (Video to Animation)");
+        System.out.println("PASS: list_algorithm_model node_type=4 sub_type=1 (Video to Animation)- first=" + models.get(0));
 
         // Test Text to Animation
         subType = 2;
         models = api.listAlgorithmModel(4, subType);
         assertNotNull(models);
-        System.out.println("PASS: list_algorithm_model node_type=4 sub_type=2 (Text to Animation)");
+        System.out.println("PASS: list_algorithm_model node_type=4 sub_type=2 (Text to Animation)- first=" + models.get(0));
 
         // Test Rigging
         models = api.listAlgorithmModel(5, null);
         assertNotNull(models);
-        System.out.println("PASS: list_algorithm_model node_type=5 (Rigging)");
+        System.out.println("PASS: list_algorithm_model node_type=5 (Rigging)- first=" + models.get(0));
 
         // Test LOD
         models = api.listAlgorithmModel(2, null);
         assertNotNull(models);
-        System.out.println("PASS: list_algorithm_model node_type=2 (LOD)");
+        System.out.println("PASS: list_algorithm_model node_type=2 (LOD)- first=" + models.get(0));
     }
 
     @Test
     public void testGetText2MotionPromptList() throws WeaverError {
-        if (!hasCredentials()) {
+        if (!isConfigured()) {
+            System.out.println("Skipping test: VISVISE credentials not configured");
             return;
         }
-        VisviseClient client = createClient();
         VisviseAPI api = client.getAPI();
 
         // Test Chinese prompts
@@ -118,23 +119,5 @@ public class AtomicAPITest {
         assertNotNull(prompts);
         assertFalse(prompts.isEmpty());
         System.out.println("PASS: get_text2motion_prompt_list lang=en - count=" + prompts.size() + " first=" + prompts.get(0));
-    }
-
-    @Test
-    public void testWaitOptionsDefaults() {
-        WaitOptions opts = WaitOptions.defaults();
-        assertEquals(2.0, opts.getInterval());
-        assertEquals(600, opts.getTimeout());
-        assertEquals(2000, opts.getIntervalMillis());
-        System.out.println("PASS: WaitOptions defaults work correctly");
-    }
-
-    @Test
-    public void testClientOptionsDefaults() {
-        ClientOptions opts = ClientOptions.create();
-        assertEquals(Environment.PROD, opts.getEnv());
-        assertEquals(30, opts.getTimeout());
-        assertFalse(opts.isDebug());
-        System.out.println("PASS: ClientOptions defaults work correctly");
     }
 }

@@ -2,20 +2,28 @@ package com.visvise.sdk.options;
 
 import com.visvise.sdk.enums.FaceType;
 import com.visvise.sdk.enums.OutputModelFormat;
-import com.visvise.sdk.models.View;
 
 /**
  * Gen360Options defines optional parameters for Gen360
  */
 public class Gen360Options {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_360";
+    /** optional, algorithm model name; auto-selected if empty */
     private String algorithmModel;
+    /** optional, output format (default fbx) */
     private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    /** optional, face type (default triangle) */
     private FaceType faceType = FaceType.TRIANGLE;
+    /** optional, enable A-Pose */
     private Boolean enableAPose;
+    /** optional, style type (VISVISE proprietary models only)  灰模/超写实/Q版卡通/像素风格 */
     private String style;
+    /** optional, back view to improve quality */
     private Object backView;
+    /** optional, left view */
     private Object leftView;
+    /** optional, right view */
     private Object rightView;
 
     public Gen360Options() {

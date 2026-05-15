@@ -6,9 +6,13 @@ import java.util.List;
  * GenSkinningOptions defines optional parameters for GenSkinning
  */
 public class GenSkinningOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_skinning";
+    /** optional, algorithm model name */
     private String algorithmModel;
+    /** required, meshes to skin */
     private List<String> meshNames;
+    /** required, joints to skin */
     private List<String> jointNames;
 
     public GenSkinningOptions(List<String> meshNames, List<String> jointNames) {

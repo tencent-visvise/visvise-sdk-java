@@ -4,7 +4,9 @@ package com.visvise.sdk.options;
  * WaitOptions represents the options for waiting for model completion
  */
 public class WaitOptions {
+    /** polling interval in seconds (default 2.0) */
     private double interval = 2.0;
+    /** maximum wait time in seconds (default 600) */
     private int timeout = 600;
 
     public WaitOptions() {

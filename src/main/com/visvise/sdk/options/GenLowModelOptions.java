@@ -7,12 +7,19 @@ import com.visvise.sdk.enums.OutputModelFormat;
  * GenLowModelOptions defines optional parameters for GenLowModel
  */
 public class GenLowModelOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_low_model";
+    /** optional, algorithm model name */
     private String algorithmModel;
+    /** optional, output format (default fbx) */
     private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    /** optional, face type (default triangle) */
     private FaceType faceType = FaceType.TRIANGLE;
+    /** optional, back view */
     private Object backView;
+    /** optional, left view */
     private Object leftView;
+    /** optional, right view */
     private Object rightView;
 
     public GenLowModelOptions() {

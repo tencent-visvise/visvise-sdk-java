@@ -7,10 +7,15 @@ import com.visvise.sdk.enums.OutputModelFormat;
  * GenMidModelOptions defines optional parameters for GenMidModel
  */
 public class GenMidModelOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_mid_model";
+    /** optional, algorithm model name */
     private String algorithmModel;
+    /** optional, output format (default fbx) */
     private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    /** optional, face type (default triangle) */
     private FaceType faceType = FaceType.TRIANGLE;
+    /** optional, 2D segmentation asset ID */
     private String segmentModelId;
 
     public GenMidModelOptions() {

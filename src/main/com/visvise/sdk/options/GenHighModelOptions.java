@@ -7,13 +7,21 @@ import com.visvise.sdk.enums.OutputModelFormat;
  * GenHighModelOptions defines optional parameters for GenHighModel
  */
 public class GenHighModelOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_high_model";
+    /** optional, algorithm model name; auto-selected if empty */
     private String algorithmModel;
+    /** optional, output format (default fbx) */
     private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    /** optional, face type (default triangle) */
     private FaceType faceType = FaceType.TRIANGLE;
+    /** optional, target face count (1000-1500000) */
     private Integer faceNum;
+    /** optional, back view to improve quality */
     private Object backView;
+    /** optional, left view */
     private Object leftView;
+    /** optional, right view */
     private Object rightView;
 
     public GenHighModelOptions() {

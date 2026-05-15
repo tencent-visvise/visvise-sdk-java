@@ -6,8 +6,11 @@ import com.visvise.sdk.enums.OutputModelFormat;
  * GenPoseOptions defines optional parameters for GenPose
  */
 public class GenPoseOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_pose";
+    /** optional, algorithm model name */
     private String algorithmModel;
+    /** optional, output format (default fbx) */
     private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
 
     public GenPoseOptions() {

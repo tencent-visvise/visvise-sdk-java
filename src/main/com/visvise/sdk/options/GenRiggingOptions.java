@@ -4,9 +4,13 @@ package com.visvise.sdk.options;
  * GenRiggingOptions defines optional parameters for GenRigging
  */
 public class GenRiggingOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_rigging";
+    /** optional, algorithm model name */
     private String algorithmModel;
+    /** optional, mesh category: "humanoid" (default) or "tetrapod" */
     private String meshCategory = "humanoid";
+    /** optional, template skeleton */
     private Object templateSkeleton;
 
     public GenRiggingOptions() {

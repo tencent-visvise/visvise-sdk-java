@@ -8,13 +8,21 @@ import com.visvise.sdk.models.View;
  * GenSegment2DOptions defines optional parameters for GenSegment2D
  */
 public class GenSegment2DOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_segment_2d";
+    /** optional, algorithm model name */
     private String algorithmModel;
+    /** optional, input view (with model_id_360) */
     private View inputView;
+    /** optional, split type */
     private SegmentSplitType splitType;
+    /** optional, granularity */
     private SegmentGranularity granularity;
+    /** optional, natural language prompt */
     private String prompt;
+    /** optional, callback for thinking events */
     private ThinkingCallback onThinking;
+    /** SSE read timeout in seconds */
     private int readTimeout = 0;
 
     public GenSegment2DOptions() {

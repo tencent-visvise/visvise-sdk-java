@@ -6,9 +6,13 @@ import com.visvise.sdk.enums.OutputModelFormat;
  * GenLODOptions defines optional parameters for GenLOD
  */
 public class GenLODOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_lod";
+    /** optional, algorithm model name */
     private String algorithmModel;
+    /** optional, output format (default fbx) */
     private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    /** optional, number of generations (default 3) */
     private int genTimes = 3;
 
     public GenLODOptions() {

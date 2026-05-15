@@ -6,8 +6,11 @@ import com.visvise.sdk.enums.OutputModelFormat;
  * GenTextMotionOptions defines optional parameters for GenTextMotion
  */
 public class GenTextMotionOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_text_motion";
+    /** optional, algorithm model name */
     private String algorithmModel;
+    /** optional, output format (default fbx) */
     private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
 
     public GenTextMotionOptions() {

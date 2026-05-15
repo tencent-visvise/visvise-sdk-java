@@ -4,8 +4,11 @@ package com.visvise.sdk.options;
  * GenUVOptions defines optional parameters for GenUV
  */
 public class GenUVOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_uv";
+    /** optional, algorithm model name */
     private String algorithmModel;
+    /** optional, enable auto-smoothing */
     private Boolean enableAutoSmoothing;
 
     public GenUVOptions() {

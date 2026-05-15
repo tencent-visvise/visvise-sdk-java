@@ -6,11 +6,17 @@ import com.visvise.sdk.enums.OutputModelFormat;
  * GenVideoMotionOptions defines optional parameters for GenVideoMotion
  */
 public class GenVideoMotionOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_video_motion";
+    /** optional, algorithm model name */
     private String algorithmModel;
+    /** optional, output format (default fbx) */
     private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    /** optional, enable hand capture */
     private Boolean withHand;
+    /** optional, enable multi-person capture */
     private Boolean multipleTrack;
+    /** optional, rotation axis-angle [x, y, z] (radians) */
     private double[] rotateAxisAngle;
 
     public GenVideoMotionOptions() {

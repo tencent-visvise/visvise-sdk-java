@@ -8,11 +8,17 @@ import com.visvise.sdk.enums.OutputModelFormat;
  * GenRetopologyOptions defines optional parameters for GenRetopology
  */
 public class GenRetopologyOptions {
+    /** optional, task name (auto-generated if empty) */
     private String name = "gen_retopology";
+    /** optional, algorithm model name */
     private String algorithmModel;
+    /** optional, output format (default fbx) */
     private OutputModelFormat outputModelFormat = OutputModelFormat.FBX;
+    /** optional, face type (default quad) */
     private FaceType faceType = FaceType.QUAD;
+    /** optional, for Hunyuan models: DetailLevel.LOW/MEDIUM/HIGH */
     private DetailLevel detailLevel;
+    /** optional, for VISVISE models: target face count */
     private Integer faceNum;
 
     public GenRetopologyOptions() {
