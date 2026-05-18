@@ -237,7 +237,7 @@ Gen360Options opts = Gen360Options.create()
     .setOutputModelFormat(ModelFormat.FBX)                // 可选，输出格式（默认 fbx）
     .setFaceType(FaceType.TRIANGLE)                       // 可选，面数类型（默认三角面）
     .setEnableAPose(true)                                 // 可选，是否开启 A-Pose
-    .setStyle("anime")                                   // 可选，风格类型
+    .setStyle(ImageGen360Style.GRAY_MODEL.getValue())     // # 可选，风格类型（仅 VISVISE 自研模型支持），只接受 ImageGen360Style 枚举：GRAY_MODEL/PHOTOREAL/Q_TOON/PIXEL，传其他值会报错
     .setBackView(backViewPath)                            // 可选，背视图（本地路径或 COS URL）
     .setLeftView(leftViewPath)                            // 可选，左视图
     .setRightView(rightViewPath)                          // 可选，右视图

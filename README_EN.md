@@ -237,7 +237,7 @@ Gen360Options opts = Gen360Options.create()
     .setOutputModelFormat(ModelFormat.FBX)                // optional, output format (default fbx)
     .setFaceType(FaceType.TRIANGLE)                       // optional, face type (default triangle)
     .setEnableAPose(true)                                 // optional, enable A-Pose
-    .setStyle("anime")                                   // optional, style type
+    .setStyle(ImageGen360Style.GRAY_MODEL.getValue())     // optional, style (VISVISE proprietary models only). Must be one of ImageGen360Style: GRAY_MODEL/PHOTOREAL/Q_TOON/PIXEL — any other value will be rejected
     .setBackView(backViewPath)                            // optional, back view (local path or COS URL)
     .setLeftView(leftViewPath)                            // optional, left view
     .setRightView(rightViewPath)                          // optional, right view
