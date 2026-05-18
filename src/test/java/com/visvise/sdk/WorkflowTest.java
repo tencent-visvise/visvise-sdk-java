@@ -7,7 +7,6 @@ import com.visvise.sdk.options.*;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -150,7 +149,7 @@ public class WorkflowTest {
                 .setPrompt("high quality, realistic");
 
         assertNotNull(opts.getInputView());
-        assertEquals(Optional.of(2048), opts.getResolution());
+        assertEquals(Integer.valueOf(2048), opts.getResolution());
         assertTrue(opts.getUnwarpUV());
         assertEquals("high quality, realistic", opts.getPrompt());
 
