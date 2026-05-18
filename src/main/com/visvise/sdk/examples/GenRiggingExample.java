@@ -18,7 +18,7 @@ public class GenRiggingExample {
 
     static final String APP_ID     = System.getenv("VISVISE_APP_ID");
     static final String SECRET_KEY = System.getenv("VISVISE_SECRET_KEY");
-    static final String UID        = System.getenv("VISVISE_UID");
+    static final String RTX        = System.getenv("VISVISE_RTX");
     static final String ENV        = System.getenv().getOrDefault("VISVISE_ENV", "prod");
 
     static final String ASSETS     = "examples/assets";
@@ -26,7 +26,7 @@ public class GenRiggingExample {
 
     public static void main(String[] args) throws WeaverError {
         Environment env = "dev".equals(ENV) ? Environment.DEV : "test".equals(ENV) ? Environment.TEST : Environment.PROD;
-        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY, UID,
+        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY,
                 ClientOptions.create().setEnv(env));
 
         System.out.println("[gen_rigging] 开始骨骼架设...");
@@ -37,11 +37,13 @@ public class GenRiggingExample {
                 GenRiggingOptions.create()
                         .setAlgorithmModel("VISVISE-GoRigging-V1.0.0")
                         .setMeshCategory("humanoid")    // humanoid（人形）或 tetrapod（四足）
-                        .setName("example_gen_rigging"));
+                        .setName("example_gen_rigging"),
+                RTX);
         System.out.println("[gen_rigging] 任务已创建，model_id=" + modelId);
 
         ModelInfo model = client.waitModel(modelId,
-                WaitOptions.create().setInterval(5).setTimeout(600));
+                WaitOptions.create().setInterval(5).setTimeout(600),
+                RTX);
         System.out.println("[gen_rigging] 生成成功！耗时 " + model.getTimeCost() + "s");
         System.out.println("  output_model : " + model.getOutputModel());
     }

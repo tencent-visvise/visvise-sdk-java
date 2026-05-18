@@ -20,12 +20,12 @@ public class GenSegment2DExample {
 
     static final String APP_ID     = System.getenv("VISVISE_APP_ID");
     static final String SECRET_KEY = System.getenv("VISVISE_SECRET_KEY");
-    static final String UID        = System.getenv("VISVISE_UID");
+    static final String RTX        = System.getenv("VISVISE_RTX");
     static final String ENV        = System.getenv().getOrDefault("VISVISE_ENV", "prod");
 
     public static void main(String[] args) throws WeaverError {
         Environment env = "dev".equals(ENV) ? Environment.DEV : "test".equals(ENV) ? Environment.TEST : Environment.PROD;
-        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY, UID,
+        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY,
                 ClientOptions.create().setEnv(env));
 
         // 需要先有 gen_360 输出的 model_id
@@ -43,7 +43,8 @@ public class GenSegment2DExample {
                         .setGranularity(SegmentGranularity.MEDIUM)     // 1 粗 / 2 中（默认） / 3 细
                         .setPrompt(null)                                 // 可选：自然语言描述拆分规则
                         .setOnThinking(content -> System.out.println("  [thinking] " + content))
-                        .setName("example_gen_segment_2d"));
+                        .setName("example_gen_segment_2d"),
+                RTX);
         System.out.println("[gen_segment_2d] 分割完成，model_id=" + segModelId);
         System.out.println("  → 可作为图生中模/低模的 segment_model_id 参数使用");
     }

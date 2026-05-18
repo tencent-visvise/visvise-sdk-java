@@ -30,15 +30,13 @@ public class HTTPClient {
 
     private final String appId;
     private final String secretKey;
-    private final String uid;
     private final String baseURL;
     private final int timeout;
     private boolean debug;
 
-    public HTTPClient(String appId, String secretKey, String uid, String baseURL, int timeout) {
+    public HTTPClient(String appId, String secretKey, String baseURL, int timeout) {
         this.appId = appId;
         this.secretKey = secretKey;
-        this.uid = uid;
         this.baseURL = baseURL.endsWith("/") ? baseURL.substring(0, baseURL.length() - 1) : baseURL;
         this.timeout = timeout;
         this.debug = false;
@@ -85,7 +83,7 @@ public class HTTPClient {
     /**
      * Builds the request headers with signature
      */
-    private Map<String, String> buildHeaders(String bodyStr) {
+    private Map<String, String> buildHeaders(String bodyStr, String rtx) {
         long ts = System.currentTimeMillis() / 1000;
         String tsStr = String.valueOf(ts);
         String sign = sign(bodyStr, tsStr);
@@ -93,7 +91,7 @@ public class HTTPClient {
         Map<String, String> headers = new java.util.HashMap<>();
         headers.put("Content-Type", "application/json");
         headers.put("app_id", appId);
-        headers.put("uid", uid);
+        headers.put("rtx", rtx);
         headers.put("ts", tsStr);
         headers.put("sign", sign);
         return headers;
@@ -102,7 +100,7 @@ public class HTTPClient {
     /**
      * Sends a POST request
      */
-    public Object post(String path, Object body) throws WeaverError {
+    public Object post(String path, Object body, String rtx) throws WeaverError {
         String bodyStr;
         if (body == null) {
             bodyStr = "{}";
@@ -111,7 +109,7 @@ public class HTTPClient {
         }
 
         String urlStr = baseURL + "/" + path.replaceFirst("^/", "");
-        Map<String, String> headers = buildHeaders(bodyStr);
+        Map<String, String> headers = buildHeaders(bodyStr, rtx);
 
         if (isDebugEnabled()) {
             httpLogger.debug("POST request: url={}, body={}", urlStr, truncate(bodyStr, 2000));
@@ -186,18 +184,18 @@ public class HTTPClient {
     /**
      * Sends a POST request and returns an SSE iterator
      */
-    public SSEIterator postSSE(String path, Object body, int readTimeout) throws WeaverError {
+    public SSEIterator postSSE(String path, Object body, int readTimeout, String rtx) throws WeaverError {
         if (readTimeout <= 0) {
             readTimeout = 1200; // Default 20 minutes
         }
-        return new SSEIterator(this, path, body, readTimeout);
+        return new SSEIterator(this, path, body, readTimeout, rtx);
     }
 
     public String getBaseURL() {
         return baseURL;
     }
 
-    public Map<String, String> buildHeadersForSSE(String bodyStr) {
-        return buildHeaders(bodyStr);
+    public Map<String, String> buildHeadersForSSE(String bodyStr, String rtx) {
+        return buildHeaders(bodyStr, rtx);
     }
 }

@@ -22,7 +22,7 @@ public class AutoAlgorithmModelTest {
 
     private String appId;
     private String secretKey;
-    private String uid;
+    private String rtx;
     private VisviseClient client;
 
     private static final String ASSETS_DIR = "src/test/resources/assets";
@@ -31,20 +31,20 @@ public class AutoAlgorithmModelTest {
     public void setUp() {
         appId = System.getenv("VISVISE_APP_ID");
         secretKey = System.getenv("VISVISE_SECRET_KEY");
-        uid = System.getenv("VISVISE_UID");
+        rtx = System.getenv("VISVISE_RTX");
 
-        if (appId != null && secretKey != null && uid != null) {
+        if (appId != null && secretKey != null && rtx != null) {
             ClientOptions opts = ClientOptions.create()
                     .setEnv(Environment.DEV)
                     .setDebug(true);
-            client = new VisviseClient(appId, secretKey, uid, opts);
+            client = new VisviseClient(appId, secretKey, opts);
         }
     }
 
     private boolean isConfigured() {
         return appId != null && !appId.isEmpty()
                 && secretKey != null && !secretKey.isEmpty()
-                && uid != null && !uid.isEmpty();
+                && rtx != null && !rtx.isEmpty();
     }
 
     // TestAutoAlgorithmModel_Gen360 tests gen_360 without algorithm_model parameter
@@ -65,7 +65,7 @@ public class AutoAlgorithmModelTest {
         try {
             Gen360Options opts = Gen360Options.create();
 
-            String modelId = client.gen360(mainViewFile.getAbsolutePath(), opts);
+            String modelId = client.gen360(mainViewFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: gen_360 (no algorithm_model) - model_id=" + modelId);
         } catch (Exception e) {
@@ -93,7 +93,7 @@ public class AutoAlgorithmModelTest {
                     .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.TRIANGLE);
 
-            String modelId = client.genHighModel(mainViewFile.getAbsolutePath(), opts);
+            String modelId = client.genHighModel(mainViewFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: gen_high_model (no algorithm_model) - model_id=" + modelId);
         } catch (Exception e) {
@@ -129,7 +129,7 @@ public class AutoAlgorithmModelTest {
                     backViewFile.exists() ? backViewFile.getAbsolutePath() : "",
                     leftViewFile.exists() ? leftViewFile.getAbsolutePath() : "",
                     rightViewFile.exists() ? rightViewFile.getAbsolutePath() : "",
-                    opts);
+                    opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: gen_mid_model (no algorithm_model) - model_id=" + modelId);
         } catch (Exception e) {
@@ -157,7 +157,7 @@ public class AutoAlgorithmModelTest {
                     .setOutputModelFormat(ModelFormat.FBX)
                     .setFaceType(FaceType.TRIANGLE);
 
-            String modelId = client.genLowModel(mainViewFile.getAbsolutePath(), opts);
+            String modelId = client.genLowModel(mainViewFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: gen_low_model (no algorithm_model) - model_id=" + modelId);
         } catch (Exception e) {
@@ -183,7 +183,7 @@ public class AutoAlgorithmModelTest {
         try {
             GenMeshRefineOptions opts = GenMeshRefineOptions.create();
 
-            String modelId = client.genMeshRefine(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genMeshRefine(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: gen_mesh_refine (no algorithm_model) - model_id=" + modelId);
         } catch (Exception e) {
@@ -212,7 +212,7 @@ public class AutoAlgorithmModelTest {
                     .setFaceType(FaceType.QUAD)
                     .setDetailLevel(DetailLevel.MEDIUM);
 
-            String modelId = client.genRetopology(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genRetopology(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: gen_retopology (no algorithm_model) - model_id=" + modelId);
         } catch (Exception e) {
@@ -242,7 +242,7 @@ public class AutoAlgorithmModelTest {
                     .setOutputModelFormat(ModelFormat.FBX)
                     .setGenTimes(1);
 
-            List<String> modelIds = client.genLOD(modelFile.getAbsolutePath(), reduceFaces, opts);
+            List<String> modelIds = client.genLOD(modelFile.getAbsolutePath(), reduceFaces, opts, rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.println("PASS: gen_lod (no algorithm_model) - model_ids=" + modelIds);
         } catch (Exception e) {
@@ -269,7 +269,7 @@ public class AutoAlgorithmModelTest {
             GenUVOptions opts = GenUVOptions.create()
                     .setEnableAutoSmoothing(false);
 
-            String modelId = client.genUV(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genUV(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: gen_uv (no algorithm_model) - model_id=" + modelId);
         } catch (Exception e) {
@@ -302,7 +302,7 @@ public class AutoAlgorithmModelTest {
             GenTextureOptions opts = GenTextureOptions.create()
                     .setInputView(view);
 
-            String modelId = client.genTexture(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genTexture(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: gen_texture (no algorithm_model) - model_id=" + modelId);
         } catch (Exception e) {
@@ -328,7 +328,7 @@ public class AutoAlgorithmModelTest {
         try {
             GenRiggingOptions opts = GenRiggingOptions.create();
 
-            String modelId = client.genRigging(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genRigging(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: gen_rigging (no algorithm_model) - model_id=" + modelId);
         } catch (Exception e) {
@@ -356,7 +356,7 @@ public class AutoAlgorithmModelTest {
                     Arrays.asList("Body_Mesh"),
                     Arrays.asList("Bip001", "Bip001 Pelvis"));
 
-            String modelId = client.genSkinning(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genSkinning(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: gen_skinning (no algorithm_model) - model_id=" + modelId);
         } catch (Exception e) {
@@ -387,7 +387,7 @@ public class AutoAlgorithmModelTest {
                     .setMultipleTrack(false);
 
             String modelId = client.genVideoMotion(modelFile.getAbsolutePath(),
-                    videoFile.exists() ? videoFile.getAbsolutePath() : "", opts);
+                    videoFile.exists() ? videoFile.getAbsolutePath() : "", opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: gen_video_motion (no algorithm_model) - model_id=" + modelId);
         } catch (Exception e) {
@@ -413,7 +413,7 @@ public class AutoAlgorithmModelTest {
         try {
             GenTextMotionOptions opts = GenTextMotionOptions.create();
 
-            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), "一个人在原地踏步", opts);
+            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), "一个人在原地踏步", opts, rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.println("PASS: gen_text_motion (no algorithm_model) - model_ids=" + modelIds);
         } catch (Exception e) {
@@ -444,7 +444,7 @@ public class AutoAlgorithmModelTest {
                     ? Collections.singletonList(mainViewFile.getAbsolutePath())
                     : Collections.emptyList();
 
-            List<String> modelIds = client.genPose(modelFile.getAbsolutePath(), images, opts);
+            List<String> modelIds = client.genPose(modelFile.getAbsolutePath(), images, opts, rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.println("PASS: gen_pose (no algorithm_model) - model_ids=" + modelIds);
         } catch (Exception e) {

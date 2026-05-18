@@ -24,10 +24,10 @@ public class SSEIterator implements Closeable {
     private final BufferedReader reader;
     private String leftover = "";
 
-    public SSEIterator(HTTPClient httpClient, String path, Object body, int readTimeout) throws WeaverError {
+    public SSEIterator(HTTPClient httpClient, String path, Object body, int readTimeout, String rtx) throws WeaverError {
         String bodyStr = body == null ? "{}" : new com.google.gson.Gson().toJson(body);
         String urlStr = httpClient.getBaseURL() + "/" + path.replaceFirst("^/", "");
-        Map<String, String> headers = httpClient.buildHeadersForSSE(bodyStr);
+        Map<String, String> headers = httpClient.buildHeadersForSSE(bodyStr, rtx);
 
         try {
             URL url = new URL(urlStr);

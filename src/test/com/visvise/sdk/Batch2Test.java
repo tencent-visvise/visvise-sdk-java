@@ -1,12 +1,9 @@
 package com.visvise.sdk;
 
+import com.visvise.sdk.enums.*;
 import com.visvise.sdk.models.ModelInfo;
 import com.visvise.sdk.models.View;
 import com.visvise.sdk.options.*;
-import com.visvise.sdk.enums.ModelFormat;
-import com.visvise.sdk.enums.FaceType;
-import com.visvise.sdk.enums.DetailLevel;
-import com.visvise.sdk.enums.MeshRefineMode;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +18,7 @@ public class Batch2Test {
 
     private String appId;
     private String secretKey;
-    private String uid;
+    private String rtx;
     private VisviseClient client;
 
     private static final String ASSETS_DIR = "src/test/resources/assets";
@@ -31,17 +28,20 @@ public class Batch2Test {
     public void setUp() {
         appId = System.getenv("VISVISE_APP_ID");
         secretKey = System.getenv("VISVISE_SECRET_KEY");
-        uid = System.getenv("VISVISE_UID");
+        rtx = System.getenv("VISVISE_RTX");
 
-        if (appId != null && secretKey != null && uid != null) {
-            client = new VisviseClient(appId, secretKey, uid);
+        if (appId != null && secretKey != null && rtx != null) {
+            ClientOptions opts = ClientOptions.create()
+                    .setEnv(Environment.DEV)
+                    .setDebug(true);
+            client = new VisviseClient(appId, secretKey, opts);
         }
     }
 
     private boolean isConfigured() {
         return appId != null && !appId.isEmpty()
                 && secretKey != null && !secretKey.isEmpty()
-                && uid != null && !uid.isEmpty();
+                && rtx != null && !rtx.isEmpty();
     }
 
     @Test
@@ -62,12 +62,12 @@ public class Batch2Test {
                     MV_BASE + "/example_gen_360_MultiView(2)_BackView.png",
                     MV_BASE + "/example_gen_360_MultiView(2)_LeftView.png",
                     MV_BASE + "/example_gen_360_MultiView(2)_RightView.png",
-                    opts);
+                    opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: mid face_type=1 fbx - model_id=" + modelId);
 
             // Wait for completion
-            ModelInfo model = client.waitModel(modelId,  WaitOptions.create().setInterval(5).setTimeout(900));
+            ModelInfo model = client.waitModel(modelId, WaitOptions.create().setInterval(5).setTimeout(900), rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenMidModel face_type=1 fbx failed: " + e.getMessage());
@@ -93,13 +93,13 @@ public class Batch2Test {
                     MV_BASE + "/example_gen_360_MultiView(2)_BackView.png",
                     MV_BASE + "/example_gen_360_MultiView(2)_LeftView.png",
                     MV_BASE + "/example_gen_360_MultiView(2)_RightView.png",
-                    opts);
+                    opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: mid face_type=2 fbx - model_id=" + modelId);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelId, waitOpts);
+            ModelInfo model = client.waitModel(modelId, waitOpts, rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenMidModel face_type=2 fbx failed: " + e.getMessage());
@@ -127,13 +127,13 @@ public class Batch2Test {
                     .setFaceType(FaceType.QUAD)
                     .setDetailLevel(DetailLevel.MEDIUM);
 
-            String modelId = client.genRetopology(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genRetopology(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: rtp detail=2 face=2 - model_id=" + modelId);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelId, waitOpts);
+            ModelInfo model = client.waitModel(modelId, waitOpts, rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenRetopology detail=2 face=2 failed: " + e.getMessage());
@@ -161,13 +161,13 @@ public class Batch2Test {
                     .setFaceType(FaceType.TRIANGLE)
                     .setDetailLevel(DetailLevel.HIGH);
 
-            String modelId = client.genRetopology(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genRetopology(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: rtp detail=3 face=1 - model_id=" + modelId);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelId, waitOpts);
+            ModelInfo model = client.waitModel(modelId, waitOpts, rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenRetopology detail=3 face=1 failed: " + e.getMessage());
@@ -193,13 +193,13 @@ public class Batch2Test {
                     .setAlgorithmModel("VISVISE-MeshRefine-V1.0.0")
                     .setMode(MeshRefineMode.OPTIMIZE);
 
-            String modelId = client.genMeshRefine(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genMeshRefine(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: mr mode=optimize - model_id=" + modelId);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelId, waitOpts);
+            ModelInfo model = client.waitModel(modelId, waitOpts, rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenMeshRefine mode=optimize failed: " + e.getMessage());
@@ -225,13 +225,13 @@ public class Batch2Test {
                     .setAlgorithmModel("VISVISE-MeshRefine-V1.0.0")
                     .setMode(MeshRefineMode.DENSIFY);
 
-            String modelId = client.genMeshRefine(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genMeshRefine(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: mr mode=densify - model_id=" + modelId);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelId, waitOpts);
+            ModelInfo model = client.waitModel(modelId, waitOpts, rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenMeshRefine mode=densify failed: " + e.getMessage());
@@ -257,13 +257,13 @@ public class Batch2Test {
                     .setAlgorithmModel("hunyuan3D-UV-v2.0")
                     .setEnableAutoSmoothing(true);
 
-            String modelId = client.genUV(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genUV(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: uv smooth=True - model_id=" + modelId);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelId, waitOpts);
+            ModelInfo model = client.waitModel(modelId, waitOpts, rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenUV smooth=True failed: " + e.getMessage());
@@ -289,13 +289,13 @@ public class Batch2Test {
                     .setAlgorithmModel("hunyuan3D-UV-v2.0")
                     .setEnableAutoSmoothing(false);
 
-            String modelId = client.genUV(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genUV(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: uv smooth=False - model_id=" + modelId);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelId, waitOpts);
+            ModelInfo model = client.waitModel(modelId, waitOpts, rtx);;
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenUV smooth=False failed: " + e.getMessage());
@@ -329,13 +329,13 @@ public class Batch2Test {
                     .setResolution(1024)
                     .setUnwarpUV(false);
 
-            String modelId = client.genTexture(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genTexture(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: tex res=1024 - model_id=" + modelId);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelId, waitOpts);
+            ModelInfo model = client.waitModel(modelId, waitOpts, rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenTexture res=1024 failed: " + e.getMessage());
@@ -369,13 +369,13 @@ public class Batch2Test {
                     .setResolution(2048)
                     .setUnwarpUV(true);
 
-            String modelId = client.genTexture(modelFile.getAbsolutePath(), opts);
+            String modelId = client.genTexture(modelFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: tex res=2048 uv=True - model_id=" + modelId);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelId, waitOpts);
+            ModelInfo model = client.waitModel(modelId, waitOpts, rtx);;
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenTexture res=2048 uv=True failed: " + e.getMessage());

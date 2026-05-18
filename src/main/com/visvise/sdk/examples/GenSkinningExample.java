@@ -21,7 +21,7 @@ public class GenSkinningExample {
 
     static final String APP_ID     = System.getenv("VISVISE_APP_ID");
     static final String SECRET_KEY = System.getenv("VISVISE_SECRET_KEY");
-    static final String UID        = System.getenv("VISVISE_UID");
+    static final String RTX        = System.getenv("VISVISE_RTX");
     static final String ENV        = System.getenv().getOrDefault("VISVISE_ENV", "prod");
 
     static final String ASSETS     = "examples/assets";
@@ -58,7 +58,7 @@ public class GenSkinningExample {
 
     public static void main(String[] args) throws WeaverError {
         Environment env = "dev".equals(ENV) ? Environment.DEV : "test".equals(ENV) ? Environment.TEST : Environment.PROD;
-        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY, UID,
+        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY,
                 ClientOptions.create().setEnv(env));
 
         System.out.println("[gen_skinning] 开始蒙皮生成...");
@@ -66,11 +66,13 @@ public class GenSkinningExample {
         String modelId = client.genSkinning(MODEL_PATH,
                 GenSkinningOptions.create(MESH_NAMES, MESH_NAMES)
                         .setAlgorithmModel("VISVISE-GoSkinning-V1.0.0")
-                        .setName("example_gen_skinning"));
+                        .setName("example_gen_skinning"),
+                RTX);
         System.out.println("[gen_skinning] 任务已创建，model_id=" + modelId);
 
         ModelInfo model = client.waitModel(modelId,
-                WaitOptions.create().setInterval(5).setTimeout(600));
+                WaitOptions.create().setInterval(5).setTimeout(600),
+                RTX);
         System.out.println("[gen_skinning] 生成成功！耗时 " + model.getTimeCost() + "s");
         System.out.println("  output_model : " + model.getOutputModel());
     }

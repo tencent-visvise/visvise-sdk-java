@@ -2,6 +2,7 @@ package com.visvise.sdk;
 
 import com.visvise.sdk.api.VisviseAPI;
 import com.visvise.sdk.enums.DetailLevel;
+import com.visvise.sdk.enums.Environment;
 import com.visvise.sdk.enums.FaceType;
 import com.visvise.sdk.enums.ModelFormat;
 import com.visvise.sdk.models.ModelInfo;
@@ -25,7 +26,7 @@ public class FinalTest {
 
     private String appId;
     private String secretKey;
-    private String uid;
+    private String rtx;
     private VisviseClient client;
 
     private static final String ASSETS_DIR = "src/test/resources/assets";
@@ -35,17 +36,20 @@ public class FinalTest {
     public void setUp() {
         appId = System.getenv("VISVISE_APP_ID");
         secretKey = System.getenv("VISVISE_SECRET_KEY");
-        uid = System.getenv("VISVISE_UID");
+        rtx = System.getenv("VISVISE_RTX");
 
-        if (appId != null && secretKey != null && uid != null) {
-            client = new VisviseClient(appId, secretKey, uid);
+        if (appId != null && secretKey != null && rtx != null) {
+            ClientOptions opts = ClientOptions.create()
+                    .setEnv(Environment.DEV)
+                    .setDebug(true);
+            client = new VisviseClient(appId, secretKey, opts);
         }
     }
 
     private boolean isConfigured() {
         return appId != null && !appId.isEmpty()
                 && secretKey != null && !secretKey.isEmpty()
-                && uid != null && !uid.isEmpty();
+                && rtx != null && !rtx.isEmpty();
     }
 
     /**
@@ -73,7 +77,7 @@ public class FinalTest {
             String id = m[1];
             try {
                 VisviseAPI.ModelListResult result = api.getModelList(
-                        Collections.singletonList(id), null, null, "", 10, 1);
+                        Collections.singletonList(id), null, null, "", 10, 1, rtx);
                 if (!result.getModels().isEmpty()) {
                     ModelInfo model = result.getModels().get(0);
                     System.out.printf("PASS: [%s] model_id=%s status=%d time_cost=%d%n",
@@ -110,7 +114,7 @@ public class FinalTest {
                     MV_BASE + "/example_gen_360_MultiView(2)_BackView.png",
                     MV_BASE + "/example_gen_360_MultiView(2)_LeftView.png",
                     MV_BASE + "/example_gen_360_MultiView(2)_RightView.png",
-                    opts);
+                    opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.printf("Submitted [mid face_type=2 fbx] -> %s%n", modelId);
         } catch (Exception e) {
@@ -133,7 +137,7 @@ public class FinalTest {
                     .setName("opt_rtp_b_final")
                     .setDetailLevel(DetailLevel.HIGH);
 
-            String modelId = client.genRetopology(modelFile.getAbsolutePath(), opts2);
+            String modelId = client.genRetopology(modelFile.getAbsolutePath(), opts2, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.printf("Submitted [rtp detail=3 face=1] -> %s%n", modelId);
         } catch (Exception e) {
@@ -148,7 +152,7 @@ public class FinalTest {
                     .setName("opt_uv_b_final")
                     .setEnableAutoSmoothing(false);
 
-            String modelId = client.genUV(modelFile.getAbsolutePath(), opts3);
+            String modelId = client.genUV(modelFile.getAbsolutePath(), opts3, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.printf("Submitted [uv smooth=False] -> %s%n", modelId);
         } catch (Exception e) {
@@ -171,7 +175,7 @@ public class FinalTest {
                     .setResolution(2048)
                     .setUnwarpUV(true);
 
-            String modelId = client.genTexture(modelFile.getAbsolutePath(), opts4);
+            String modelId = client.genTexture(modelFile.getAbsolutePath(), opts4, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.printf("Submitted [tex res=2048 uv=True] -> %s%n", modelId);
         } catch (Exception e) {
@@ -190,7 +194,7 @@ public class FinalTest {
                     .setName("opt_lod_a_final")
                     .setGenTimes(1);
 
-            List<String> modelIds = client.genLOD(modelFile.getAbsolutePath(), reduceFaces, opts5);
+            List<String> modelIds = client.genLOD(modelFile.getAbsolutePath(), reduceFaces, opts5, rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.printf("Submitted [lod gen_times=1] -> %s%n", modelIds);
         } catch (Exception e) {
@@ -226,7 +230,7 @@ public class FinalTest {
                         .setMultipleTrack(false);
 
                 String modelId = client.genVideoMotion(
-                        animModelFile.getAbsolutePath(), videoFile.getAbsolutePath(), opts);
+                        animModelFile.getAbsolutePath(), videoFile.getAbsolutePath(), opts, rtx);
                 assertNotNull("Model ID should not be null", modelId);
                 System.out.printf("Submitted [vm with_hand=True] -> %s%n", modelId);
             } catch (Exception e) {
@@ -243,7 +247,7 @@ public class FinalTest {
                         .setMultipleTrack(false);
 
                 String modelId = client.genVideoMotion(
-                        animModelFile.getAbsolutePath(), videoFile.getAbsolutePath(), opts2);
+                        animModelFile.getAbsolutePath(), videoFile.getAbsolutePath(), opts2, rtx);
                 assertNotNull("Model ID should not be null", modelId);
                 System.out.printf("Submitted [vm hand=False multi=False] -> %s%n", modelId);
             } catch (Exception e) {
@@ -259,7 +263,7 @@ public class FinalTest {
                     .setName("opt_tm_a_final");
 
             List<String> modelIds = client.genTextMotion(
-                    animModelFile.getAbsolutePath(), "一个人在挥手打招呼", opts3);
+                    animModelFile.getAbsolutePath(), "一个人在挥手打招呼", opts3, rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.printf("Submitted [tm prompt=挥手] -> %s%n", modelIds);
         } catch (Exception e) {
@@ -275,7 +279,7 @@ public class FinalTest {
                     .setName("opt_tm_b_final");
 
             List<String> modelIds = client.genTextMotion(
-                    animModelFile.getAbsolutePath(), "一个人在原地踏步", opts4);
+                    animModelFile.getAbsolutePath(), "一个人在原地踏步", opts4, rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.printf("Submitted [tm prompt=踏步 glb] -> %s%n", modelIds);
         } catch (Exception e) {

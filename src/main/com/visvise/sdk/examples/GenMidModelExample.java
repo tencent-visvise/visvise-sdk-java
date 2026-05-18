@@ -22,7 +22,7 @@ public class GenMidModelExample {
 
     static final String APP_ID     = System.getenv("VISVISE_APP_ID");
     static final String SECRET_KEY = System.getenv("VISVISE_SECRET_KEY");
-    static final String UID        = System.getenv("VISVISE_UID");
+    static final String RTX        = System.getenv("VISVISE_RTX");
     static final String ENV        = System.getenv().getOrDefault("VISVISE_ENV", "prod");
 
     static final String ASSETS = "examples/assets";
@@ -33,7 +33,7 @@ public class GenMidModelExample {
 
     public static void main(String[] args) throws WeaverError {
         Environment env = "dev".equals(ENV) ? Environment.DEV : "test".equals(ENV) ? Environment.TEST : Environment.PROD;
-        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY, UID,
+        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY,
                 ClientOptions.create().setEnv(env));
 
         String mvModelId = System.getenv("MV_360_MODEL_ID");
@@ -42,7 +42,7 @@ public class GenMidModelExample {
         if (mvModelId != null && !mvModelId.isEmpty()) {
             System.out.println("[gen_mid_model] 从 gen_360 输出提取四视图 (model_id=" + mvModelId + ")");
             VisviseAPI.ModelListResult result = client.getAPI().getModelList(
-                    java.util.Collections.singletonList(mvModelId), null, null, "", 10, 1);
+                    java.util.Collections.singletonList(mvModelId), null, null, "", 10, 1, RTX);
             View out = result.getModels().get(0).getImageGen360Output().getOutputView();
             mainView  = stripSign(out.getMainView());
             backView  = stripSign(out.getBackView());
@@ -61,11 +61,13 @@ public class GenMidModelExample {
                         .setAlgorithmModel("VISVISE-MeshGen-V1.0.0")
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setFaceType(FaceType.TRIANGLE)
-                        .setName("example_gen_mid_model"));
+                        .setName("example_gen_mid_model"),
+                RTX);
         System.out.println("[gen_mid_model] 任务已创建，model_id=" + modelId);
 
         ModelInfo model = client.waitModel(modelId,
-                WaitOptions.create().setInterval(5).setTimeout(900));
+                WaitOptions.create().setInterval(5).setTimeout(900),
+                RTX);
         System.out.println("[gen_mid_model] 生成成功！耗时 " + model.getTimeCost() + "s");
         System.out.println("  output_model : " + model.getOutputModel());
     }

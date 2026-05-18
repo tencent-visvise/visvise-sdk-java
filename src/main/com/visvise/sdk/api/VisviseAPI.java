@@ -30,13 +30,13 @@ public class VisviseAPI {
     /**
      * Retrieves COS temporary credentials for direct file upload
      */
-    public GetCosCredResult getCosCred(boolean isTemp) throws WeaverError {
+    public GetCosCredResult getCosCred(boolean isTemp, String rtx) throws WeaverError {
         Map<String, Object> body = new HashMap<>();
         if (isTemp) {
             body.put("is_temp", true);
         }
 
-        Object data = http.post("openapi/weaver/resource/get_cos_cred", body);
+        Object data = http.post("openapi/weaver/resource/get_cos_cred", body, rtx);
         if (data == null) {
             return null;
         }
@@ -86,8 +86,8 @@ public class VisviseAPI {
     /**
      * Retrieves the remaining generation count for the current API key
      */
-    public UserQuota getUserQuota() throws WeaverError {
-        Object data = http.post("openapi/weaver/resource/get_user_quota", new HashMap<>());
+    public UserQuota getUserQuota(String rtx) throws WeaverError {
+        Object data = http.post("openapi/weaver/resource/get_user_quota", new HashMap<>(), rtx);
         if (data == null || !(data instanceof JsonObject)) {
             return null;
         }
@@ -112,7 +112,8 @@ public class VisviseAPI {
             View inputView,
             String inputModel,
             String inputModelFormat,
-            String inputVideo) throws WeaverError {
+            String inputVideo,
+            String rtx) throws WeaverError {
 
         Map<String, Object> body = new HashMap<>();
         body.put("name", name);
@@ -132,7 +133,7 @@ public class VisviseAPI {
             body.put("input_video", inputVideo);
         }
 
-        Object data = http.post("openapi/weaver/resource/gen_3d_model", body);
+        Object data = http.post("openapi/weaver/resource/gen_3d_model", body, rtx);
         if (data == null || !(data instanceof JsonObject)) {
             return null;
         }
@@ -152,13 +153,13 @@ public class VisviseAPI {
     /**
      * Generates multi-view images from a single image (async)
      */
-    public String genMultiViews(String name, View inputView, Map<String, Object> params) throws WeaverError {
+    public String genMultiViews(String name, View inputView, Map<String, Object> params, String rtx) throws WeaverError {
         Map<String, Object> body = new HashMap<>();
         body.put("name", name);
         body.put("input_view", inputView.toMap());
         body.put("params", params);
 
-        Object data = http.post("openapi/weaver/resource/gen_multi_views", body);
+        Object data = http.post("openapi/weaver/resource/gen_multi_views", body, rtx);
         if (data == null || !(data instanceof JsonObject)) {
             return null;
         }
@@ -179,7 +180,8 @@ public class VisviseAPI {
             List<Integer> statusList,
             String keyword,
             int limit,
-            int page) throws WeaverError {
+            int page,
+            String rtx) throws WeaverError {
 
         Map<String, Object> body = new HashMap<>();
         body.put("limit", limit);
@@ -198,7 +200,7 @@ public class VisviseAPI {
             body.put("keyword", keyword);
         }
 
-        Object data = http.post("openapi/weaver/resource/get_model_list", body);
+        Object data = http.post("openapi/weaver/resource/get_model_list", body, rtx);
         if (data == null || !(data instanceof JsonObject)) {
             return new ModelListResult(new ArrayList<>(), 0);
         }
@@ -223,14 +225,14 @@ public class VisviseAPI {
     /**
      * Retrieves the list of algorithm models for a given node type
      */
-    public List<String> listAlgorithmModel(int nodeType, Integer subType) throws WeaverError {
+    public List<String> listAlgorithmModel(int nodeType, Integer subType, String rtx) throws WeaverError {
         Map<String, Object> body = new HashMap<>();
         body.put("node_type", nodeType);
         if (subType != null) {
             body.put("type", subType);
         }
 
-        Object data = http.post("openapi/weaver/resource/list_algorithm_model", body);
+        Object data = http.post("openapi/weaver/resource/list_algorithm_model", body, rtx);
         if (data == null || !(data instanceof JsonObject)) {
             return null;
         }
@@ -250,11 +252,11 @@ public class VisviseAPI {
     /**
      * Generates a signed download URL for a model asset
      */
-    public String downloadModel(String modelId) throws WeaverError {
+    public String downloadModel(String modelId, String rtx) throws WeaverError {
         Map<String, Object> body = new HashMap<>();
         body.put("model_id", modelId);
 
-        Object data = http.post("openapi/weaver/resource/download_model", body);
+        Object data = http.post("openapi/weaver/resource/download_model", body, rtx);
         if (data != null && !(data instanceof JsonNull)) {
             return data.toString();
         }
@@ -264,29 +266,29 @@ public class VisviseAPI {
     /**
      * Deletes a single model asset
      */
-    public void deleteModel(String modelId) throws WeaverError {
+    public void deleteModel(String modelId, String rtx) throws WeaverError {
         Map<String, Object> body = new HashMap<>();
         body.put("model_id", modelId);
-        http.post("openapi/weaver/resource/delete_model", body);
+        http.post("openapi/weaver/resource/delete_model", body, rtx);
     }
 
     /**
      * Batch deletes model assets
      */
-    public void batchDeleteModel(List<String> modelIds) throws WeaverError {
+    public void batchDeleteModel(List<String> modelIds, String rtx) throws WeaverError {
         Map<String, Object> body = new HashMap<>();
         body.put("model_ids", modelIds);
-        http.post("openapi/weaver/resource/batch_delete_model", body);
+        http.post("openapi/weaver/resource/batch_delete_model", body, rtx);
     }
 
     /**
      * Removes the background from an image
      */
-    public String removeBackground(String imageUrl) throws WeaverError {
+    public String removeBackground(String imageUrl, String rtx) throws WeaverError {
         Map<String, Object> body = new HashMap<>();
         body.put("image_url", imageUrl);
 
-        Object data = http.post("openapi/weaver/resource/remove_background", body);
+        Object data = http.post("openapi/weaver/resource/remove_background", body, rtx);
         if (data == null || !(data instanceof JsonObject)) {
             return null;
         }
@@ -305,7 +307,8 @@ public class VisviseAPI {
             String name,
             String inputModel,
             List<String> inputImages,
-            Map<String, Object> params) throws WeaverError {
+            Map<String, Object> params,
+            String rtx) throws WeaverError {
 
         Map<String, Object> body = new HashMap<>();
         body.put("name", name);
@@ -313,7 +316,7 @@ public class VisviseAPI {
         body.put("input_images", inputImages);
         body.put("params", params);
 
-        Object data = http.post("openapi/weaver/resource/batch_gen_pose", body);
+        Object data = http.post("openapi/weaver/resource/batch_gen_pose", body, rtx);
         if (data == null || !(data instanceof JsonObject)) {
             return null;
         }
@@ -333,11 +336,11 @@ public class VisviseAPI {
     /**
      * Retrieves the text-to-motion prompt demo list
      */
-    public List<String> getText2MotionPromptList(String language) throws WeaverError {
+    public List<String> getText2MotionPromptList(String language, String rtx) throws WeaverError {
         Map<String, Object> body = new HashMap<>();
         body.put("language", language);
 
-        Object data = http.post("openapi/weaver/demo/get_text2motion_prompt_list", body);
+        Object data = http.post("openapi/weaver/demo/get_text2motion_prompt_list", body, rtx);
         if (data == null || !(data instanceof JsonObject)) {
             return null;
         }
@@ -365,7 +368,8 @@ public class VisviseAPI {
             Integer splitType,
             Integer granularity,
             String prompt,
-            int readTimeout) throws WeaverError {
+            int readTimeout,
+            String rtx) throws WeaverError {
 
         Map<String, Object> body = new HashMap<>();
         body.put("name", name);
@@ -387,7 +391,7 @@ public class VisviseAPI {
             body.put("prompt", prompt);
         }
 
-        return http.postSSE("openapi/weaver/component/init_segment", body, readTimeout);
+        return http.postSSE("openapi/weaver/component/init_segment", body, readTimeout, rtx);
     }
 
     /**

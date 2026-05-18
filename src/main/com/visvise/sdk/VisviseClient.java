@@ -44,13 +44,13 @@ public class VisviseClient {
     /**
      * Create a new VisviseClient with custom options
      */
-    public VisviseClient(String appId, String secretKey, String uid, ClientOptions opts) {
+    public VisviseClient(String appId, String secretKey, ClientOptions opts) {
         if (opts == null) {
             opts = ClientOptions.create();
         }
         String env = opts.getEnv() != null ? opts.getEnv().getValue() : Environment.PROD.getValue();
         int timeout = opts.getTimeout() > 0 ? opts.getTimeout() : 30;
-        this.http = new HTTPClient(appId, secretKey, uid, env, timeout);
+        this.http = new HTTPClient(appId, secretKey, env, timeout);
         this.api = new VisviseAPI(this.http);
         if (opts.isDebug()) {
             setDebug(true);
@@ -60,8 +60,8 @@ public class VisviseClient {
     /**
      * Create a new VisviseClient with default options (Env.PROD, Timeout=30)
      */
-    public VisviseClient(String appId, String secretKey, String uid) {
-        this(appId, secretKey, uid, ClientOptions.create());
+    public VisviseClient(String appId, String secretKey) {
+        this(appId, secretKey, ClientOptions.create());
     }
 
     /**
@@ -83,7 +83,7 @@ public class VisviseClient {
     /**
      * Resolves a file input to a COS URL (without filename parameter)
      */
-    private String resolveFile(Object source, boolean isTemp) throws WeaverError {
+    private String resolveFile(Object source, boolean isTemp, String rtx) throws WeaverError {
         if (source == null) {
             throw new WeaverError(-1, "File input cannot be null");
         }
@@ -92,7 +92,7 @@ public class VisviseClient {
             String s = (String) source;
             if (isLocalFile(s)) {
                 String filename = Paths.get(s).getFileName().toString();
-                return uploadFile(s, filename, false);
+                return uploadFile(s, filename, false, rtx);
             }
             if (isCosUrl(s)) {
                 return s;
@@ -104,14 +104,14 @@ public class VisviseClient {
         if (source instanceof byte[]) {
             byte[] data = (byte[]) source;
             String filename = genRandomFilename(sniffExtension(data, ".bin"));
-            return uploadBytes(data, filename, isTemp);
+            return uploadBytes(data, filename, isTemp, rtx);
         }
 
         if (source instanceof File) {
             File file = (File) source;
             try {
                 String filename = file.getName();
-                return uploadBytes(Files.readAllBytes(file.toPath()), filename, isTemp);
+                return uploadBytes(Files.readAllBytes(file.toPath()), filename, isTemp, rtx);
             } catch (IOException e) {
                 throw new WeaverError(-1, String.format("Failed to read file: %s", e.getMessage()));
             }
@@ -121,7 +121,7 @@ public class VisviseClient {
             try {
                 byte[] data = toByteArray((InputStream) source);
                 String filename = genRandomFilename(sniffExtension(data, ".bin"));
-                return uploadBytes(data, filename, isTemp);
+                return uploadBytes(data, filename, isTemp, rtx);
             } catch (IOException e) {
                 throw new WeaverError(-1, String.format("Failed to read data: %s", e.getMessage()));
             }
@@ -130,7 +130,7 @@ public class VisviseClient {
         throw new WeaverError(-1, "Unsupported file input type");
     }
 
-    private String resolveModelFile(Object source, boolean isTemp) throws WeaverError {
+    private String resolveModelFile(Object source, boolean isTemp, String rtx) throws WeaverError {
         if (source == null) {
             throw new WeaverError(-1, "Model file input cannot be null");
         }
@@ -145,13 +145,13 @@ public class VisviseClient {
                         String srcFilename = Paths.get(s).getFileName().toString();
                         String stem = srcFilename.substring(0, srcFilename.lastIndexOf('.'));
                         String zipFilename = stem + ".zip";
-                        return uploadZip(data, srcFilename, zipFilename, isTemp);
+                        return uploadZip(data, srcFilename, zipFilename, isTemp, rtx);
                     } catch (IOException e) {
                         throw new WeaverError(-1, String.format("Failed to read file: %s", e.getMessage()));
                     }
                 }
                 String filename = Paths.get(s).getFileName().toString();
-                return uploadFile(s, filename, isTemp);
+                return uploadFile(s, filename, isTemp, rtx);
             }
             if (isCosUrl(s)) {
                 return s;
@@ -180,17 +180,17 @@ public class VisviseClient {
 
         if (isZip(data)) {
             String filename = genRandomFilename(".zip");
-            return uploadBytes(data, filename, isTemp);
+            return uploadBytes(data, filename, isTemp, rtx);
         }
 
         String filename = genRandomFilename(sniffExtension(data, ".fbx"));
         String stem = filename.substring(0, filename.lastIndexOf('.'));
         String zipFilename = stem + ".zip";
-        return uploadZip(data, filename, zipFilename, isTemp);
+        return uploadZip(data, filename, zipFilename, isTemp, rtx);
     }
 
-    private String uploadFile(String path, String filename, boolean isTemp) throws WeaverError {
-        GetCosCredResult cred = api.getCosCred(isTemp);
+    private String uploadFile(String path, String filename, boolean isTemp, String rtx) throws WeaverError {
+        GetCosCredResult cred = api.getCosCred(isTemp, rtx);
         if (cred == null) {
             throw new WeaverError(-1, "Failed to get COS credentials");
         }
@@ -203,8 +203,8 @@ public class VisviseClient {
         }
     }
 
-    private String uploadBytes(byte[] data, String filename, boolean isTemp) throws WeaverError {
-        GetCosCredResult cred = api.getCosCred(isTemp);
+    private String uploadBytes(byte[] data, String filename, boolean isTemp, String rtx) throws WeaverError {
+        GetCosCredResult cred = api.getCosCred(isTemp, rtx);
         if (cred == null) {
             throw new WeaverError(-1, "Failed to get COS credentials");
         }
@@ -240,7 +240,7 @@ public class VisviseClient {
         return String.format("https://%s.cos.%s.myqcloud.com/%s", cred.getBucket(), cred.getRegion(), cosKey);
     }
 
-    private String uploadZip(byte[] data, String innerFilename, String zipFilename, boolean isTemp) throws WeaverError {
+    private String uploadZip(byte[] data, String innerFilename, String zipFilename, boolean isTemp, String rtx) throws WeaverError {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
             ZipEntry entry = new ZipEntry(innerFilename);
@@ -251,16 +251,16 @@ public class VisviseClient {
             throw new WeaverError(-1, String.format("Failed to create zip: %s", e.getMessage()));
         }
 
-        return uploadBytes(baos.toByteArray(), zipFilename, isTemp);
+        return uploadBytes(baos.toByteArray(), zipFilename, isTemp, rtx);
     }
 
-    private String resolveAlgorithmModel(String algorithmModel, NodeType nodeType, AnimationSubType subType) throws WeaverError {
+    private String resolveAlgorithmModel(String algorithmModel, NodeType nodeType, AnimationSubType subType, String rtx) throws WeaverError {
         if (algorithmModel != null && !algorithmModel.isEmpty()) {
             return algorithmModel;
         }
 
         Integer subTypeValue = subType != null ? subType.getValue() : null;
-        List<String> models = api.listAlgorithmModel(nodeType.getValue(), subTypeValue);
+        List<String> models = api.listAlgorithmModel(nodeType.getValue(), subTypeValue, rtx);
         if (models == null || models.isEmpty()) {
             throw new WeaverError(-1, String.format(
                     "No available algorithm model for node_type=%d. Please apply through the platform or specify algorithm_model manually", nodeType.getValue()));
@@ -274,7 +274,7 @@ public class VisviseClient {
     /**
      * Polls and waits for model generation to complete
      */
-    public ModelInfo waitModel(String modelId, WaitOptions opts) throws WeaverError {
+    public ModelInfo waitModel(String modelId, WaitOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = WaitOptions.defaults();
         }
@@ -290,7 +290,7 @@ public class VisviseClient {
             }
 
             VisviseAPI.ModelListResult result = api.getModelList(
-                    Collections.singletonList(modelId), null, null, "", 10, 1);
+                    Collections.singletonList(modelId), null, null, "", 10, 1, rtx);
 
             if (result.getModels().isEmpty()) {
                 logger.info("Model {} not found, continuing to wait...", modelId);
@@ -332,28 +332,28 @@ public class VisviseClient {
     /**
      * Generates multi-view images from an image
      */
-    public String gen360(Object mainView, Gen360Options opts) throws WeaverError {
+    public String gen360(Object mainView, Gen360Options opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = Gen360Options.create();
         }
 
-        String mainUrl = resolveFile(mainView, false);
+        String mainUrl = resolveFile(mainView, false, rtx);
         View view = new View(mainUrl);
 
         if (opts.getBackView() != null) {
-            String backUrl = resolveFile(opts.getBackView(), false);
+            String backUrl = resolveFile(opts.getBackView(), false, rtx);
             view.setBackView(backUrl);
         }
         if (opts.getLeftView() != null) {
-            String leftUrl = resolveFile(opts.getLeftView(), false);
+            String leftUrl = resolveFile(opts.getLeftView(), false, rtx);
             view.setLeftView(leftUrl);
         }
         if (opts.getRightView() != null) {
-            String rightUrl = resolveFile(opts.getRightView(), false);
+            String rightUrl = resolveFile(opts.getRightView(), false, rtx);
             view.setRightView(rightUrl);
         }
 
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_360, null);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_360, null, rtx);
 
         Map<String, Object> img360 = new HashMap<>();
         img360.put("algorithm_model", resolvedModel);
@@ -368,32 +368,32 @@ public class VisviseClient {
 
         Map<String, Object> params = new HashMap<>();
         params.put("image_gen_360_params", img360);
-        return api.genMultiViews(opts.getName(), view, params);
+        return api.genMultiViews(opts.getName(), view, params, rtx);
     }
 
     /**
      * Generates a high-detail 3D model from images
      */
-    public String genHighModel(Object mainView, GenHighModelOptions opts) throws WeaverError {
+    public String genHighModel(Object mainView, GenHighModelOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenHighModelOptions.create();
         }
 
         View view = new View();
-        String mainUrl = resolveFile(mainView, false);
+        String mainUrl = resolveFile(mainView, false, rtx);
         view.setMainView(mainUrl);
 
         if (opts.getBackView() != null) {
-            view.setBackView(resolveFile(opts.getBackView(), false));
+            view.setBackView(resolveFile(opts.getBackView(), false, rtx));
         }
         if (opts.getLeftView() != null) {
-            view.setLeftView(resolveFile(opts.getLeftView(), false));
+            view.setLeftView(resolveFile(opts.getLeftView(), false, rtx));
         }
         if (opts.getRightView() != null) {
-            view.setRightView(resolveFile(opts.getRightView(), false));
+            view.setRightView(resolveFile(opts.getRightView(), false, rtx));
         }
 
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_3D_HIGH, null);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_3D_HIGH, null, rtx);
 
         Map<String, Object> imgParams = new HashMap<>();
         imgParams.put("algorithm_model", resolvedModel);
@@ -406,25 +406,25 @@ public class VisviseClient {
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("image_gen_model_params", imgParams);
         List<String> modelIds = api.gen3DModel(opts.getName(), NodeType.IMG_TO_3D_HIGH.getValue(),
-                genParams, view, "", "", "");
+                genParams, view, "", "", "", rtx);
         return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
     }
 
     /**
      * Generates a mid-detail 3D model from images
      */
-    public String genMidModel(Object mainView, Object backView, Object leftView, Object rightView, GenMidModelOptions opts) throws WeaverError {
+    public String genMidModel(Object mainView, Object backView, Object leftView, Object rightView, GenMidModelOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenMidModelOptions.create();
         }
 
         View view = new View();
-        view.setMainView(resolveFile(mainView, false));
-        view.setBackView(resolveFile(backView, false));
-        view.setLeftView(resolveFile(leftView, false));
-        view.setRightView(resolveFile(rightView, false));
+        view.setMainView(resolveFile(mainView, false, rtx));
+        view.setBackView(resolveFile(backView, false, rtx));
+        view.setLeftView(resolveFile(leftView, false, rtx));
+        view.setRightView(resolveFile(rightView, false, rtx));
 
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_3D_MID, null);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_3D_MID, null, rtx);
 
         Map<String, Object> imgParams = new HashMap<>();
         imgParams.put("algorithm_model", resolvedModel);
@@ -437,31 +437,31 @@ public class VisviseClient {
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("image_gen_model_params", imgParams);
         List<String> modelIds = api.gen3DModel(opts.getName(), NodeType.IMG_TO_3D_MID.getValue(),
-                genParams, view, "", "", "");
+                genParams, view, "", "", "", rtx);
         return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
     }
 
     /**
      * Generates a low-detail 3D model from images
      */
-    public String genLowModel(Object mainView, GenLowModelOptions opts) throws WeaverError {
+    public String genLowModel(Object mainView, GenLowModelOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenLowModelOptions.create();
         }
 
         View view = new View();
-        view.setMainView(resolveFile(mainView, false));
+        view.setMainView(resolveFile(mainView, false, rtx));
         if (opts.getBackView() != null) {
-            view.setBackView(resolveFile(opts.getBackView(), false));
+            view.setBackView(resolveFile(opts.getBackView(), false, rtx));
         }
         if (opts.getLeftView() != null) {
-            view.setLeftView(resolveFile(opts.getLeftView(), false));
+            view.setLeftView(resolveFile(opts.getLeftView(), false, rtx));
         }
         if (opts.getRightView() != null) {
-            view.setRightView(resolveFile(opts.getRightView(), false));
+            view.setRightView(resolveFile(opts.getRightView(), false, rtx));
         }
 
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_3D_LOW, null);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_3D_LOW, null, rtx);
 
         Map<String, Object> imgParams = new HashMap<>();
         imgParams.put("algorithm_model", resolvedModel);
@@ -471,20 +471,20 @@ public class VisviseClient {
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("image_gen_model_params", imgParams);
         List<String> modelIds = api.gen3DModel(opts.getName(), NodeType.IMG_TO_3D_LOW.getValue(),
-                genParams, view, "", "", "");
+                genParams, view, "", "", "", rtx);
         return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
     }
 
     /**
      * Performs mesh refinement/optimization
      */
-    public String genMeshRefine(Object modelPath, GenMeshRefineOptions opts) throws WeaverError {
+    public String genMeshRefine(Object modelPath, GenMeshRefineOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenMeshRefineOptions.create();
         }
 
-        String cosUrl = resolveModelFile(modelPath, false);
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.MESH_REFINE, null);
+        String cosUrl = resolveModelFile(modelPath, false, rtx);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.MESH_REFINE, null, rtx);
 
         Map<String, Object> params = new HashMap<>();
         params.put("algorithm_model", resolvedModel);
@@ -493,27 +493,27 @@ public class VisviseClient {
             params.put("mode", opts.getMode().getValue());
         }
         if (opts.getColorModel() != null) {
-            String colorUrl = resolveModelFile(opts.getColorModel(), false);
+            String colorUrl = resolveModelFile(opts.getColorModel(), false, rtx);
             params.put("color_model", colorUrl);
         }
 
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("mesh_refine_params", params);
         List<String> modelIds = api.gen3DModel(opts.getName(), NodeType.MESH_REFINE.getValue(),
-                genParams, null, cosUrl, "", "");
+                genParams, null, cosUrl, "", "", rtx);
         return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
     }
 
     /**
      * Performs re-topology on a model
      */
-    public String genRetopology(Object modelPath, GenRetopologyOptions opts) throws WeaverError {
+    public String genRetopology(Object modelPath, GenRetopologyOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenRetopologyOptions.create();
         }
 
-        String cosUrl = resolveModelFile(modelPath, false);
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.RE_TOPOLOGY, null);
+        String cosUrl = resolveModelFile(modelPath, false, rtx);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.RE_TOPOLOGY, null, rtx);
 
         Map<String, Object> params = new HashMap<>();
         params.put("algorithm_model", resolvedModel);
@@ -529,20 +529,20 @@ public class VisviseClient {
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("re_topology_params", params);
         List<String> modelIds = api.gen3DModel(opts.getName(), NodeType.RE_TOPOLOGY.getValue(),
-                genParams, null, cosUrl, "", "");
+                genParams, null, cosUrl, "", "", rtx);
         return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
     }
 
     /**
      * Generates LOD (Level of Detail) models
      */
-    public List<String> genLOD(Object modelPath, List<ReduceFace> reduceFaces, GenLODOptions opts) throws WeaverError {
+    public List<String> genLOD(Object modelPath, List<ReduceFace> reduceFaces, GenLODOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenLODOptions.create();
         }
 
-        String cosUrl = resolveModelFile(modelPath, false);
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.LOD, null);
+        String cosUrl = resolveModelFile(modelPath, false, rtx);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.LOD, null, rtx);
 
         List<Map<String, Object>> reduceFacesData = new ArrayList<>();
         for (ReduceFace rf : reduceFaces) {
@@ -558,19 +558,19 @@ public class VisviseClient {
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("lod_params", lodParams);
         return api.gen3DModel(opts.getName(), NodeType.LOD.getValue(),
-                genParams, null, cosUrl, "", "");
+                genParams, null, cosUrl, "", "", rtx);
     }
 
     /**
      * Performs UV unwrapping on a model
      */
-    public String genUV(Object modelPath, GenUVOptions opts) throws WeaverError {
+    public String genUV(Object modelPath, GenUVOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenUVOptions.create();
         }
 
-        String cosUrl = resolveModelFile(modelPath, false);
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.UV, null);
+        String cosUrl = resolveModelFile(modelPath, false, rtx);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.UV, null, rtx);
 
         Map<String, Object> uvParams = new HashMap<>();
         uvParams.put("algorithm_model", resolvedModel);
@@ -581,14 +581,14 @@ public class VisviseClient {
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("uv_params", uvParams);
         List<String> modelIds = api.gen3DModel(opts.getName(), NodeType.UV.getValue(),
-                genParams, null, cosUrl, "", "");
+                genParams, null, cosUrl, "", "", rtx);
         return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
     }
 
     /**
      * Generates textures for a model
      */
-    public String genTexture(Object modelPath, GenTextureOptions opts) throws WeaverError {
+    public String genTexture(Object modelPath, GenTextureOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenTextureOptions.create();
         }
@@ -599,8 +599,8 @@ public class VisviseClient {
             throw new WeaverError(-1, "gen_texture requires either input_view.main_view or prompt");
         }
 
-        String cosUrl = resolveModelFile(modelPath, false);
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.TEXTURE, null);
+        String cosUrl = resolveModelFile(modelPath, false, rtx);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.TEXTURE, null, rtx);
 
         Map<String, Object> texParams = new HashMap<>();
         texParams.put("algorithm_model", resolvedModel);
@@ -618,35 +618,35 @@ public class VisviseClient {
         if (inputView != null) {
             resolvedView = new View();
             if (inputView.getMainView() != null && !inputView.getMainView().isEmpty()) {
-                resolvedView.setMainView(resolveFile(inputView.getMainView(), false));
+                resolvedView.setMainView(resolveFile(inputView.getMainView(), false, rtx));
             }
             if (inputView.getBackView() != null && !inputView.getBackView().isEmpty()) {
-                resolvedView.setBackView(resolveFile(inputView.getBackView(), false));
+                resolvedView.setBackView(resolveFile(inputView.getBackView(), false, rtx));
             }
             if (inputView.getLeftView() != null && !inputView.getLeftView().isEmpty()) {
-                resolvedView.setLeftView(resolveFile(inputView.getLeftView(), false));
+                resolvedView.setLeftView(resolveFile(inputView.getLeftView(), false, rtx));
             }
             if (inputView.getRightView() != null && !inputView.getRightView().isEmpty()) {
-                resolvedView.setRightView(resolveFile(inputView.getRightView(), false));
+                resolvedView.setRightView(resolveFile(inputView.getRightView(), false, rtx));
             }
         }
 
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("tex_params", texParams);
         List<String> modelIds = api.gen3DModel(opts.getName(), NodeType.TEXTURE.getValue(),
-                genParams, resolvedView, cosUrl, "", "");
+                genParams, resolvedView, cosUrl, "", "", rtx);
         return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
     }
 
     /**
      * Performs skeleton rigging on a model
      */
-    public String genRigging(Object modelPath, GenRiggingOptions opts) throws WeaverError {
+    public String genRigging(Object modelPath, GenRiggingOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenRiggingOptions.create();
         }
 
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.RIGGING, null);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.RIGGING, null, rtx);
 
         Map<String, Object> jsonData = new HashMap<>();
         Map<String, Object> config = new HashMap<>();
@@ -655,26 +655,26 @@ public class VisviseClient {
         jsonData.put("config", config);
 
         byte[] zipBytes = buildModelZip(modelPath, jsonData);
-        String cosUrl = uploadBytes(zipBytes, "", false);
+        String cosUrl = uploadBytes(zipBytes, "", false, rtx);
 
         Map<String, Object> riggingParams = new HashMap<>();
         riggingParams.put("algorithm_model", resolvedModel);
         if (opts.getTemplateSkeleton() != null) {
-            String skeletonUrl = resolveModelFile(opts.getTemplateSkeleton(), false);
+            String skeletonUrl = resolveModelFile(opts.getTemplateSkeleton(), false, rtx);
             riggingParams.put("template_skeleton", skeletonUrl);
         }
 
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("go_rigging_params", riggingParams);
         List<String> modelIds = api.gen3DModel(opts.getName(), NodeType.RIGGING.getValue(),
-                genParams, null, cosUrl, "", "");
+                genParams, null, cosUrl, "", "", rtx);
         return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
     }
 
     /**
      * Performs skinning on a rigged model
      */
-    public String genSkinning(Object modelPath, GenSkinningOptions opts) throws WeaverError {
+    public String genSkinning(Object modelPath, GenSkinningOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             throw new WeaverError(-1, "gen_skinning requires opts with mesh_names and joint_names");
         }
@@ -683,7 +683,7 @@ public class VisviseClient {
             throw new WeaverError(-1, "gen_skinning requires mesh_names and joint_names");
         }
 
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.SKINNING, null);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.SKINNING, null, rtx);
 
         Map<String, Object> jsonData = new HashMap<>();
         Map<String, Object> config = new HashMap<>();
@@ -695,26 +695,26 @@ public class VisviseClient {
         jsonData.put("selection", selection);
 
         byte[] zipBytes = buildModelZip(modelPath, jsonData);
-        String cosUrl = uploadBytes(zipBytes, "", false);
+        String cosUrl = uploadBytes(zipBytes, "", false, rtx);
 
         List<String> modelIds = api.gen3DModel(opts.getName(), NodeType.SKINNING.getValue(),
-                new HashMap<>(), null, cosUrl, "", "");
+                new HashMap<>(), null, cosUrl, "", "", rtx);
         return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
     }
 
     /**
      * Generates animation from video
      */
-    public String genVideoMotion(Object modelPath, Object videoPath, GenVideoMotionOptions opts) throws WeaverError {
+    public String genVideoMotion(Object modelPath, Object videoPath, GenVideoMotionOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenVideoMotionOptions.create();
         }
 
-        String modelUrl = resolveModelFile(modelPath, false);
-        String videoUrl = resolveFile(videoPath, false);
+        String modelUrl = resolveModelFile(modelPath, false, rtx);
+        String videoUrl = resolveFile(videoPath, false, rtx);
 
         AnimationSubType subType = AnimationSubType.VIDEO;
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.ANIMATION, subType);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.ANIMATION, subType, rtx);
 
         Map<String, Object> framing = new HashMap<>();
         framing.put("algorithm_model", resolvedModel);
@@ -732,22 +732,22 @@ public class VisviseClient {
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("framing_ai_params", framing);
         List<String> modelIds = api.gen3DModel(opts.getName(), NodeType.ANIMATION.getValue(),
-                genParams, null, modelUrl, "", videoUrl);
+                genParams, null, modelUrl, "", videoUrl, rtx);
         return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
     }
 
     /**
      * Generates animation from text prompts
      */
-    public List<String> genTextMotion(Object modelPath, String prompt, GenTextMotionOptions opts) throws WeaverError {
+    public List<String> genTextMotion(Object modelPath, String prompt, GenTextMotionOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenTextMotionOptions.create();
         }
 
-        String modelUrl = resolveModelFile(modelPath, false);
+        String modelUrl = resolveModelFile(modelPath, false, rtx);
 
         AnimationSubType subType = AnimationSubType.TEXT;
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.ANIMATION, subType);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.ANIMATION, subType, rtx);
 
         Map<String, Object> framingParams = new HashMap<>();
         framingParams.put("algorithm_model", resolvedModel);
@@ -757,37 +757,37 @@ public class VisviseClient {
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("framing_ai_params", framingParams);
         return api.gen3DModel(opts.getName(), NodeType.ANIMATION.getValue(),
-                genParams, null, modelUrl, "", "");
+                genParams, null, modelUrl, "", "", rtx);
     }
 
     /**
      * Generates poses from reference images
      */
-    public List<String> genPose(Object modelPath, List<?> inputImages, GenPoseOptions opts) throws WeaverError {
+    public List<String> genPose(Object modelPath, List<?> inputImages, GenPoseOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenPoseOptions.create();
         }
 
-        String modelUrl = resolveModelFile(modelPath, false);
+        String modelUrl = resolveModelFile(modelPath, false, rtx);
 
         List<String> uploadedImages = new ArrayList<>();
         for (Object img : inputImages) {
-            uploadedImages.add(resolveFile(img, false));
+            uploadedImages.add(resolveFile(img, false, rtx));
         }
 
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_POSE, null);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_POSE, null, rtx);
 
         Map<String, Object> params = new HashMap<>();
         params.put("algorithm_model", resolvedModel);
         params.put("output_model_format", opts.getOutputModelFormat().getValue());
 
-        return api.batchGenPose(opts.getName(), modelUrl, uploadedImages, params);
+        return api.batchGenPose(opts.getName(), modelUrl, uploadedImages, params, rtx);
     }
 
     /**
      * Performs 2D segmentation (SSE streaming interface)
      */
-    public String genSegment2D(String modelId360, GenSegment2DOptions opts) throws WeaverError {
+    public String genSegment2D(String modelId360, GenSegment2DOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenSegment2DOptions.create();
         }
@@ -800,27 +800,27 @@ public class VisviseClient {
         if (opts.getInputView() != null) {
             resolvedView = new View();
             if (opts.getInputView().getMainView() != null && !opts.getInputView().getMainView().isEmpty()) {
-                resolvedView.setMainView(resolveFile(opts.getInputView().getMainView(), false));
+                resolvedView.setMainView(resolveFile(opts.getInputView().getMainView(), false, rtx));
             }
             if (opts.getInputView().getBackView() != null && !opts.getInputView().getBackView().isEmpty()) {
-                resolvedView.setBackView(resolveFile(opts.getInputView().getBackView(), false));
+                resolvedView.setBackView(resolveFile(opts.getInputView().getBackView(), false, rtx));
             }
             if (opts.getInputView().getLeftView() != null && !opts.getInputView().getLeftView().isEmpty()) {
-                resolvedView.setLeftView(resolveFile(opts.getInputView().getLeftView(), false));
+                resolvedView.setLeftView(resolveFile(opts.getInputView().getLeftView(), false, rtx));
             }
             if (opts.getInputView().getRightView() != null && !opts.getInputView().getRightView().isEmpty()) {
-                resolvedView.setRightView(resolveFile(opts.getInputView().getRightView(), false));
+                resolvedView.setRightView(resolveFile(opts.getInputView().getRightView(), false, rtx));
             }
         }
 
-        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.SEGMENT_2D, null);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.SEGMENT_2D, null, rtx);
 
         Integer splitType = opts.getSplitType() != null ? opts.getSplitType().getValue() : null;
         Integer granularity = opts.getGranularity() != null ? opts.getGranularity().getValue() : null;
 
         SSEIterator iter = api.initSegment(opts.getName(), resolvedModel, modelId360,
                 resolvedView, splitType, granularity,
-                opts.getPrompt(), opts.getReadTimeout());
+                opts.getPrompt(), opts.getReadTimeout(), rtx);
 
         String newModelId = null;
 
@@ -893,8 +893,8 @@ public class VisviseClient {
     /**
      * Uploads a local file to COS and returns the COS URL
      */
-    public String upload(String path, String filename, boolean isTemp) throws WeaverError {
-        return uploadFile(path, filename, isTemp);
+    public String upload(String path, String filename, boolean isTemp, String rtx) throws WeaverError {
+        return uploadFile(path, filename, isTemp, rtx);
     }
 
     // ════════════════════════════════════════════════════════════════════

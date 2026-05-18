@@ -24,7 +24,7 @@ public class GenLODExample {
 
     static final String APP_ID     = System.getenv("VISVISE_APP_ID");
     static final String SECRET_KEY = System.getenv("VISVISE_SECRET_KEY");
-    static final String UID        = System.getenv("VISVISE_UID");
+    static final String RTX        = System.getenv("VISVISE_RTX");
     static final String ENV        = System.getenv().getOrDefault("VISVISE_ENV", "prod");
 
     static final String ASSETS     = "examples/assets";
@@ -32,7 +32,7 @@ public class GenLODExample {
 
     public static void main(String[] args) throws WeaverError {
         Environment env = "dev".equals(ENV) ? Environment.DEV : "test".equals(ENV) ? Environment.TEST : Environment.PROD;
-        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY, UID,
+        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY,
                 ClientOptions.create().setEnv(env));
 
         System.out.println("[gen_lod] 开始 LOD 减面...");
@@ -48,12 +48,14 @@ public class GenLODExample {
                         .setAlgorithmModel("VISVISE-LOD-V1.0.0")
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setGenTimes(1)
-                        .setName("example_gen_lod"));
+                        .setName("example_gen_lod"),
+                RTX);
         System.out.println("[gen_lod] 任务已创建，model_ids=" + modelIds);
 
         for (String mid : modelIds) {
             ModelInfo model = client.waitModel(mid,
-                    WaitOptions.create().setInterval(5).setTimeout(600));
+                    WaitOptions.create().setInterval(5).setTimeout(600),
+                    RTX);
             System.out.println("[gen_lod] " + mid + " 生成成功！耗时 " + model.getTimeCost() + "s");
             if (model.getLodOutput() != null) {
                 for (LODFile lf : model.getLodOutput().getLodFiles()) {

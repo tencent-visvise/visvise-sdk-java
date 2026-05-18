@@ -1,6 +1,8 @@
 package com.visvise.sdk;
 
+import com.visvise.sdk.enums.Environment;
 import com.visvise.sdk.models.ModelInfo;
+import com.visvise.sdk.options.ClientOptions;
 import com.visvise.sdk.options.GenVideoMotionOptions;
 import com.visvise.sdk.options.GenTextMotionOptions;
 import com.visvise.sdk.options.WaitOptions;
@@ -20,7 +22,7 @@ public class Batch3Test {
 
     private String appId;
     private String secretKey;
-    private String uid;
+    private String rtx;
     private VisviseClient client;
 
     private static final String ASSETS_DIR = "src/test/resources/assets";
@@ -29,17 +31,20 @@ public class Batch3Test {
     public void setUp() {
         appId = System.getenv("VISVISE_APP_ID");
         secretKey = System.getenv("VISVISE_SECRET_KEY");
-        uid = System.getenv("VISVISE_UID");
+        rtx = System.getenv("VISVISE_RTX");
 
-        if (appId != null && secretKey != null && uid != null) {
-            client = new VisviseClient(appId, secretKey, uid);
+        if (appId != null && secretKey != null && rtx != null) {
+            ClientOptions opts = ClientOptions.create()
+                    .setEnv(Environment.DEV)
+                    .setDebug(true);
+            client = new VisviseClient(appId, secretKey, opts);
         }
     }
 
     private boolean isConfigured() {
         return appId != null && !appId.isEmpty()
                 && secretKey != null && !secretKey.isEmpty()
-                && uid != null && !uid.isEmpty();
+                && rtx != null && !rtx.isEmpty();
     }
 
     @Test
@@ -62,13 +67,13 @@ public class Batch3Test {
                     .setWithHand(true)
                     .setMultipleTrack(false);
 
-            String modelId = client.genVideoMotion(modelFile.getAbsolutePath(), videoFile.getAbsolutePath(), opts);
+            String modelId = client.genVideoMotion(modelFile.getAbsolutePath(), videoFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: vm with_hand=True - model_id=" + modelId);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelId, waitOpts);
+            ModelInfo model = client.waitModel(modelId, waitOpts, rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenVideoMotion with_hand=True failed: " + e.getMessage());
@@ -96,13 +101,13 @@ public class Batch3Test {
                     .setWithHand(false)
                     .setMultipleTrack(false);
 
-            String modelId = client.genVideoMotion(modelFile.getAbsolutePath(), videoFile.getAbsolutePath(), opts);
+            String modelId = client.genVideoMotion(modelFile.getAbsolutePath(), videoFile.getAbsolutePath(), opts, rtx);
             assertNotNull("Model ID should not be null", modelId);
             System.out.println("PASS: vm hand=False multi=False - model_id=" + modelId);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelId, waitOpts);
+            ModelInfo model = client.waitModel(modelId, waitOpts, rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenVideoMotion hand=False multi=False failed: " + e.getMessage());
@@ -127,13 +132,13 @@ public class Batch3Test {
             GenTextMotionOptions opts = GenTextMotionOptions.create()
                     .setAlgorithmModel("VISVISE-TextMotion-V1.1.0");
 
-            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), "一个人在挥手打招呼", opts);
+            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), "一个人在挥手打招呼", opts, rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.println("PASS: tm prompt=挥手 - model_ids=" + modelIds);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelIds.get(0), waitOpts);
+            ModelInfo model = client.waitModel(modelIds.get(0), waitOpts, rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenTextMotion prompt=挥手 failed: " + e.getMessage());
@@ -159,13 +164,13 @@ public class Batch3Test {
                     .setAlgorithmModel("VISVISE-TextMotion-V1.1.0")
                     .setOutputModelFormat(ModelFormat.GLB);
 
-            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), "一个人在原地踏步", opts);
+            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), "一个人在原地踏步", opts, rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.println("PASS: tm prompt=踏步 glb - model_ids=" + modelIds);
 
             // Wait for completion
             WaitOptions waitOpts = WaitOptions.create().setInterval(5).setTimeout(900);
-            ModelInfo model = client.waitModel(modelIds.get(0), waitOpts);
+            ModelInfo model = client.waitModel(modelIds.get(0), waitOpts, rtx);
             System.out.println("Model completed: status=" + model.getStatus() + " time_cost=" + model.getTimeCost());
         } catch (Exception e) {
             System.out.println("GenTextMotion prompt=踏步 glb failed: " + e.getMessage());

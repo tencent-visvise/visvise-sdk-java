@@ -19,7 +19,7 @@ public class GenLowModelExample {
 
     static final String APP_ID     = System.getenv("VISVISE_APP_ID");
     static final String SECRET_KEY = System.getenv("VISVISE_SECRET_KEY");
-    static final String UID        = System.getenv("VISVISE_UID");
+    static final String RTX        = System.getenv("VISVISE_RTX");
     static final String ENV        = System.getenv().getOrDefault("VISVISE_ENV", "prod");
 
     static final String ASSETS     = "examples/assets";
@@ -27,7 +27,7 @@ public class GenLowModelExample {
 
     public static void main(String[] args) throws WeaverError {
         Environment env = "dev".equals(ENV) ? Environment.DEV : "test".equals(ENV) ? Environment.TEST : Environment.PROD;
-        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY, UID,
+        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY,
                 ClientOptions.create().setEnv(env));
 
         System.out.println("[gen_low_model] 开始生成低模...");
@@ -37,11 +37,13 @@ public class GenLowModelExample {
                         .setAlgorithmModel("Tripo-v1.0-快速生成")
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setFaceType(FaceType.TRIANGLE)
-                        .setName("example_gen_low_model"));
+                        .setName("example_gen_low_model"),
+                RTX);
         System.out.println("[gen_low_model] 任务已创建，model_id=" + modelId);
 
         ModelInfo model = client.waitModel(modelId,
-                WaitOptions.create().setInterval(3).setTimeout(600));
+                WaitOptions.create().setInterval(3).setTimeout(600),
+                RTX);
         System.out.println("[gen_low_model] 生成成功！耗时 " + model.getTimeCost() + "s");
         System.out.println("  output_model : " + model.getOutputModel());
     }

@@ -63,34 +63,34 @@ import com.visvise.sdk.options.*;
 
 public class Main {
     public static void main(String[] args) {
-        // Create client with optional parameters
+        // Create client (rtx passed via each API call)
+        String rtx = System.getenv("VISVISE_RTX");
         VisviseClient client = new VisviseClient(
             "your_app_id",
             "your_secret_key",
-            "your_uid",
             null // Use default config, or pass ClientOptions
         );
 
         // 1) Image-to-360: upload local image, generate multi-views
         Gen360Options opts = Gen360Options.create()
             .setEnableAPose(true);  // optional
-        String mvModelId = client.gen360("character.png", opts);
+        String mvModelId = client.gen360("character.png", opts, rtx);
 
         // 2) Wait for completion, fetch multi-view output
         ModelInfo mvInfo = client.waitModel(mvModelId,
-            WaitOptions.create().setInterval(3.0).setTimeout(300));
+            WaitOptions.create().setInterval(3.0).setTimeout(300), rtx);
         View outputView = mvInfo.getImageGen360Output().getOutputView();
 
         // 3) Image-to-high-poly (pass COS URLs directly)
         GenHighModelOptions highOpts = GenHighModelOptions.create()
-            .setBackView(outputView.getBackView(), "")
-            .setLeftView(outputView.getLeftView(), "")
-            .setRightView(outputView.getRightView(), "");
-        String highModelId = client.genHighModel(outputView.getMainView(), highOpts);
+            .setBackView(outputView.getBackView())
+            .setLeftView(outputView.getLeftView())
+            .setRightView(outputView.getRightView());
+        String highModelId = client.genHighModel(outputView.getMainView(), highOpts, rtx);
 
         // 4) Wait for completion
         ModelInfo modelInfo = client.waitModel(highModelId,
-            WaitOptions.create().setTimeout(900));
+            WaitOptions.create().setTimeout(900), rtx);
         System.out.println("Output model: " + modelInfo.getOutputModel());
     }
 }
@@ -106,10 +106,10 @@ import com.visvise.sdk.options.ClientOptions;
 import com.visvise.sdk.enums.Environment;
 
 // Required parameters
+String rtx = System.getenv("VISVISE_RTX");  // Get from environment variable
 VisviseClient client = new VisviseClient(
     "your_app_id",     // required, assigned by platform
-    "your_secret_key", // required, assigned by platform
-    "your_uid"         // required, the user ID of the account that obtained the key
+    "your_secret_key"  // required, assigned by platform
 );
 
 // Simplified constructor (use default config)
@@ -120,7 +120,7 @@ ClientOptions opts = ClientOptions.create()
     .setEnv(Environment.DEV)   // Set environment
     .setTimeout(60)            // Set timeout (seconds)
     .setDebug(true);           // Enable debug logging
-VisviseClient client = new VisviseClient(appId, secretKey, uid, opts);
+VisviseClient client = new VisviseClient(appId, secretKey, opts);
 
 // Runtime toggle debug logging
 client.setDebug(true);  // Enable debug for this client
@@ -131,8 +131,8 @@ client.setDebug(false); // Disable debug
 |---|---|---|
 | `appId` | ✅ | Client identifier assigned by the platform |
 | `secretKey` | ✅ | Signing key assigned by the platform |
-| `uid` | ✅ | User ID, obtained from the account that registered the key |
 | `opts` | — | Optional parameters `ClientOptions`, null means use defaults |
+| `rtx` | ✅ | User Token, passed with each API call |
 
 ### Debug Logging
 
@@ -141,10 +141,10 @@ Enable debug logging to output detailed HTTP request/response information:
 ```java
 // Method 1: Enable via ClientOptions
 ClientOptions opts = ClientOptions.create().setDebug(true);
-VisviseClient client = new VisviseClient(appId, secretKey, uid, opts);
+VisviseClient client = new VisviseClient(appId, secretKey, opts);
 
 // Method 2: Enable at runtime
-VisviseClient client = new VisviseClient(appId, secretKey, uid);
+VisviseClient client = new VisviseClient(appId, secretKey);
 client.setDebug(true);
 ```
 
@@ -178,10 +178,10 @@ DetailLevel.LOW    // 1 - low
 DetailLevel.MEDIUM // 2 - medium
 DetailLevel.HIGH   // 3 - high
 
-// Output model format
-OutputModelFormat.FBX  // "fbx"
-OutputModelFormat.OBJ  // "obj"
-OutputModelFormat.GLB  // "glb"
+// model format
+ModelFormat.FBX  // "fbx"
+ModelFormat.OBJ  // "obj"
+ModelFormat.GLB  // "glb"
 
 // Mesh refine mode
 MeshRefineMode.OPTIMIZE  // 1 - mesh optimization
@@ -232,54 +232,54 @@ All `Gen*()` methods use **Options struct** pattern with fluent API for cleaner 
 
 ### Gen360 — Image to 360
 
-Generate 360-degree multi-views from a single image.
+Generate 360-degree multi-views from a single image. → [Example](src/main/com/visvise/sdk/examples/Gen360Example.java)
 
 ```java
 Gen360Options opts = Gen360Options.create()
     .setName("my_360")                                    // optional, default "gen_360"
     .setAlgorithmModel("hunyuan3D-MultiView-v3.0")        // optional
-    .setOutputModelFormat(OutputModelFormat.FBX)          // optional, output format (default fbx)
+    .setOutputModelFormat(ModelFormat.FBX)                // optional, output format (default fbx)
     .setFaceType(FaceType.TRIANGLE)                       // optional, face type (default triangle)
     .setEnableAPose(true)                                 // optional, enable A-Pose
     .setStyle("anime")                                   // optional, style type
-    .setBackView(backViewPath, "back.png")                // optional, back view
-    .setLeftView(leftViewPath, "left.png")               // optional, left view
-    .setRightView(rightViewPath, "right.png")             // optional, right view
+    .setBackView(backViewPath)                            // optional, back view (local path or COS URL)
+    .setLeftView(leftViewPath)                            // optional, left view
+    .setRightView(rightViewPath)                          // optional, right view
 
-String modelId = client.gen360("path/to/character.png", opts);
+String modelId = client.gen360("path/to/character.png", opts, rtx);
 ```
 
 ---
 
 ### GenHighModel — Image to High-poly
 
-Generate a high-poly 3D model from images / multi-views (node_type=3).
+Generate a high-poly 3D model from images / multi-views (node_type=3). → [Example](src/main/com/visvise/sdk/examples/GenHighModelExample.java)
 
 ```java
 GenHighModelOptions opts = GenHighModelOptions.create()
     .setName("my_high_model")                            // optional, default "gen_high_model"
     .setAlgorithmModel("hunyuan3D-v3.1")                 // optional
-    .setOutputModelFormat(OutputModelFormat.FBX)         // optional, output format (default fbx)
+    .setOutputModelFormat(ModelFormat.FBX)               // optional, output format (default fbx)
     .setFaceType(FaceType.TRIANGLE)                      // optional, face type (default triangle)
     .setFaceNum(500000)                                 // optional, target face count (1000-1500000)
-    .setBackView(backView, "")                           // optional, back view
-    .setLeftView(leftView, "")                          // optional, left view
-    .setRightView(rightView, "")                         // optional, right view
+    .setBackView(backView)                               // optional, back view (local path or COS URL)
+    .setLeftView(leftView)                              // optional, left view
+    .setRightView(rightView)                             // optional, right view
 
-String modelId = client.genHighModel("path/to/main.png", opts);
+String modelId = client.genHighModel("path/to/main.png", opts, rtx);
 ```
 
 ---
 
 ### GenMidModel — Image to Mid-poly
 
-Mid-poly generation requires all four views (node_type=11).
+Mid-poly generation requires all four views (node_type=11). → [Example](src/main/com/visvise/sdk/examples/GenMidModelExample.java)
 
 ```java
 GenMidModelOptions opts = GenMidModelOptions.create()
     .setName("my_mid_model")                             // optional, default "gen_mid_model"
     .setAlgorithmModel("VISVISE-MeshGen-V1.0.0")         // optional
-    .setOutputModelFormat(OutputModelFormat.FBX)         // optional, output format
+    .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
     .setFaceType(FaceType.TRIANGLE)                      // optional, face type
     .setSegmentModelId("Model2026...")                   // optional, 2D segmentation asset ID
 
@@ -289,7 +289,7 @@ String modelId = client.genMidModel(
     "path/to/back.png",
     "path/to/left.png",
     "path/to/right.png",
-    opts
+    opts, rtx
 );
 ```
 
@@ -297,44 +297,43 @@ String modelId = client.genMidModel(
 
 ### GenLowModel — Image to Low-poly
 
-Low-poly only needs the main view (node_type=13).
+Low-poly only needs the main view (node_type=13). → [Example](src/main/com/visvise/sdk/examples/GenLowModelExample.java)
 
 ```java
 GenLowModelOptions opts = GenLowModelOptions.create()
     .setName("my_low_model")                             // optional, default "gen_low_model"
-    .setAlgorithmModel("Tripo-v1.0-fast")               // optional
-    .setOutputModelFormat(OutputModelFormat.FBX)         // optional, output format
+    .setAlgorithmModel("Tripo-v1.0-fast")                // optional
+    .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
     .setFaceType(FaceType.TRIANGLE)                      // optional, face type
-    .setBackView(backView, "back.png")                  // optional, back view
-    .setLeftView(leftView, "left.png")                  // optional, left view
-    .setRightView(rightView, "right.png")               // optional, right view
+    .setBackView(backView)                               // optional, back view (local path or COS URL)
+    .setLeftView(leftView)                               // optional, left view
+    .setRightView(rightView)                             // optional, right view
 
-String modelId = client.genLowModel("path/to/main.png", opts);
+String modelId = client.genLowModel("path/to/main.png", opts, rtx);
 ```
 
 ---
 
 ### GenMeshRefine — Mesh Refinement
 
-Mesh-line refinement (node_type=10).
+Mesh-line refinement (node_type=10). → [Example](src/main/com/visvise/sdk/examples/GenMeshRefineExample.java)
 
 ```java
 GenMeshRefineOptions opts = GenMeshRefineOptions.create()
     .setName("my_mesh_refine")                          // optional, default "gen_mesh_refine"
     .setAlgorithmModel("VISVISE-MeshRefine-V1.0.0")     // optional
-    .setInputModelFormat(OutputModelFormat.FBX)          // optional, input format (default fbx)
+    .setInputModelFormat(ModelFormat.FBX)                // optional, input format (default fbx)
     .setMode(MeshRefineMode.OPTIMIZE)                  // optional, refine mode
-    .setColorModel(colorModelPath, "color.fbx")          // optional, color model
-    .setFilename("model.fbx")                           // optional, filename
+    .setColorModel(colorModelPath)                       // optional, color model (local path or COS URL)
 
-String modelId = client.genMeshRefine("path/to/model.fbx", opts);
+String modelId = client.genMeshRefine("path/to/model.fbx", opts, rtx);
 ```
 
 ---
 
 ### GenRetopology — Retopology
 
-Retopology of high-poly models (node_type=1).
+Retopology of high-poly models (node_type=1). → [Example](src/main/com/visvise/sdk/examples/GenRetopologyExample.java)
 
 > Note: pass `DetailLevel` for Hunyuan models, `FaceNum` for VISVISE proprietary models — choose one.
 
@@ -343,24 +342,23 @@ Retopology of high-poly models (node_type=1).
 GenRetopologyOptions opts = GenRetopologyOptions.create()
     .setName("my_retopo")                               // optional, default "gen_retopology"
     .setAlgorithmModel("hunyuan3D-RTP-v1.5")             // optional
-    .setOutputModelFormat(OutputModelFormat.FBX)         // optional, output format
+    .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
     .setFaceType(FaceType.QUAD)                         // optional, face type (default quad)
     .setDetailLevel(DetailLevel.MEDIUM)                  // optional, for Hunyuan models
-    .setFilename("model.fbx")                           // optional, filename
 
 // VISVISE proprietary model example
 GenRetopologyOptions opts2 = GenRetopologyOptions.create()
     .setAlgorithmModel("VISVISE-RTP-V1.0.0")
     .setFaceNum(50000)                                 // optional, for VISVISE models
 
-String modelId = client.genRetopology("path/to/model.fbx", opts);
+String modelId = client.genRetopology("path/to/model.fbx", opts, rtx);
 ```
 
 ---
 
 ### GenLOD — LOD
 
-Generate level-of-detail meshes (node_type=2), with multi-shot support. Default generation times is 3.
+Generate level-of-detail meshes (node_type=2), with multi-shot support. Default generation times is 3. → [Example](src/main/com/visvise/sdk/examples/GenLODExample.java)
 
 ```java
 ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);
@@ -369,35 +367,33 @@ List<ReduceFace> reduceFaces = Arrays.asList(rf1, rf2);
 
 GenLODOptions opts = GenLODOptions.create()
     .setName("my_lod")                                  // optional, default "gen_lod"
-    .setAlgorithmModel("VISVISE-LOD-V1.0.0")             // optional
-    .setOutputModelFormat(OutputModelFormat.FBX)         // optional, output format (default fbx)
+    .setAlgorithmModel("VISVISE-LOD-V1.0.0")            // optional
+    .setOutputModelFormat(ModelFormat.FBX)               // optional, output format (default fbx)
     .setGenTimes(3)                                     // optional, number of generations (default 3)
-    .setFilename("model.fbx")                           // optional, filename
 
-List<String> modelIds = client.genLOD("path/to/model.fbx", reduceFaces, opts);
+List<String> modelIds = client.genLOD("path/to/model.fbx", reduceFaces, opts, rtx);
 ```
 
 ---
 
 ### GenUV — UV Unwrap
 
-Automatic UV unwrap (node_type=9).
+Automatic UV unwrap (node_type=9). → [Example](src/main/com/visvise/sdk/examples/GenUVExample.java)
 
 ```java
 GenUVOptions opts = GenUVOptions.create()
     .setName("my_uv")                                    // optional, default "gen_uv"
     .setAlgorithmModel("hunyuan3D-UV-v2.0")              // optional
     .setEnableAutoSmoothing(true)                        // optional, enable auto-smoothing
-    .setFilename("model.fbx")                           // optional, filename
 
-String modelId = client.genUV("path/to/model.fbx", opts);
+String modelId = client.genUV("path/to/model.fbx", opts, rtx);
 ```
 
 ---
 
 ### GenTexture — Texture Generation
 
-Generate textures for a model (node_type=8).
+Generate textures for a model (node_type=8). → [Example](src/main/com/visvise/sdk/examples/GenTextureExample.java)
 
 > At least one of `InputView.MainView` or `Prompt` is required; both can be supplied together.
 
@@ -412,33 +408,31 @@ GenTextureOptions opts = GenTextureOptions.create()
     .setResolution(2048)                               // optional, resolution
     .setUnwarpUV(true)                                 // optional, also unwrap UV
     .setPrompt("high quality, realistic")                // optional, text prompt
-    .setFilename("model.fbx")                           // optional, filename
 
-String modelId = client.genTexture("path/to/model.fbx", opts);
+String modelId = client.genTexture("path/to/model.fbx", opts, rtx);
 ```
 
 ---
 
 ### GenRigging — Rigging
 
-Auto-rigging (node_type=5). The SDK packages the raw model + JSON parameters into a zip automatically — no manual zipping required.
+Auto-rigging (node_type=5). The SDK packages the raw model + JSON parameters into a zip automatically — no manual zipping required. → [Example](src/main/com/visvise/sdk/examples/GenRiggingExample.java)
 
 ```java
 GenRiggingOptions opts = GenRiggingOptions.create()
     .setName("my_rigging")                              // optional, default "gen_rigging"
     .setAlgorithmModel("VISVISE-GoRigging-V1.0.0")      // optional
     .setMeshCategory("humanoid")                        // optional, "humanoid" (default) or "tetrapod"
-    .setTemplateSkeleton(skeletonPath, "skeleton.fbx")   // optional, template skeleton
-    .setFilename("model.fbx")                           // optional, filename
+    .setTemplateSkeleton(skeletonPath)                   // optional, template skeleton (local path or COS URL)
 
-String modelId = client.genRigging("path/to/model.fbx", opts);
+String modelId = client.genRigging("path/to/model.fbx", opts, rtx);
 ```
 
 ---
 
 ### GenSkinning — Skinning
 
-Auto-skinning (node_type=6). The SDK packages the rigged model + selection JSON into a zip automatically.
+Auto-skinning (node_type=6). The SDK packages the rigged model + selection JSON into a zip automatically. → [Example](src/main/com/visvise/sdk/examples/GenSkinningExample.java)
 
 ```java
 List<String> meshNames = Arrays.asList("Body_Mesh", "Hair_Mesh");
@@ -447,45 +441,41 @@ List<String> jointNames = Arrays.asList("Bip001", "Bip001 Pelvis");
 GenSkinningOptions opts = GenSkinningOptions.create(meshNames, jointNames)
     .setName("my_skinning")                            // optional, default "gen_skinning"
     .setAlgorithmModel("VISVISE-GoSkinning-V1.0.0")     // optional
-    .setFilename("model.fbx")                           // optional, filename
 
-String modelId = client.genSkinning("path/to/rigged_model.fbx", opts);
+String modelId = client.genSkinning("path/to/rigged_model.fbx", opts, rtx);
 ```
 
 ---
 
 ### GenVideoMotion — Video to Animation
 
-Drive a 3D model from motion extracted from a video (node_type=4).
+Drive a 3D model from motion extracted from a video (node_type=4). → [Example](src/main/com/visvise/sdk/examples/GenVideoMotionExample.java)
 
 ```java
 GenVideoMotionOptions opts = GenVideoMotionOptions.create()
     .setName("my_video_motion")                         // optional, default "gen_video_motion"
     .setAlgorithmModel("VISVISE-FramingAI-Base-V1.5.0") // optional
-    .setOutputModelFormat(OutputModelFormat.FBX)         // optional, output format (default fbx)
+    .setOutputModelFormat(ModelFormat.FBX)               // optional, output format (default fbx)
     .setWithHand(true)                                 // optional, enable hand capture
     .setMultipleTrack(false)                             // optional, enable multi-person capture
     .setRotateAxisAngle(0, 0, 0)                       // optional, rotation axis-angle [x, y, z] (radians)
-    .setModelFilename("model.fbx")                      // optional, model filename
-    .setVideoFilename("video.mp4")                       // optional, video filename
 
-String modelId = client.genVideoMotion("path/to/model.fbx", "path/to/dance.mp4", opts);
+String modelId = client.genVideoMotion("path/to/model.fbx", "path/to/dance.mp4", opts, rtx);
 ```
 
 ---
 
 ### GenTextMotion — Text to Animation
 
-Generate animation from a text prompt; returns 4 candidate models (node_type=4).
+Generate animation from a text prompt; returns 4 candidate models (node_type=4). → [Example](src/main/com/visvise/sdk/examples/GenTextMotionExample.java)
 
 ```java
 GenTextMotionOptions opts = GenTextMotionOptions.create()
     .setName("my_text_motion")                          // optional, default "gen_text_motion"
     .setAlgorithmModel("VISVISE-TextMotion-V1.1.0")     // optional
-    .setOutputModelFormat(OutputModelFormat.FBX)         // optional, output format
-    .setFilename("model.fbx")                           // optional, filename
+    .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
 
-List<String> modelIds = client.genTextMotion("path/to/model.fbx", "a person breakdancing", opts);
+List<String> modelIds = client.genTextMotion("path/to/model.fbx", "a person breakdancing", opts, rtx);
 // modelIds contains 4 IDs, wait for whichever you prefer
 ```
 
@@ -493,20 +483,18 @@ List<String> modelIds = client.genTextMotion("path/to/model.fbx", "a person brea
 
 ### GenPose — Image to Pose
 
-Generate pose models from reference images (up to 10).
+Generate pose models from reference images (up to 10). → [Example](src/main/com/visvise/sdk/examples/GenPoseExample.java)
 
 ```java
 GenPoseOptions opts = GenPoseOptions.create()
     .setName("my_pose")                                 // optional, default "gen_pose"
     .setAlgorithmModel("VISVISE-PosingAI-V1.0.0")       // optional
-    .setOutputModelFormat(OutputModelFormat.FBX)         // optional, output format
-    .setImageFilenames(Arrays.asList("pose1.png", "pose2.png")) // optional
-    .setModelFilename("model.fbx")                      // optional, model filename
+    .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
 
 List<String> modelIds = client.genPose(
     "path/to/model.fbx",
     Arrays.asList("path/to/pose_ref_1.png", "path/to/pose_ref_2.png"),
-    opts
+    opts, rtx
 );
 ```
 
@@ -514,7 +502,7 @@ List<String> modelIds = client.genPose(
 
 ### GenSegment2D — 2D Segmentation
 
-Component segmentation over multi-views from Gen360 (node_type=14, SSE protocol). The resulting `model_id` can be passed as `segmentModelID` for `GenMidModel` / `GenLowModel`.
+Component segmentation over multi-views from Gen360 (node_type=14, SSE protocol). The resulting `model_id` can be passed as `segmentModelID` for `GenMidModel` / `GenLowModel`. → [Example](src/main/com/visvise/sdk/examples/GenSegment2DExample.java)
 
 ```java
 ThinkingCallback onThinking = content -> {
@@ -530,7 +518,7 @@ GenSegment2DOptions opts = GenSegment2DOptions.create()
     .setOnThinking(onThinking)                           // optional, thinking callback
     .setReadTimeout(120);                               // optional, read timeout
 
-String segModelId = client.genSegment2D("Model2026...", opts);
+String segModelId = client.genSegment2D("Model2026...", opts, rtx);
 // Use the result as segmentModelID for GenMidModel
 ```
 
@@ -545,7 +533,8 @@ ModelInfo modelInfo = client.waitModel(
     "Model2026033100192028",
     WaitOptions.create()
         .setInterval(2)    // poll interval in seconds (default 2)
-        .setTimeout(600)    // max wait in seconds (default 600)
+        .setTimeout(600),  // max wait in seconds (default 600)
+    rtx
 );
 
 System.out.println(modelInfo.getOutputModel()); // output model URL
@@ -625,10 +614,11 @@ All SDK errors inherit from `WeaverError`; you can catch the base class or any s
 ```java
 import com.visvise.sdk.exceptions.*;
 
-VisviseClient client = new VisviseClient("...", "...", "...", null);
+String rtx = System.getenv("VISVISE_RTX");
+VisviseClient client = new VisviseClient("...", "...", null);
 
 try {
-    String modelId = client.gen360("image.png", Gen360Options.create());
+    String modelId = client.gen360("image.png", Gen360Options.create(), rtx);
 } catch (PollingTimeoutError e) {
     System.out.println("Timeout waiting for model");
 } catch (QuotaExceededError e) {
@@ -645,25 +635,26 @@ try {
 ### Example 1: Image → High-poly (Gen360 + GenHighModel)
 
 ```java
-VisviseClient client = new VisviseClient("...", "...", "...", null);
+String rtx = System.getenv("VISVISE_RTX");
+VisviseClient client = new VisviseClient("...", "...", null);
 
 // Step 1: Image-to-360
 System.out.println("Step 1: generating multi-views...");
 Gen360Options opts = Gen360Options.create();
-String mvId = client.gen360("character.png", opts);
+String mvId = client.gen360("character.png", opts, rtx);
 ModelInfo mv = client.waitModel(mvId,
-    WaitOptions.create().setInterval(3.0).setTimeout(300));
+    WaitOptions.create().setInterval(3.0).setTimeout(300), rtx);
 View views = mv.getImageGen360Output().getOutputView();
 
 // Step 2: High-poly model
 System.out.println("Step 2: generating high-poly model...");
 GenHighModelOptions highOpts = GenHighModelOptions.create()
-    .setBackView(views.getBackView(), "")
-    .setLeftView(views.getLeftView(), "")
-    .setRightView(views.getRightView(), "");
-String highId = client.genHighModel(views.getMainView(), highOpts);
+    .setBackView(views.getBackView())
+    .setLeftView(views.getLeftView())
+    .setRightView(views.getRightView());
+String highId = client.genHighModel(views.getMainView(), highOpts, rtx);
 ModelInfo highModel = client.waitModel(highId,
-    WaitOptions.create().setTimeout(900));
+    WaitOptions.create().setTimeout(900), rtx);
 System.out.println("High-poly download URL: " + highModel.getOutputModel());
 ```
 
@@ -672,13 +663,14 @@ System.out.println("High-poly download URL: " + highModel.getOutputModel());
 ### Example 2: Animation pipeline (Rigging → Skinning → Animation)
 
 ```java
-VisviseClient client = new VisviseClient("...", "...", "...", null);
+String rtx = System.getenv("VISVISE_RTX");
+VisviseClient client = new VisviseClient("...", "...", null);
 
 // Step 1: Rigging
 GenRiggingOptions riggingOpts = GenRiggingOptions.create();
-String rigId = client.genRigging("character.fbx", riggingOpts);
+String rigId = client.genRigging("character.fbx", riggingOpts, rtx);
 ModelInfo rig = client.waitModel(rigId,
-    WaitOptions.create().setTimeout(600));
+    WaitOptions.create().setTimeout(600), rtx);
 System.out.println("Rigged model: " + rig.getOutputModel());
 
 // Step 2: Skinning
@@ -686,14 +678,14 @@ GenSkinningOptions skinningOpts = GenSkinningOptions.create(
     Arrays.asList("Body_Mesh"),
     Arrays.asList("Bip001", "Bip001 Pelvis")
 );
-String skinId = client.genSkinning("rigged_character.fbx", skinningOpts);
-client.waitModel(skinId, WaitOptions.create().setTimeout(600));
+String skinId = client.genSkinning("rigged_character.fbx", skinningOpts, rtx);
+client.waitModel(skinId, WaitOptions.create().setTimeout(600), rtx);
 
 // Step 3: Video-to-animation
 GenVideoMotionOptions motionOpts = GenVideoMotionOptions.create();
-String animId = client.genVideoMotion("skinned_model.fbx", "dance.mp4", motionOpts);
+String animId = client.genVideoMotion("skinned_model.fbx", "dance.mp4", motionOpts, rtx);
 ModelInfo anim = client.waitModel(animId,
-    WaitOptions.create().setTimeout(900));
+    WaitOptions.create().setTimeout(900), rtx);
 System.out.println("Animation download URL: " + anim.getOutputModel());
 ```
 
@@ -702,19 +694,20 @@ System.out.println("Animation download URL: " + anim.getOutputModel());
 ### Example 3: LOD generation (with multi-shot)
 
 ```java
-VisviseClient client = new VisviseClient("...", "...", "...", null);
+String rtx = System.getenv("VISVISE_RTX");
+VisviseClient client = new VisviseClient("...", "...", null);
 
 ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);
 ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD);
 List<ReduceFace> reduceFaces = Arrays.asList(rf1, rf2);
 
 GenLODOptions opts = GenLODOptions.create();
-List<String> modelIds = client.genLOD("high_model.fbx", reduceFaces, opts);
+List<String> modelIds = client.genLOD("high_model.fbx", reduceFaces, opts, rtx);
 
 // Wait for all variants
 for (String mid : modelIds) {
     ModelInfo r = client.waitModel(mid,
-        WaitOptions.create().setTimeout(300));
+        WaitOptions.create().setTimeout(300), rtx);
     System.out.println(r.getModelId() + " " + r.getOutputModel());
 }
 ```

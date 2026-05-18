@@ -21,7 +21,7 @@ public class GenPoseExample {
 
     static final String APP_ID     = System.getenv("VISVISE_APP_ID");
     static final String SECRET_KEY = System.getenv("VISVISE_SECRET_KEY");
-    static final String UID        = System.getenv("VISVISE_UID");
+    static final String RTX        = System.getenv("VISVISE_RTX");
     static final String ENV        = System.getenv().getOrDefault("VISVISE_ENV", "prod");
 
     static final String ASSETS     = "examples/assets";
@@ -29,7 +29,7 @@ public class GenPoseExample {
 
     public static void main(String[] args) throws WeaverError {
         Environment env = "dev".equals(ENV) ? Environment.DEV : "test".equals(ENV) ? Environment.TEST : Environment.PROD;
-        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY, UID,
+        VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY,
                 ClientOptions.create().setEnv(env));
 
         System.out.println("[gen_pose] 开始图生 Pose...");
@@ -40,12 +40,14 @@ public class GenPoseExample {
                 GenPoseOptions.create()
                         .setAlgorithmModel("VISVISE-PosingAI-V1.0.0")
                         .setOutputModelFormat(ModelFormat.FBX)
-                        .setName("example_gen_pose"));
+                        .setName("example_gen_pose"),
+                RTX);
         System.out.println("[gen_pose] 任务已创建，model_ids=" + modelIds);
 
         for (String mid : modelIds) {
             ModelInfo model = client.waitModel(mid,
-                    WaitOptions.create().setInterval(3).setTimeout(600));
+                    WaitOptions.create().setInterval(3).setTimeout(600),
+                    RTX);
             System.out.println("[gen_pose] " + mid + " 生成成功！耗时 " + model.getTimeCost() + "s");
             System.out.println("  output_model : " + model.getOutputModel());
         }
