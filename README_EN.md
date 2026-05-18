@@ -229,7 +229,7 @@ All `Gen*()` methods use **Options struct** pattern with fluent API for cleaner 
 
 ### Gen360 — Image to 360
 
-Generate 360-degree multi-views from a single image. → [Example](src/main/com/visvise/sdk/examples/Gen360Example.java)
+Generate 360-degree multi-views from a single image. → [Example](src/main/java/com/visvise/sdk/examples/Gen360Example.java)
 
 ```java
 Gen360Options opts = Gen360Options.create()
@@ -249,7 +249,7 @@ String modelId = client.gen360("path/to/character.png", opts, rtx);
 
 ### GenHighModel — Image to High-poly
 
-Generate a high-poly 3D model from images / multi-views (node_type=3). → [Example](src/main/com/visvise/sdk/examples/GenHighModelExample.java)
+Generate a high-poly 3D model from images / multi-views (node_type=3). → [Example](src/main/java/com/visvise/sdk/examples/GenHighModelExample.java)
 
 ```java
 GenHighModelOptions opts = GenHighModelOptions.create()
@@ -268,7 +268,7 @@ String modelId = client.genHighModel("path/to/main.png", opts, rtx);
 
 ### GenMidModel — Image to Mid-poly
 
-Mid-poly generation requires all four views (node_type=11). → [Example](src/main/com/visvise/sdk/examples/GenMidModelExample.java)
+Mid-poly generation requires all four views (node_type=11). → [Example](src/main/java/com/visvise/sdk/examples/GenMidModelExample.java)
 
 ```java
 GenMidModelOptions opts = GenMidModelOptions.create()
@@ -291,7 +291,7 @@ String modelId = client.genMidModel(
 
 ### GenLowModel — Image to Low-poly
 
-Low-poly only needs the main view (node_type=13). → [Example](src/main/com/visvise/sdk/examples/GenLowModelExample.java)
+Low-poly only needs the main view (node_type=13). → [Example](src/main/java/com/visvise/sdk/examples/GenLowModelExample.java)
 
 ```java
 GenLowModelOptions opts = GenLowModelOptions.create()
@@ -309,7 +309,7 @@ String modelId = client.genLowModel("path/to/main.png", opts, rtx);
 
 ### GenMeshRefine — Mesh Refinement
 
-Mesh-line refinement (node_type=10). → [Example](src/main/com/visvise/sdk/examples/GenMeshRefineExample.java)
+Mesh-line refinement (node_type=10). → [Example](src/main/java/com/visvise/sdk/examples/GenMeshRefineExample.java)
 
 ```java
 GenMeshRefineOptions opts = GenMeshRefineOptions.create()
@@ -325,7 +325,7 @@ String modelId = client.genMeshRefine("path/to/model.fbx", opts, rtx);
 
 ### GenRetopology — Retopology
 
-Retopology of high-poly models (node_type=1). → [Example](src/main/com/visvise/sdk/examples/GenRetopologyExample.java)
+Retopology of high-poly models (node_type=1). → [Example](src/main/java/com/visvise/sdk/examples/GenRetopologyExample.java)
 
 > Note: pass `DetailLevel` for Hunyuan models, `FaceNum` for VISVISE proprietary models — choose one.
 
@@ -350,7 +350,7 @@ String modelId = client.genRetopology("path/to/model.fbx", opts, rtx);
 
 ### GenLOD — LOD
 
-Generate level-of-detail meshes (node_type=2), with multi-shot support. Default generation times is 3. → [Example](src/main/com/visvise/sdk/examples/GenLODExample.java)
+Generate level-of-detail meshes (node_type=2), with multi-shot support. Default generation times is 3. → [Example](src/main/java/com/visvise/sdk/examples/GenLODExample.java)
 
 ```java
 ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);
@@ -369,7 +369,7 @@ List<String> modelIds = client.genLOD("path/to/model.fbx", reduceFaces, opts, rt
 
 ### GenUV — UV Unwrap
 
-Automatic UV unwrap (node_type=9). → [Example](src/main/com/visvise/sdk/examples/GenUVExample.java)
+Automatic UV unwrap (node_type=9). → [Example](src/main/java/com/visvise/sdk/examples/GenUVExample.java)
 
 ```java
 GenUVOptions opts = GenUVOptions.create()
@@ -383,7 +383,7 @@ String modelId = client.genUV("path/to/model.fbx", opts, rtx);
 
 ### GenTexture — Texture Generation
 
-Generate textures for a model (node_type=8). → [Example](src/main/com/visvise/sdk/examples/GenTextureExample.java)
+Generate textures for a model (node_type=8). → [Example](src/main/java/com/visvise/sdk/examples/GenTextureExample.java)
 
 > At least one of `InputView.MainView` or `Prompt` is required; both can be supplied together.
 
@@ -405,7 +405,7 @@ String modelId = client.genTexture("path/to/model.fbx", opts, rtx);
 
 ### GenRigging — Rigging
 
-Auto-rigging (node_type=5). The SDK packages the raw model + JSON parameters into a zip automatically — no manual zipping required. → [Example](src/main/com/visvise/sdk/examples/GenRiggingExample.java)
+Auto-rigging (node_type=5). The SDK packages the raw model + JSON parameters into a zip automatically — no manual zipping required. → [Example](src/main/java/com/visvise/sdk/examples/GenRiggingExample.java)
 
 ```java
 GenRiggingOptions opts = GenRiggingOptions.create()
@@ -420,7 +420,7 @@ String modelId = client.genRigging("path/to/model.fbx", opts, rtx);
 
 ### GenSkinning — Skinning
 
-Auto-skinning (node_type=6). The SDK packages the rigged model + selection JSON into a zip automatically. → [Example](src/main/com/visvise/sdk/examples/GenSkinningExample.java)
+Auto-skinning (node_type=6). The SDK packages the rigged model + selection JSON into a zip automatically. → [Example](src/main/java/com/visvise/sdk/examples/GenSkinningExample.java)
 
 ```java
 List<String> meshNames = Arrays.asList("Body_Mesh", "Hair_Mesh");
@@ -436,7 +436,7 @@ String modelId = client.genSkinning("path/to/rigged_model.fbx", opts, rtx);
 
 ### GenVideoMotion — Video to Animation
 
-Drive a 3D model from motion extracted from a video (node_type=4). → [Example](src/main/com/visvise/sdk/examples/GenVideoMotionExample.java)
+Drive a 3D model from motion extracted from a video (node_type=4). → [Example](src/main/java/com/visvise/sdk/examples/GenVideoMotionExample.java)
 
 ```java
 GenVideoMotionOptions opts = GenVideoMotionOptions.create()
@@ -453,7 +453,7 @@ String modelId = client.genVideoMotion("path/to/model.fbx", "path/to/dance.mp4",
 
 ### GenTextMotion — Text to Animation
 
-Generate animation from a text prompt; returns 4 candidate models (node_type=4). → [Example](src/main/com/visvise/sdk/examples/GenTextMotionExample.java)
+Generate animation from a text prompt; returns 4 candidate models (node_type=4). → [Example](src/main/java/com/visvise/sdk/examples/GenTextMotionExample.java)
 
 ```java
 GenTextMotionOptions opts = GenTextMotionOptions.create()
@@ -468,7 +468,7 @@ List<String> modelIds = client.genTextMotion("path/to/model.fbx", "a person brea
 
 ### GenPose — Image to Pose
 
-Generate pose models from reference images (up to 10). → [Example](src/main/com/visvise/sdk/examples/GenPoseExample.java)
+Generate pose models from reference images (up to 10). → [Example](src/main/java/com/visvise/sdk/examples/GenPoseExample.java)
 
 ```java
 GenPoseOptions opts = GenPoseOptions.create()
@@ -486,7 +486,7 @@ List<String> modelIds = client.genPose(
 
 ### GenSegment2D — 2D Segmentation
 
-Component segmentation over multi-views from Gen360 (node_type=14, SSE protocol). The resulting `model_id` can be passed as `segmentModelID` for `GenMidModel` / `GenLowModel`. → [Example](src/main/com/visvise/sdk/examples/GenSegment2DExample.java)
+Component segmentation over multi-views from Gen360 (node_type=14, SSE protocol). The resulting `model_id` can be passed as `segmentModelID` for `GenMidModel` / `GenLowModel`. → [Example](src/main/java/com/visvise/sdk/examples/GenSegment2DExample.java)
 
 ```java
 ThinkingCallback onThinking = content -> {
