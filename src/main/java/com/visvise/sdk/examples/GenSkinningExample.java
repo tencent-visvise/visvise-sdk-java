@@ -24,7 +24,7 @@ public class GenSkinningExample {
     static final String RTX        = System.getenv("VISVISE_RTX");
     static final String ENV        = System.getenv().getOrDefault("VISVISE_ENV", "prod");
 
-    static final String ASSETS     = "examples/assets";
+    static final String ASSETS     = "src/test/resources/assets";
     static final String MODEL_PATH = ASSETS + "/skinning_model.fbx";
 
     // 来自 skinning_model.json

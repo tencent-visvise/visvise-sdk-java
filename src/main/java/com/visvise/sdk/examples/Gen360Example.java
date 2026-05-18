@@ -24,7 +24,7 @@ public class Gen360Example {
     static final String ENV        = System.getenv().getOrDefault("VISVISE_ENV", "prod");
 
     // 素材路径（请替换为实际文件路径）
-    static final String ASSETS    = "examples/assets";
+    static final String ASSETS    = "src/test/resources/assets";
     static final String MAIN_VIEW = ASSETS + "/main_view.png";
 
     public static void main(String[] args) throws WeaverError {

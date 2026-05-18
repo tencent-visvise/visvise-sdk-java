@@ -21,7 +21,7 @@ public class GenVideoMotionExample {
     static final String RTX        = System.getenv("VISVISE_RTX");
     static final String ENV        = System.getenv().getOrDefault("VISVISE_ENV", "prod");
 
-    static final String ASSETS     = "examples/assets";
+    static final String ASSETS     = "src/test/resources/assets";
     static final String MODEL_PATH = ASSETS + "/animation_model.fbx";
     static final String VIDEO_PATH = ASSETS + "/animation_video.mp4";
 

@@ -24,7 +24,7 @@ public class GenRetopologyExample {
     static final String RTX        = System.getenv("VISVISE_RTX");
     static final String ENV        = System.getenv().getOrDefault("VISVISE_ENV", "prod");
 
-    static final String ASSETS     = "examples/assets";
+    static final String ASSETS     = "src/test/resources/assets";
     static final String MODEL_PATH = ASSETS + "/high_model.fbx";
 
     public static void main(String[] args) throws WeaverError {
