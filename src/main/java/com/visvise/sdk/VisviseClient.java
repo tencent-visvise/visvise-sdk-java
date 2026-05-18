@@ -953,10 +953,26 @@ public class VisviseClient {
     }
 
     private boolean isLocalFile(String s) {
+        if (s == null || s.isEmpty()) {
+            return false;
+        }
+
+        // 1. 先判断是否像 URL
+        if (isUrl(s)) {
+            return false;
+        }
+
+        // 2. 再判断是否是本地文件
         Path path = Paths.get(s);
         return Files.exists(path) && !Files.isDirectory(path);
     }
 
+    private boolean isUrl(String s) {
+        String lower = s.toLowerCase();
+        return lower.startsWith("http://")
+                || lower.startsWith("https://")
+                || lower.startsWith("cos://");
+    }
     private boolean isCosUrl(String s) {
         return s.startsWith("https://") && s.contains(".myqcloud.com") && s.contains(".cos.");
     }
