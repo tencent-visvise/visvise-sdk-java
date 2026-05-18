@@ -19,8 +19,6 @@ public class ClientOptions {
     private Environment env = Environment.PROD;
     /** optional, HTTP timeout in seconds (default 30) */
     private int timeout = 30;
-    /** optional, enable debug logging (default false) */
-    private boolean debug = false;
 
     public ClientOptions() {
     }
@@ -40,15 +38,6 @@ public class ClientOptions {
 
     public ClientOptions setTimeout(int timeout) {
         this.timeout = timeout;
-        return this;
-    }
-
-    public boolean isDebug() {
-        return debug;
-    }
-
-    public ClientOptions setDebug(boolean debug) {
-        this.debug = debug;
         return this;
     }
 

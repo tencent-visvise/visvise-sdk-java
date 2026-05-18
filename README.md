@@ -113,7 +113,7 @@ VisviseClient client = new VisviseClient(
 );
 
 // 简化构造函数（使用默认配置）
-// 默认配置：Env.PROD, Timeout=30, Debug=false
+// 默认配置：Env.PROD, Timeout=30
 
 // 自定义环境示例
 ClientOptions opts = ClientOptions.create()
@@ -123,8 +123,7 @@ ClientOptions opts = ClientOptions.create()
 VisviseClient client = new VisviseClient(appId, secretKey, opts);
 
 // 运行时开关调试日志
-client.setDebug(true);  // 开启此客户端的调试日志
-client.setDebug(false); // 关闭调试日志
+org.slf4j.simpleLogger.log.visvise.http=debug
 ```
 
 | 参数 | 必填 | 说明 |

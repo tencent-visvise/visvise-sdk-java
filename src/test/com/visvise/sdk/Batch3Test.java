@@ -35,8 +35,7 @@ public class Batch3Test {
 
         if (appId != null && secretKey != null && rtx != null) {
             ClientOptions opts = ClientOptions.create()
-                    .setEnv(Environment.DEV)
-                    .setDebug(true);
+                    .setEnv(Environment.DEV);
             client = new VisviseClient(appId, secretKey, opts);
         }
     }

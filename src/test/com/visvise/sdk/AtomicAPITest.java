@@ -29,11 +29,9 @@ public class AtomicAPITest {
         appId = System.getenv("VISVISE_APP_ID");
         secretKey = System.getenv("VISVISE_SECRET_KEY");
         rtx = System.getenv("VISVISE_RTX");
-
         if (appId != null && secretKey != null && rtx != null) {
             ClientOptions opts = ClientOptions.create()
-                    .setEnv(Environment.DEV)
-                    .setDebug(true);
+                    .setEnv(Environment.DEV);
             client = new VisviseClient(appId, secretKey, opts);
         }
     }

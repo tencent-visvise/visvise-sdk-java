@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * SSEIterator iterates over SSE events
  */
 public class SSEIterator implements Closeable {
-    private static final Logger logger = LoggerFactory.getLogger(SSEIterator.class);
+    private static final Logger httpLogger = LoggerFactory.getLogger("visvise.http");
 
     private final HttpURLConnection conn;
     private final BufferedReader reader;
@@ -47,7 +47,7 @@ public class SSEIterator implements Closeable {
             }
 
             int responseCode = conn.getResponseCode();
-            logger.info("POST(SSE) response: status={}, content-type={}", responseCode, conn.getContentType());
+            httpLogger.debug("POST(SSE) response: status={}, content-type={}", responseCode, conn.getContentType());
 
             if (responseCode < 200 || responseCode >= 300) {
                 String errorBody;

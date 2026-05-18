@@ -35,8 +35,7 @@ public class AutoAlgorithmModelTest {
 
         if (appId != null && secretKey != null && rtx != null) {
             ClientOptions opts = ClientOptions.create()
-                    .setEnv(Environment.DEV)
-                    .setDebug(true);
+                    .setEnv(Environment.DEV);
             client = new VisviseClient(appId, secretKey, opts);
         }
     }

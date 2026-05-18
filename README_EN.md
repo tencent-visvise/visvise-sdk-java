@@ -123,8 +123,7 @@ ClientOptions opts = ClientOptions.create()
 VisviseClient client = new VisviseClient(appId, secretKey, opts);
 
 // Runtime toggle debug logging
-client.setDebug(true);  // Enable debug for this client
-client.setDebug(false); // Disable debug
+org.slf4j.simpleLogger.log.visvise.http=debug        
 ```
 
 | Parameter | Required | Description |

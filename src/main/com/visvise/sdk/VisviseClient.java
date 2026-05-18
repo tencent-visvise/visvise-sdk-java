@@ -52,9 +52,6 @@ public class VisviseClient {
         int timeout = opts.getTimeout() > 0 ? opts.getTimeout() : 30;
         this.http = new HTTPClient(appId, secretKey, env, timeout);
         this.api = new VisviseAPI(this.http);
-        if (opts.isDebug()) {
-            setDebug(true);
-        }
     }
 
     /**
@@ -71,14 +68,6 @@ public class VisviseClient {
         return api;
     }
 
-    /**
-     * Enable or disable debug logging for this client.
-     * When enabled, logs HTTP request path, request body, response status, and response body.
-     */
-    public VisviseClient setDebug(boolean enabled) {
-        this.http.setDebug(enabled);
-        return this;
-    }
 
     /**
      * Resolves a file input to a COS URL (without filename parameter)

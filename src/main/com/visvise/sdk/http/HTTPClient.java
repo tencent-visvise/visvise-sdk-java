@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
  * HTTPClient is the low-level HTTP client that handles signing and error handling
  */
 public class HTTPClient {
-    private static final Logger logger = LoggerFactory.getLogger(HTTPClient.class);
     private static final Logger httpLogger = LoggerFactory.getLogger("visvise.http");
     private static final Gson gson = new Gson();
 
@@ -32,28 +31,12 @@ public class HTTPClient {
     private final String secretKey;
     private final String baseURL;
     private final int timeout;
-    private boolean debug;
 
     public HTTPClient(String appId, String secretKey, String baseURL, int timeout) {
         this.appId = appId;
         this.secretKey = secretKey;
         this.baseURL = baseURL.endsWith("/") ? baseURL.substring(0, baseURL.length() - 1) : baseURL;
         this.timeout = timeout;
-        this.debug = false;
-    }
-
-    /**
-     * Enable or disable debug logging for this HTTP client
-     */
-    public void setDebug(boolean enabled) {
-        this.debug = enabled;
-    }
-
-    /**
-     * Check if debug is enabled for this client
-     */
-    public boolean isDebugEnabled() {
-        return this.debug;
     }
 
     /**
@@ -111,9 +94,9 @@ public class HTTPClient {
         String urlStr = baseURL + "/" + path.replaceFirst("^/", "");
         Map<String, String> headers = buildHeaders(bodyStr, rtx);
 
-        if (isDebugEnabled()) {
+//        if (isDebugEnabled()) {
             httpLogger.debug("POST request: url={}, body={}", urlStr, truncate(bodyStr, 2000));
-        }
+//        }
 
         try {
             URL url = new URL(urlStr);
@@ -140,9 +123,9 @@ public class HTTPClient {
                 responseBody = br.lines().collect(Collectors.joining());
             }
 
-            if (isDebugEnabled()) {
-                httpLogger.debug("POST response: url={}, status={}, body={}", urlStr, responseCode, truncate(responseBody, 2000));
-            }
+
+            httpLogger.debug("POST response: url={}, status={}, body={}", urlStr, responseCode, truncate(responseBody, 2000));
+
 
             if (responseCode < 200 || responseCode >= 300) {
                 throw ErrorFactory.newNetworkError(String.format("HTTP error [%d]: %s", responseCode, responseBody));
