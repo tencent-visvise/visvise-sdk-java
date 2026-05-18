@@ -41,17 +41,7 @@ VISVISE Weaver OpenAPI 的 Java SDK，提供：
 
 ## 安装
 
-添加 Maven 依赖到 `pom.xml`：
-
-```xml
-<dependency>
-    <groupId>com.visvise</groupId>
-    <artifactId>visvise-sdk-java</artifactId>
-    <version>1.0.0</version>
-</dependency>
-```
-
-或者手动下载 JAR 文件引入项目。
+手动下载 JAR 文件引入项目。
 
 ---
 
