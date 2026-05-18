@@ -3,8 +3,7 @@ package com.visvise.sdk;
 import com.google.gson.JsonObject;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.ClientConfig;
-import com.qcloud.cos.auth.BasicCOSCredentials;
-import com.qcloud.cos.auth.COSCredentials;
+import com.qcloud.cos.auth.BasicSessionCredentials;
 import com.qcloud.cos.http.HttpProtocol;
 import com.qcloud.cos.model.ObjectMetadata;
 import com.qcloud.cos.region.Region;
@@ -207,9 +206,11 @@ public class VisviseClient {
 
         String cosKey = cred.getPathPrefix().replaceAll("/$", "") + "/" + filename;
 
-        COSCredentials credentials = new BasicCOSCredentials(
+        BasicSessionCredentials credentials = new BasicSessionCredentials(
                 cred.getCred().getTmpSecretId(),
-                cred.getCred().getTmpSecretKey());
+                cred.getCred().getTmpSecretKey(),
+                cred.getCred().getSessionToken()
+        );
         Region region = new Region(cred.getRegion());
         ClientConfig clientConfig = new ClientConfig(region);
         clientConfig.setHttpProtocol(HttpProtocol.https);
