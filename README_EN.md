@@ -121,9 +121,7 @@ ClientOptions opts = ClientOptions.create()
     .setTimeout(60)            // Set timeout (seconds)
     .setDebug(true);           // Enable debug logging
 VisviseClient client = new VisviseClient(appId, secretKey, opts);
-
-// Runtime toggle debug logging
-org.slf4j.simpleLogger.log.visvise.http=debug        
+ 
 ```
 
 | Parameter | Required | Description |
@@ -138,13 +136,7 @@ org.slf4j.simpleLogger.log.visvise.http=debug
 Enable debug logging to output detailed HTTP request/response information:
 
 ```java
-// Method 1: Enable via ClientOptions
-ClientOptions opts = ClientOptions.create().setDebug(true);
-VisviseClient client = new VisviseClient(appId, secretKey, opts);
-
-// Method 2: Enable at runtime
-VisviseClient client = new VisviseClient(appId, secretKey);
-client.setDebug(true);
+org.slf4j.simpleLogger.log.visvise.http=debug
 ```
 
 Debug log output example:
@@ -236,7 +228,6 @@ Generate 360-degree multi-views from a single image. → [Example](src/main/com/
 ```java
 Gen360Options opts = Gen360Options.create()
     .setName("my_360")                                    // optional, default "gen_360"
-    .setAlgorithmModel("hunyuan3D-MultiView-v3.0")        // optional
     .setOutputModelFormat(ModelFormat.FBX)                // optional, output format (default fbx)
     .setFaceType(FaceType.TRIANGLE)                       // optional, face type (default triangle)
     .setEnableAPose(true)                                 // optional, enable A-Pose
@@ -257,7 +248,6 @@ Generate a high-poly 3D model from images / multi-views (node_type=3). → [Exam
 ```java
 GenHighModelOptions opts = GenHighModelOptions.create()
     .setName("my_high_model")                            // optional, default "gen_high_model"
-    .setAlgorithmModel("hunyuan3D-v3.1")                 // optional
     .setOutputModelFormat(ModelFormat.FBX)               // optional, output format (default fbx)
     .setFaceType(FaceType.TRIANGLE)                      // optional, face type (default triangle)
     .setFaceNum(500000)                                 // optional, target face count (1000-1500000)
@@ -277,7 +267,6 @@ Mid-poly generation requires all four views (node_type=11). → [Example](src/ma
 ```java
 GenMidModelOptions opts = GenMidModelOptions.create()
     .setName("my_mid_model")                             // optional, default "gen_mid_model"
-    .setAlgorithmModel("VISVISE-MeshGen-V1.0.0")         // optional
     .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
     .setFaceType(FaceType.TRIANGLE)                      // optional, face type
     .setSegmentModelId("Model2026...")                   // optional, 2D segmentation asset ID
@@ -301,7 +290,6 @@ Low-poly only needs the main view (node_type=13). → [Example](src/main/com/vis
 ```java
 GenLowModelOptions opts = GenLowModelOptions.create()
     .setName("my_low_model")                             // optional, default "gen_low_model"
-    .setAlgorithmModel("Tripo-v1.0-fast")                // optional
     .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
     .setFaceType(FaceType.TRIANGLE)                      // optional, face type
     .setBackView(backView)                               // optional, back view (local path or COS URL)
@@ -320,7 +308,6 @@ Mesh-line refinement (node_type=10). → [Example](src/main/com/visvise/sdk/exam
 ```java
 GenMeshRefineOptions opts = GenMeshRefineOptions.create()
     .setName("my_mesh_refine")                          // optional, default "gen_mesh_refine"
-    .setAlgorithmModel("VISVISE-MeshRefine-V1.0.0")     // optional
     .setInputModelFormat(ModelFormat.FBX)                // optional, input format (default fbx)
     .setMode(MeshRefineMode.OPTIMIZE)                  // optional, refine mode
     .setColorModel(colorModelPath)                       // optional, color model (local path or COS URL)
@@ -366,7 +353,6 @@ List<ReduceFace> reduceFaces = Arrays.asList(rf1, rf2);
 
 GenLODOptions opts = GenLODOptions.create()
     .setName("my_lod")                                  // optional, default "gen_lod"
-    .setAlgorithmModel("VISVISE-LOD-V1.0.0")            // optional
     .setOutputModelFormat(ModelFormat.FBX)               // optional, output format (default fbx)
     .setGenTimes(3)                                     // optional, number of generations (default 3)
 
@@ -382,7 +368,6 @@ Automatic UV unwrap (node_type=9). → [Example](src/main/com/visvise/sdk/exampl
 ```java
 GenUVOptions opts = GenUVOptions.create()
     .setName("my_uv")                                    // optional, default "gen_uv"
-    .setAlgorithmModel("hunyuan3D-UV-v2.0")              // optional
     .setEnableAutoSmoothing(true)                        // optional, enable auto-smoothing
 
 String modelId = client.genUV("path/to/model.fbx", opts, rtx);
@@ -402,7 +387,6 @@ refView.setMainView("path/to/ref.png");
 
 GenTextureOptions opts = GenTextureOptions.create()
     .setName("my_texture")                              // optional, default "gen_texture"
-    .setAlgorithmModel("hunyuan3D-TEX-v2.0")            // optional
     .setInputView(refView)                             // optional, reference view (or use prompt)
     .setResolution(2048)                               // optional, resolution
     .setUnwarpUV(true)                                 // optional, also unwrap UV
@@ -420,7 +404,6 @@ Auto-rigging (node_type=5). The SDK packages the raw model + JSON parameters int
 ```java
 GenRiggingOptions opts = GenRiggingOptions.create()
     .setName("my_rigging")                              // optional, default "gen_rigging"
-    .setAlgorithmModel("VISVISE-GoRigging-V1.0.0")      // optional
     .setMeshCategory("humanoid")                        // optional, "humanoid" (default) or "tetrapod"
     .setTemplateSkeleton(skeletonPath)                   // optional, template skeleton (local path or COS URL)
 
@@ -439,7 +422,6 @@ List<String> jointNames = Arrays.asList("Bip001", "Bip001 Pelvis");
 
 GenSkinningOptions opts = GenSkinningOptions.create(meshNames, jointNames)
     .setName("my_skinning")                            // optional, default "gen_skinning"
-    .setAlgorithmModel("VISVISE-GoSkinning-V1.0.0")     // optional
 
 String modelId = client.genSkinning("path/to/rigged_model.fbx", opts, rtx);
 ```
@@ -453,7 +435,6 @@ Drive a 3D model from motion extracted from a video (node_type=4). → [Example]
 ```java
 GenVideoMotionOptions opts = GenVideoMotionOptions.create()
     .setName("my_video_motion")                         // optional, default "gen_video_motion"
-    .setAlgorithmModel("VISVISE-FramingAI-Base-V1.5.0") // optional
     .setOutputModelFormat(ModelFormat.FBX)               // optional, output format (default fbx)
     .setWithHand(true)                                 // optional, enable hand capture
     .setMultipleTrack(false)                             // optional, enable multi-person capture
@@ -471,7 +452,6 @@ Generate animation from a text prompt; returns 4 candidate models (node_type=4).
 ```java
 GenTextMotionOptions opts = GenTextMotionOptions.create()
     .setName("my_text_motion")                          // optional, default "gen_text_motion"
-    .setAlgorithmModel("VISVISE-TextMotion-V1.1.0")     // optional
     .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
 
 List<String> modelIds = client.genTextMotion("path/to/model.fbx", "a person breakdancing", opts, rtx);
@@ -487,7 +467,6 @@ Generate pose models from reference images (up to 10). → [Example](src/main/co
 ```java
 GenPoseOptions opts = GenPoseOptions.create()
     .setName("my_pose")                                 // optional, default "gen_pose"
-    .setAlgorithmModel("VISVISE-PosingAI-V1.0.0")       // optional
     .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
 
 List<String> modelIds = client.genPose(
@@ -510,7 +489,6 @@ ThinkingCallback onThinking = content -> {
 
 GenSegment2DOptions opts = GenSegment2DOptions.create()
     .setName("my_segment")                              // optional, default "gen_segment_2d"
-    .setAlgorithmModel("VISVISE-Seg2D-V1.0.0")          // optional
     .setSplitType(SegmentSplitType.FRONT_VIEW)          // optional, split type
     .setGranularity(SegmentGranularity.MEDIUM)           // optional, granularity
     .setPrompt("segment by body parts")                 // optional, natural language prompt
@@ -557,35 +535,35 @@ Access low-level endpoints via `client.getAPI().xxx()`:
 VisviseAPI api = client.getAPI();
 
 // Get temporary upload credentials
-GetCosCredResult cred = api.getCosCred(false);
+GetCosCredResult cred = api.getCosCred(false, rtx);
 
 // Query remaining quota
 UserQuota quota = api.getUserQuota();
-System.out.println(quota.getQuota()); // remaining count
+System.out.println(quota.getQuota(), rtx); // remaining count
 
 // Fetch model list
 ModelListResult result = api.getModelList(
     Collections.singletonList("Model2026..."),
-    null, null, "", 10, 1
+    null, null, "", 10, 1, rtx
 );
 
 // Fetch algorithm models for a node type
-List<String> algModels = api.listAlgorithmModel(NodeType.ANIMATION.getValue(), null);
+List<String> algModels = api.listAlgorithmModel(NodeType.ANIMATION.getValue(), null, rtx);
 
 // Get download URL
-String url = api.downloadModel("Model2026...");
+String url = api.downloadModel("Model2026...", rtx);
 
 // Delete a single model
-api.deleteModel("Model2026...");
+api.deleteModel("Model2026...", rtx);
 
 // Batch delete
-api.batchDeleteModel(Arrays.asList("Model2026...", "Model2026..."));
+api.batchDeleteModel(Arrays.asList("Model2026...", "Model2026..."), rtx);
 
 // Remove background
-String outUrl = api.removeBackground("https://cos.../image.png");
+String outUrl = api.removeBackground("https://cos.../image.png", rtx);
 
 // Text-to-motion prompt suggestions
-List<String> prompts = api.getText2MotionPromptList("en");
+List<String> prompts = api.getText2MotionPromptList("en", rtx);
 ```
 
 ---
@@ -598,7 +576,8 @@ All SDK errors inherit from `WeaverError`; you can catch the base class or any s
 |---|---|---|
 | `WeaverError` | any | Base error |
 | `NetworkError` | — | Connection / timeout errors |
-| `SignatureError` | 400 | Signature failure |
+| `SignatureError` | 410    | Signature failure |
+| `SignatureExpiredError` | 411    | Signature expired (clock skew between client and server) |
 | `InvalidParamsError` | 120008 | Invalid request parameters |
 | `UserNotFoundError` | 120017 | User not found |
 | `PermissionDeniedError` | 120018 | Permission denied |

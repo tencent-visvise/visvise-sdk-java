@@ -9,9 +9,9 @@ public class ErrorFactory {
         WeaverError weaverErr = new WeaverError(code, msg, reqId);
 
         switch (code) {
-            case 411:
+            case 410:
                 return new SignatureError(code, msg, reqId);
-            case 412:
+            case 411:
                 return new SignatureExpiredError(code, msg, reqId);
             case 120008:
                 return new InvalidParamsError(code, msg, reqId);
