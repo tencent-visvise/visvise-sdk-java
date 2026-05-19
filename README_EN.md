@@ -12,7 +12,7 @@ Java SDK for the VISVISE Weaver OpenAPI. It provides:
 
 ## Table of Contents
 
-- [Installation](#installation)
+- [Download](#download)
 - [Quick Start](#quick-start)
 - [Client Initialization](#client-initialization)
 - [Enum Constants](#enum-constants)
@@ -39,11 +39,11 @@ Java SDK for the VISVISE Weaver OpenAPI. It provides:
 
 ---
 
-## Installation
-
+## Download
 
 manually download the JAR file and add it to your project.
-
+- [Latest Release](https://github.com/tencent-visvise/visvise-sdk-java/releases/latest)
+- [All Releases](https://github.com/tencent-visvise/visvise-sdk-java/releases)
 ---
 
 ## Quick Start

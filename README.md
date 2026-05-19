@@ -12,7 +12,7 @@ VISVISE Weaver OpenAPI 的 Java SDK，提供：
 
 ## 目录
 
-- [安装](#安装)
+- [下载](#下载)
 - [快速开始](#快速开始)
 - [客户端初始化](#客户端初始化)
 - [枚举常量](#枚举常量)
@@ -39,9 +39,12 @@ VISVISE Weaver OpenAPI 的 Java SDK，提供：
 
 ---
 
-## 安装
+## 下载
 
 手动下载 JAR 文件引入项目。
+
+- [最新 Release](https://github.com/tencent-visvise/visvise-sdk-java/releases/latest)
+- [所有 Releases](https://github.com/tencent-visvise/visvise-sdk-java/releases)
 
 ---
 
