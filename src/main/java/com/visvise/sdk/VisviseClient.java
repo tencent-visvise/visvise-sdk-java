@@ -19,6 +19,7 @@ import com.visvise.sdk.http.SSEIterator;
 import com.visvise.sdk.models.*;
 import com.visvise.sdk.models.ModelInfo;
 import com.visvise.sdk.options.*;
+import com.visvise.sdk.util.FileTypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +92,7 @@ public class VisviseClient {
 
         if (source instanceof byte[]) {
             byte[] data = (byte[]) source;
-            String filename = genRandomFilename(sniffExtension(data, ".bin"));
+            String filename = genRandomFilename(FileTypeUtil.sniffExtension(data, ".bin"));
             return uploadBytes(data, filename, isTemp, rtx);
         }
 
@@ -108,7 +109,7 @@ public class VisviseClient {
         if (source instanceof InputStream) {
             try {
                 byte[] data = toByteArray((InputStream) source);
-                String filename = genRandomFilename(sniffExtension(data, ".bin"));
+                String filename = genRandomFilename(FileTypeUtil.sniffExtension(data, ".bin"));
                 return uploadBytes(data, filename, isTemp, rtx);
             } catch (IOException e) {
                 throw new WeaverError(-1, String.format("Failed to read data: %s", e.getMessage()));
@@ -171,7 +172,7 @@ public class VisviseClient {
             return uploadBytes(data, filename, isTemp, rtx);
         }
 
-        String filename = genRandomFilename(sniffExtension(data, ".fbx"));
+        String filename = genRandomFilename(FileTypeUtil.sniffExtension(data, ".fbx"));
         String stem = filename.substring(0, filename.lastIndexOf('.'));
         String zipFilename = stem + ".zip";
         return uploadZip(data, filename, zipFilename, isTemp, rtx);
@@ -908,7 +909,7 @@ public class VisviseClient {
             }
         } else if (source instanceof byte[]) {
             data = (byte[]) source;
-            srcFilename = genRandomFilename(sniffExtension(data, ".fbx"));
+            srcFilename = genRandomFilename(FileTypeUtil.sniffExtension(data, ".fbx"));
         } else if (source instanceof File) {
             try {
                 data = Files.readAllBytes(((File) source).toPath());
@@ -919,7 +920,7 @@ public class VisviseClient {
         } else if (source instanceof InputStream) {
             try {
                 data = toByteArray((InputStream) source);
-                srcFilename = genRandomFilename(sniffExtension(data, ".fbx"));
+                srcFilename = genRandomFilename(FileTypeUtil.sniffExtension(data, ".fbx"));
             } catch (IOException e) {
                 throw new WeaverError(-1, String.format("Failed to read data: %s", e.getMessage()));
             }
@@ -981,65 +982,11 @@ public class VisviseClient {
         return data.length >= 4 && data[0] == 0x50 && data[1] == 0x4B && data[2] == 0x03 && data[3] == 0x04;
     }
 
-    private String genRandomFilename(String suffix) {
+    public String genRandomFilename(String suffix) {
         if (!suffix.startsWith(".")) {
             suffix = "." + suffix;
         }
         return UUID.randomUUID().toString() + suffix;
-    }
-
-    private String sniffExtension(byte[] data, String defaultExt) {
-        if (data.length == 0) {
-            return defaultExt.startsWith(".") ? defaultExt : "." + defaultExt;
-        }
-
-        // PNG
-        if (data.length >= 8 && data[0] == (byte) 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47) {
-            return ".png";
-        }
-        // JPEG
-        if (data.length >= 3 && data[0] == (byte) 0xFF && data[1] == (byte) 0xD8 && data[2] == (byte) 0xFF) {
-            return ".jpg";
-        }
-        // GIF
-        if (data.length >= 6 && (matchBytes(data, 0, "GIF87a") || matchBytes(data, 0, "GIF89a"))) {
-            return ".gif";
-        }
-        // BMP
-        if (data.length >= 2 && data[0] == 'B' && data[1] == 'M') {
-            return ".bmp";
-        }
-        // WebP
-        if (data.length >= 12 && data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F'
-                && data[8] == 'W' && data[9] == 'E' && data[10] == 'B' && data[11] == 'P') {
-            return ".webp";
-        }
-        // FBX binary
-        if (data.length >= 16 && matchBytes(data, 0, "Kaydara FBX Bina")) {
-            return ".fbx";
-        }
-        // GLB
-        if (data.length >= 4 && data[0] == 'g' && data[1] == 'l' && data[2] == 'T' && data[3] == 'F') {
-            return ".glb";
-        }
-        // MP4/MOV
-        if (data.length >= 12 && data[4] == 'f' && data[5] == 't' && data[6] == 'y' && data[7] == 'p') {
-            return ".mp4";
-        }
-
-        return defaultExt.startsWith(".") ? defaultExt : "." + defaultExt;
-    }
-
-    private boolean matchBytes(byte[] data, int offset, String str) {
-        if (data.length < offset + str.length()) {
-            return false;
-        }
-        for (int i = 0; i < str.length(); i++) {
-            if (data[offset + i] != (byte) str.charAt(i)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private byte[] toByteArray(InputStream is) throws IOException {
