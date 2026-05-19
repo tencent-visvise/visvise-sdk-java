@@ -61,9 +61,18 @@ public class SniffExtensionRealAssetsTest {
             client = new VisviseClient(appId, secretKey, opts);
         }
     }
+    private boolean isConfigured() {
+        return appId != null && !appId.isEmpty()
+                && secretKey != null && !secretKey.isEmpty()
+                && rtx != null && !rtx.isEmpty();
+    }
 
     @Test
     public void testSniffExtensionWithRealAssets() throws IOException {
+        if (!isConfigured()) {
+            System.out.println("Skipping test: VISVISE credentials not configured");
+            return;
+        }
         List<String> failures = new ArrayList<>();
         Path assetsPath = Paths.get(ASSETS_DIR);
 
