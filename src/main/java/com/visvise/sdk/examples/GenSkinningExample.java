@@ -65,7 +65,6 @@ public class GenSkinningExample {
 
         String modelId = client.genSkinning(MODEL_PATH,
                 GenSkinningOptions.create(MESH_NAMES, MESH_NAMES)
-                        .setAlgorithmModel("VISVISE-GoSkinning-V1.0.0")
                         .setName("example_gen_skinning"),
                 RTX);
         System.out.println("[gen_skinning] 任务已创建，model_id=" + modelId);

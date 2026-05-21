@@ -193,6 +193,9 @@ public class VisviseClient {
     }
 
     private String uploadBytes(byte[] data, String filename, boolean isTemp, String rtx) throws WeaverError {
+        if (filename == null || filename.isEmpty()) {
+            filename = genRandomFilename(FileTypeUtil.sniffExtension(data, ".bin"));
+        }
         GetCosCredResult cred = api.getCosCred(isTemp, rtx);
         if (cred == null) {
             throw new WeaverError(-1, "Failed to get COS credentials");
