@@ -38,7 +38,6 @@ public class GenPoseExample {
 
         List<String> modelIds = client.genPose(MODEL_PATH, inputImages,
                 GenPoseOptions.create()
-                        .setAlgorithmModel("VISVISE-PosingAI-V1.0.0")
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setName("example_gen_pose"),
                 RTX);

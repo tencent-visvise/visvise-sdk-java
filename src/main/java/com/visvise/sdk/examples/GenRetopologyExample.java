@@ -36,7 +36,6 @@ public class GenRetopologyExample {
 
         String modelId = client.genRetopology(MODEL_PATH,
                 GenRetopologyOptions.create()
-                        .setAlgorithmModel("hunyuan3D-RTP-v1.5")
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setFaceType(FaceType.QUAD)
                         .setDetailLevel(DetailLevel.HIGH)    // 混元模型用 detail_level

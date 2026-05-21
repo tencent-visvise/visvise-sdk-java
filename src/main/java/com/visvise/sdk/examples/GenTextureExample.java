@@ -40,7 +40,6 @@ public class GenTextureExample {
 
         String modelId = client.genTexture(MODEL_PATH,
                 GenTextureOptions.create()
-                        .setAlgorithmModel("hunyuan3D-TEX-v2.0")
                         .setInputView(inputView)
                         .setResolution(2048)
                         .setUnwarpUV(false)

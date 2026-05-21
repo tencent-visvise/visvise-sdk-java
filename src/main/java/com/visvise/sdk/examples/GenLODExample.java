@@ -45,7 +45,6 @@ public class GenLODExample {
 
         List<String> modelIds = client.genLOD(MODEL_PATH, reduceFaces,
                 GenLODOptions.create()
-                        .setAlgorithmModel("VISVISE-LOD-V1.0.0")
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setGenTimes(1)
                         .setName("example_gen_lod"),

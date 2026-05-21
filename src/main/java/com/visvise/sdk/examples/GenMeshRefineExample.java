@@ -33,7 +33,6 @@ public class GenMeshRefineExample {
 
         String modelId = client.genMeshRefine(MODEL_PATH,
                 GenMeshRefineOptions.create()
-                        .setAlgorithmModel("VISVISE-MeshRefine-V1.0.0")
                         .setInputModelFormat(ModelFormat.FBX)
                         .setName("example_gen_mesh_refine"),
                 RTX);

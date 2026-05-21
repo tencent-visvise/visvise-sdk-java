@@ -36,7 +36,6 @@ public class Gen360Example {
 
         String modelId = client.gen360(MAIN_VIEW,
                 Gen360Options.create()
-                        .setAlgorithmModel("VISVISE-MultiView-V1.0.0")
                         .setName("example_gen_360"),
                 RTX);
         System.out.println("[gen_360] 任务已创建，model_id=" + modelId);

@@ -34,7 +34,6 @@ public class GenLowModelExample {
 
         String modelId = client.genLowModel(MAIN_VIEW,
                 GenLowModelOptions.create()
-                        .setAlgorithmModel("Tripo-v1.0-快速生成")
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setFaceType(FaceType.TRIANGLE)
                         .setName("example_gen_low_model"),

@@ -36,7 +36,6 @@ public class GenTextMotionExample {
         // 一次生成 4 个版本供抽卡
         List<String> modelIds = client.genTextMotion(MODEL_PATH, "一个人在跳街舞",
                 GenTextMotionOptions.create()
-                        .setAlgorithmModel("VISVISE-TextMotion-V1.1.0")
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setName("example_gen_text_motion"),
                 RTX);

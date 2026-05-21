@@ -58,7 +58,6 @@ public class GenMidModelExample {
         System.out.println("[gen_mid_model] 开始生成中模...");
         String modelId = client.genMidModel(mainView, backView, leftView, rightView,
                 GenMidModelOptions.create()
-                        .setAlgorithmModel("VISVISE-MeshGen-V1.0.0")
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setFaceType(FaceType.TRIANGLE)
                         .setName("example_gen_mid_model"),

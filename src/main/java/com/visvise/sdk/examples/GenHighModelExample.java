@@ -56,17 +56,11 @@ public class GenHighModelExample {
             rightView = null;
         }
 
-        // 高模用第 2 个算法模型（不依赖多图）
-        String algorithmModel = "Tripo-v3.1-ultra";
-
-        System.out.println("[gen_high_model] algorithm_model=" + algorithmModel);
-        System.out.println("[gen_high_model] 开始生成高模...");
         String modelId = client.genHighModel(mainView,
                 GenHighModelOptions.create()
                         .setBackView(backView)
                         .setLeftView(leftView)
                         .setRightView(rightView)
-                        .setAlgorithmModel(algorithmModel)
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setFaceType(FaceType.TRIANGLE)
                         .setName("example_gen_high_model"),

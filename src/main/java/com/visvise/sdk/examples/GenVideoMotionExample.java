@@ -34,7 +34,6 @@ public class GenVideoMotionExample {
 
         String modelId = client.genVideoMotion(MODEL_PATH, VIDEO_PATH,
                 GenVideoMotionOptions.create()
-                        .setAlgorithmModel("VISVISE-FramingAI-Base-V1.5.0")
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setWithHand(true)
                         .setName("example_gen_video_motion"),

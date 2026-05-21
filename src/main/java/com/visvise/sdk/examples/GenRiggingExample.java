@@ -35,7 +35,6 @@ public class GenRiggingExample {
         // 无需手动准备 zip 包
         String modelId = client.genRigging(MODEL_PATH,
                 GenRiggingOptions.create()
-                        .setAlgorithmModel("VISVISE-GoRigging-V1.0.0")
                         .setMeshCategory("humanoid")    // humanoid（人形）或 tetrapod（四足）
                         .setName("example_gen_rigging"),
                 RTX);

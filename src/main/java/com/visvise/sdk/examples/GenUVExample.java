@@ -30,7 +30,6 @@ public class GenUVExample {
 
         String modelId = client.genUV(MODEL_PATH,
                 GenUVOptions.create()
-                        .setAlgorithmModel("hunyuan3D-UV-v2.0")
                         .setEnableAutoSmoothing(true)
                         .setName("example_gen_uv"),
                 RTX);
