@@ -396,6 +396,9 @@ public class VisviseClient {
         if (opts.getFaceNum() != null) {
             imgParams.put("face_num", opts.getFaceNum());
         }
+        if (opts.getEnablePbr() != null) {
+            imgParams.put("enable_pbr", opts.getEnablePbr());
+        }
 
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("image_gen_model_params", imgParams);

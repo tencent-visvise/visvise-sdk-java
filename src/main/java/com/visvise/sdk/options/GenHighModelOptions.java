@@ -17,6 +17,8 @@ public class GenHighModelOptions {
     private FaceType faceType = FaceType.TRIANGLE;
     /** optional, target face count (1000-1500000) */
     private Integer faceNum;
+    /** optional, enable PBR material (default false) */
+    private Boolean enablePbr = false;
     /** optional, back view to improve quality */
     private Object backView;
     /** optional, left view */
@@ -69,6 +71,15 @@ public class GenHighModelOptions {
 
     public GenHighModelOptions setFaceNum(Integer faceNum) {
         this.faceNum = faceNum;
+        return this;
+    }
+
+    public Boolean getEnablePbr() {
+        return enablePbr;
+    }
+
+    public GenHighModelOptions setEnablePbr(Boolean enablePbr) {
+        this.enablePbr = enablePbr;
         return this;
     }
 
