@@ -408,7 +408,9 @@ public class VisviseClient {
     }
 
     /**
-     * Generates a mid-detail 3D model from images
+     * Generates a mid-detail 3D model from images.
+     * If either model_id_360 or segment_model_id is provided in opts, the view parameters (mainView/backView/leftView/rightView)
+     * will NOT be resolved and can be null.
      */
     public String genMidModel(Object mainView, Object backView, Object leftView, Object rightView, GenMidModelOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
@@ -416,10 +418,20 @@ public class VisviseClient {
         }
 
         View view = new View();
-        view.setMainView(resolveFile(mainView, false, rtx));
-        view.setBackView(resolveFile(backView, false, rtx));
-        view.setLeftView(resolveFile(leftView, false, rtx));
-        view.setRightView(resolveFile(rightView, false, rtx));
+        // Only resolve views when neither model_id_360 nor segment_model_id is provided
+        if ((opts.getModelId360() == null || opts.getModelId360().isEmpty())
+                && (opts.getSegmentModelId() == null || opts.getSegmentModelId().isEmpty())) {
+            view.setMainView(resolveFile(mainView, false, rtx));
+            if (backView != null) {
+                view.setBackView(resolveFile(backView, false, rtx));
+            }
+            if (leftView != null) {
+                view.setLeftView(resolveFile(leftView, false, rtx));
+            }
+            if (rightView != null) {
+                view.setRightView(resolveFile(rightView, false, rtx));
+            }
+        }
 
         String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_3D_MID, null, rtx);
 
@@ -429,6 +441,9 @@ public class VisviseClient {
         imgParams.put("face_type", opts.getFaceType().getValue());
         if (opts.getSegmentModelId() != null && !opts.getSegmentModelId().isEmpty()) {
             imgParams.put("segment_model_id", opts.getSegmentModelId());
+        }
+        if (opts.getModelId360() != null && !opts.getModelId360().isEmpty()) {
+            imgParams.put("model_id_360", opts.getModelId360());
         }
 
         Map<String, Object> genParams = new HashMap<>();
