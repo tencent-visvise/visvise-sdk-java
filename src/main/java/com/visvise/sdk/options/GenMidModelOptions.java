@@ -17,6 +17,8 @@ public class GenMidModelOptions {
     private FaceType faceType = FaceType.TRIANGLE;
     /** optional, 2D segmentation asset ID */
     private String segmentModelId;
+    /** optional, 360 model asset ID */
+    private String modelId360;
 
     public GenMidModelOptions() {
     }
@@ -63,6 +65,15 @@ public class GenMidModelOptions {
 
     public GenMidModelOptions setSegmentModelId(String segmentModelId) {
         this.segmentModelId = segmentModelId;
+        return this;
+    }
+
+    public String getModelId360() {
+        return modelId360;
+    }
+
+    public GenMidModelOptions setModelId360(String modelId360) {
+        this.modelId360 = modelId360;
         return this;
     }
 

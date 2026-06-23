@@ -269,13 +269,14 @@ GenMidModelOptions opts = GenMidModelOptions.create()
     .setOutputModelFormat(ModelFormat.FBX)               // 可选，输出格式
     .setFaceType(FaceType.TRIANGLE)                      // 可选，面数类型
     .setSegmentModelId("Model2026...")                   // 可选，2D 分割资产 ID
+    .setModelId360("Model2026...")                       // 可选，图生360 资产 ID
 
-// mainView, backView, leftView, rightView 四个视图必填
+// 若是用户上传原画视图，则(mainView)必填
 String modelId = client.genMidModel(
     "path/to/main.png",
-    "path/to/back.png",
-    "path/to/left.png",
-    "path/to/right.png",
+    null,
+    null,
+    null,
     opts, rtx
 );
 ```

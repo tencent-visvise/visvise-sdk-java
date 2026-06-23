@@ -267,13 +267,14 @@ GenMidModelOptions opts = GenMidModelOptions.create()
     .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
     .setFaceType(FaceType.TRIANGLE)                      // optional, face type
     .setSegmentModelId("Model2026...")                   // optional, 2D segmentation asset ID
+    .setModelId360("Model2026...")                       // optional, 360 model asset ID
 
-// mainView, backView, leftView, rightView are all required
+// If using user-uploaded views, mainView is required
 String modelId = client.genMidModel(
     "path/to/main.png",
-    "path/to/back.png",
-    "path/to/left.png",
-    "path/to/right.png",
+    null,
+    null,
+    null,
     opts, rtx
 );
 ```
