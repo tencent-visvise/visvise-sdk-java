@@ -169,6 +169,16 @@ ModelFormat.GLB  // "glb"
 MeshRefineMode.OPTIMIZE  // 1 - mesh optimization
 MeshRefineMode.DENSIFY   // 2 - mesh densification
 
+// Mesh category (for rigging)
+MeshCategory.HUMANOID  // "humanoid" - humanoid (default)
+MeshCategory.TETRAPOD  // "tetrapod" - tetrapod (four-legged)
+MeshCategory.OTHER     // "other" - other
+
+// Rigging algo scenario
+RiggingAlgoScenario.AUTO_GEN           // 1 - auto generate (default for humanoid)
+RiggingAlgoScenario.TEMPLATE_SKELETON  // 2 - template skeleton
+RiggingAlgoScenario.ADDITIONAL_BONES   // 3 - additional bones
+
 // 2D segmentation split type
 SegmentSplitType.FRONT_VIEW  // 1 - front-view split (default)
 SegmentSplitType.FOUR_VIEW   // 2 - four-view split
@@ -402,8 +412,13 @@ Auto-rigging (node_type=5). The SDK packages the raw model + JSON parameters int
 ```java
 GenRiggingOptions opts = GenRiggingOptions.create()
     .setName("my_rigging")                              // optional, default "gen_rigging"
-    .setMeshCategory("humanoid")                        // optional, "humanoid" (default) or "tetrapod"
-    .setTemplateSkeleton(skeletonPath)                   // optional, template skeleton (local path or COS URL)
+    .setMeshCategory(MeshCategory.HUMANOID)              // optional, MeshCategory.HUMANOID (default) or MeshCategory.TETRAPOD
+    .setAlgoScenario(RiggingAlgoScenario.AUTO_GEN)        // optional, algo scenario: AUTO_GEN(1)/TEMPLATE_SKELETON(2)/ADDITIONAL_BONES(3); humanoid defaults to AUTO_GEN
+    .setGenerateRoot(false)                               // optional, generate root skeleton (default false)
+    .setTemperature(0.5)                                  // optional, temperature (default -1 means unset)
+    .setNumBeams(4)                                       // optional, number of beams (default -1 means unset)
+    .setMeshNames(Arrays.asList("Body_Mesh"))             // optional, mesh names to rig
+    .setTemplateSkeleton(skeletonPath)                    // optional, template skeleton (local path or COS URL)
 
 String modelId = client.genRigging("path/to/model.fbx", opts, rtx);
 ```
@@ -643,7 +658,9 @@ String rtx = System.getenv("VISVISE_RTX");
 VisviseClient client = new VisviseClient("...", "...", null);
 
 // Step 1: Rigging
-GenRiggingOptions riggingOpts = GenRiggingOptions.create();
+GenRiggingOptions riggingOpts = GenRiggingOptions.create()
+    .setMeshCategory(MeshCategory.HUMANOID)
+    .setAlgoScenario(RiggingAlgoScenario.AUTO_GEN);
 String rigId = client.genRigging("character.fbx", riggingOpts, rtx);
 ModelInfo rig = client.waitModel(rigId,
     WaitOptions.create().setTimeout(600), rtx);

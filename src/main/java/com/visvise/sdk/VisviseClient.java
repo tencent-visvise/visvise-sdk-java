@@ -12,7 +12,9 @@ import com.visvise.sdk.http.HTTPClient;
 import com.visvise.sdk.enums.Environment;
 import com.visvise.sdk.enums.ModelStatus;
 import com.visvise.sdk.enums.AnimationSubType;
+import com.visvise.sdk.enums.MeshCategory;
 import com.visvise.sdk.enums.NodeType;
+import com.visvise.sdk.enums.RiggingAlgoScenario;
 import com.visvise.sdk.exceptions.ErrorFactory;
 import com.visvise.sdk.exceptions.WeaverError;
 import com.visvise.sdk.http.SSEIterator;
@@ -658,13 +660,30 @@ public class VisviseClient {
             opts = GenRiggingOptions.create();
         }
 
+        // Auto-set algo_scenario for humanoid if not specified
+        if (opts.getMeshCategory() == MeshCategory.HUMANOID && opts.getAlgoScenario() == null) {
+            opts.setAlgoScenario(RiggingAlgoScenario.AUTO_GEN);
+        }
+
         String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.RIGGING, null, rtx);
 
         Map<String, Object> jsonData = new HashMap<>();
         Map<String, Object> config = new HashMap<>();
-        config.put("mesh_category", opts.getMeshCategory());
+        config.put("mesh_category", opts.getMeshCategory().getValue());
         config.put("algo_name", resolvedModel);
+        config.put("generate_root", opts.getGenerateRoot());
+        config.put("temperature", opts.getTemperature());
+        config.put("num_beams", opts.getNumBeams());
+        if (opts.getAlgoScenario() != null) {
+            config.put("algo_scenario", opts.getAlgoScenario().getValue());
+        }
         jsonData.put("config", config);
+
+        Map<String, Object> selection = new HashMap<>();
+        if (opts.getMeshNames() != null && !opts.getMeshNames().isEmpty()) {
+            selection.put("mesh_names", opts.getMeshNames());
+        }
+        jsonData.put("selection", selection);
 
         byte[] zipBytes = buildModelZip(modelPath, jsonData);
         String cosUrl = uploadBytes(zipBytes, "", false, rtx);
