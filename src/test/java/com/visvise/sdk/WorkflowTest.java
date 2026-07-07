@@ -61,7 +61,7 @@ public class WorkflowTest {
                 .setMeshCategory("humanoid");
 
         assertNotNull(riggingOpts);
-        assertEquals("humanoid", riggingOpts.getMeshCategory());
+        assertEquals("humanoid", riggingOpts.getMeshCategory().getValue());
 
         // Simulate rigged model output
         String riggedModelUrl = "https://example.com/rigged_model.fbx";

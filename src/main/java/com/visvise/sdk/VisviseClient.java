@@ -12,7 +12,9 @@ import com.visvise.sdk.http.HTTPClient;
 import com.visvise.sdk.enums.Environment;
 import com.visvise.sdk.enums.ModelStatus;
 import com.visvise.sdk.enums.AnimationSubType;
+import com.visvise.sdk.enums.MeshCategory;
 import com.visvise.sdk.enums.NodeType;
+import com.visvise.sdk.enums.RiggingAlgoScenario;
 import com.visvise.sdk.exceptions.ErrorFactory;
 import com.visvise.sdk.exceptions.WeaverError;
 import com.visvise.sdk.http.SSEIterator;
@@ -396,6 +398,9 @@ public class VisviseClient {
         if (opts.getFaceNum() != null) {
             imgParams.put("face_num", opts.getFaceNum());
         }
+        if (opts.getEnablePbr() != null) {
+            imgParams.put("enable_pbr", opts.getEnablePbr());
+        }
 
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("image_gen_model_params", imgParams);
@@ -405,7 +410,9 @@ public class VisviseClient {
     }
 
     /**
-     * Generates a mid-detail 3D model from images
+     * Generates a mid-detail 3D model from images.
+     * If either model_id_360 or segment_model_id is provided in opts, the view parameters (mainView/backView/leftView/rightView)
+     * will NOT be resolved and can be null.
      */
     public String genMidModel(Object mainView, Object backView, Object leftView, Object rightView, GenMidModelOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
@@ -413,10 +420,20 @@ public class VisviseClient {
         }
 
         View view = new View();
-        view.setMainView(resolveFile(mainView, false, rtx));
-        view.setBackView(resolveFile(backView, false, rtx));
-        view.setLeftView(resolveFile(leftView, false, rtx));
-        view.setRightView(resolveFile(rightView, false, rtx));
+        // Only resolve views when neither model_id_360 nor segment_model_id is provided
+        if ((opts.getModelId360() == null || opts.getModelId360().isEmpty())
+                && (opts.getSegmentModelId() == null || opts.getSegmentModelId().isEmpty())) {
+            view.setMainView(resolveFile(mainView, false, rtx));
+            if (backView != null) {
+                view.setBackView(resolveFile(backView, false, rtx));
+            }
+            if (leftView != null) {
+                view.setLeftView(resolveFile(leftView, false, rtx));
+            }
+            if (rightView != null) {
+                view.setRightView(resolveFile(rightView, false, rtx));
+            }
+        }
 
         String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.IMG_TO_3D_MID, null, rtx);
 
@@ -426,6 +443,9 @@ public class VisviseClient {
         imgParams.put("face_type", opts.getFaceType().getValue());
         if (opts.getSegmentModelId() != null && !opts.getSegmentModelId().isEmpty()) {
             imgParams.put("segment_model_id", opts.getSegmentModelId());
+        }
+        if (opts.getModelId360() != null && !opts.getModelId360().isEmpty()) {
+            imgParams.put("model_id_360", opts.getModelId360());
         }
 
         Map<String, Object> genParams = new HashMap<>();
@@ -640,13 +660,30 @@ public class VisviseClient {
             opts = GenRiggingOptions.create();
         }
 
+        // Auto-set algo_scenario for humanoid if not specified
+        if (opts.getMeshCategory() == MeshCategory.HUMANOID && opts.getAlgoScenario() == null) {
+            opts.setAlgoScenario(RiggingAlgoScenario.AUTO_GEN);
+        }
+
         String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.RIGGING, null, rtx);
 
         Map<String, Object> jsonData = new HashMap<>();
         Map<String, Object> config = new HashMap<>();
-        config.put("mesh_category", opts.getMeshCategory());
+        config.put("mesh_category", opts.getMeshCategory().getValue());
         config.put("algo_name", resolvedModel);
+        config.put("generate_root", opts.getGenerateRoot());
+        config.put("temperature", opts.getTemperature());
+        config.put("num_beams", opts.getNumBeams());
+        if (opts.getAlgoScenario() != null) {
+            config.put("algo_scenario", opts.getAlgoScenario().getValue());
+        }
         jsonData.put("config", config);
+
+        Map<String, Object> selection = new HashMap<>();
+        if (opts.getMeshNames() != null && !opts.getMeshNames().isEmpty()) {
+            selection.put("mesh_names", opts.getMeshNames());
+        }
+        jsonData.put("selection", selection);
 
         byte[] zipBytes = buildModelZip(modelPath, jsonData);
         String cosUrl = uploadBytes(zipBytes, "", false, rtx);

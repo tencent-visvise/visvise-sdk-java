@@ -170,6 +170,16 @@ ModelFormat.GLB  // "glb"
 MeshRefineMode.OPTIMIZE  // 1 - 布线优化
 MeshRefineMode.DENSIFY   // 2 - 布线加密
 
+// 网格分类（骨骼架设）
+MeshCategory.HUMANOID  // "humanoid" - 人形（默认）
+MeshCategory.TETRAPOD  // "tetrapod" - 四足
+MeshCategory.OTHER     // "other" - 其他
+
+// 骨架算法场景
+RiggingAlgoScenario.AUTO_GEN           // 1 - 自动生成（人形默认）
+RiggingAlgoScenario.TEMPLATE_SKELETON  // 2 - 模板骨架
+RiggingAlgoScenario.ADDITIONAL_BONES   // 3 - 附加骨骼
+
 // 2D 拆分方式
 SegmentSplitType.FRONT_VIEW  // 1 - 生成正视图拆分（默认）
 SegmentSplitType.FOUR_VIEW   // 2 - 生成四视图拆分
@@ -269,13 +279,14 @@ GenMidModelOptions opts = GenMidModelOptions.create()
     .setOutputModelFormat(ModelFormat.FBX)               // 可选，输出格式
     .setFaceType(FaceType.TRIANGLE)                      // 可选，面数类型
     .setSegmentModelId("Model2026...")                   // 可选，2D 分割资产 ID
+    .setModelId360("Model2026...")                       // 可选，图生360 资产 ID
 
-// mainView, backView, leftView, rightView 四个视图必填
+// 若是用户上传原画视图，则(mainView)必填
 String modelId = client.genMidModel(
     "path/to/main.png",
-    "path/to/back.png",
-    "path/to/left.png",
-    "path/to/right.png",
+    null,
+    null,
+    null,
     opts, rtx
 );
 ```
@@ -403,8 +414,13 @@ String modelId = client.genTexture("path/to/model.fbx", opts, rtx);
 ```java
 GenRiggingOptions opts = GenRiggingOptions.create()
     .setName("my_rigging")                               // 可选，默认 "gen_rigging"
-    .setMeshCategory("humanoid")                        // 可选，"humanoid"（人形，默认）或 "tetrapod"（四足）
-    .setTemplateSkeleton(skeletonPath)                   // 可选，模板骨骼（本地路径或 COS URL）
+    .setMeshCategory(MeshCategory.HUMANOID)              // 可选，MeshCategory.HUMANOID（人形，默认）或 MeshCategory.TETRAPOD（四足）
+    .setAlgoScenario(RiggingAlgoScenario.AUTO_GEN)        // 可选，算法场景：AUTO_GEN(1)/TEMPLATE_SKELETON(2)/ADDITIONAL_BONES(3)；人形默认 AUTO_GEN
+    .setGenerateRoot(false)                               // 可选，是否生成根骨骼（默认 false）
+    .setTemperature(0.5)                                  // 可选，温度参数（默认 -1 表示不设置）
+    .setNumBeams(4)                                       // 可选，beam 数量（默认 -1 表示不设置）
+    .setMeshNames(Arrays.asList("Body_Mesh"))             // 可选，指定骨骼架设的 mesh 名称列表
+    .setTemplateSkeleton(skeletonPath)                    // 可选，模板骨骼（本地路径或 COS URL）
 
 String modelId = client.genRigging("path/to/model.fbx", opts, rtx);
 ```
@@ -646,7 +662,9 @@ String rtx = System.getenv("VISVISE_RTX");
 VisviseClient client = new VisviseClient("...", "...", null);
 
 // Step 1: 骨骼架设
-GenRiggingOptions riggingOpts = GenRiggingOptions.create();
+GenRiggingOptions riggingOpts = GenRiggingOptions.create()
+    .setMeshCategory(MeshCategory.HUMANOID)
+    .setAlgoScenario(RiggingAlgoScenario.AUTO_GEN);
 String rigId = client.genRigging("character.fbx", riggingOpts, rtx);
 ModelInfo rig = client.waitModel(rigId,
     WaitOptions.create().setTimeout(600), rtx);

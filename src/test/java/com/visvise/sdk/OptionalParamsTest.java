@@ -188,11 +188,11 @@ public class OptionalParamsTest {
                 .setMeshCategory("humanoid");
 
         assertEquals("my_rigging", opts.getName());
-        assertEquals("humanoid", opts.getMeshCategory());
+        assertEquals("humanoid", opts.getMeshCategory().getValue());
 
         // Test tetrapod
         opts.setMeshCategory("tetrapod");
-        assertEquals("tetrapod", opts.getMeshCategory());
+        assertEquals("tetrapod", opts.getMeshCategory().getValue());
 
         System.out.println("PASS: GenRiggingOptions chain builder works");
     }

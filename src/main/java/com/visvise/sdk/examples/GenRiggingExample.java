@@ -2,6 +2,8 @@ package com.visvise.sdk.examples;
 
 import com.visvise.sdk.VisviseClient;
 import com.visvise.sdk.enums.Environment;
+import com.visvise.sdk.enums.MeshCategory;
+import com.visvise.sdk.enums.RiggingAlgoScenario;
 import com.visvise.sdk.exceptions.WeaverError;
 import com.visvise.sdk.models.ModelInfo;
 import com.visvise.sdk.options.ClientOptions;
@@ -35,7 +37,9 @@ public class GenRiggingExample {
         // 无需手动准备 zip 包
         String modelId = client.genRigging(MODEL_PATH,
                 GenRiggingOptions.create()
-                        .setMeshCategory("humanoid")    // humanoid（人形）或 tetrapod（四足）
+                        .setMeshCategory(MeshCategory.HUMANOID)     // 人形（默认）或 MeshCategory.TETRAPOD（四足）
+                        .setAlgoScenario(RiggingAlgoScenario.AUTO_GEN) // 可选，算法场景
+                        .setGenerateRoot(false)                     // 可选，是否生成根骨骼
                         .setName("example_gen_rigging"),
                 RTX);
         System.out.println("[gen_rigging] 任务已创建，model_id=" + modelId);
