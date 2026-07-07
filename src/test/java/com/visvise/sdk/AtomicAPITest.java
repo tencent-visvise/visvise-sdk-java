@@ -51,8 +51,8 @@ public class AtomicAPITest {
 
         UserQuota quota = api.getUserQuota(rtx);
         assertNotNull(quota);
-        assertTrue(quota.getQuota() >= 0);
-        System.out.println("PASS: get_user_quota - quota=" + quota.getQuota() + " server_ts=" + quota.getServerTs());
+        assertTrue(quota.getModelQuota() >= 0);
+        System.out.println("PASS: get_user_quota - model_quota=" + quota.getModelQuota() + " animation_quota=" + quota.getAnimationQuota() + " server_ts=" + quota.getServerTs());
     }
 
     @Test

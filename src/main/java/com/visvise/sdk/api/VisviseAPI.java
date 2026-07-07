@@ -92,8 +92,11 @@ public class VisviseAPI {
         }
         JsonObject m = (JsonObject) data;
         UserQuota quota = new UserQuota();
-        if (m.has("quota") && !m.get("quota").isJsonNull()) {
-            quota.setQuota(m.get("quota").getAsInt());
+        if (m.has("model_quota") && !m.get("model_quota").isJsonNull()) {
+            quota.setModelQuota(m.get("model_quota").getAsInt());
+        }
+        if (m.has("animation_quota") && !m.get("animation_quota").isJsonNull()) {
+            quota.setAnimationQuota(m.get("animation_quota").getAsInt());
         }
         if (m.has("server_ts") && !m.get("server_ts").isJsonNull()) {
             quota.setServerTs(m.get("server_ts").getAsLong());

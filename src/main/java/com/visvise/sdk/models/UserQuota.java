@@ -6,17 +6,29 @@ import com.google.gson.annotations.SerializedName;
  * UserQuota represents the get_user_quota API response
  */
 public class UserQuota {
-    private int quota;
+    @SerializedName("model_quota")
+    private int modelQuota;
+
+    @SerializedName("animation_quota")
+    private int animationQuota;
 
     @SerializedName("server_ts")
     private long serverTs;
 
-    public int getQuota() {
-        return quota;
+    public int getModelQuota() {
+        return modelQuota;
     }
 
-    public void setQuota(int quota) {
-        this.quota = quota;
+    public void setModelQuota(int modelQuota) {
+        this.modelQuota = modelQuota;
+    }
+
+    public int getAnimationQuota() {
+        return animationQuota;
+    }
+
+    public void setAnimationQuota(int animationQuota) {
+        this.animationQuota = animationQuota;
     }
 
     public long getServerTs() {

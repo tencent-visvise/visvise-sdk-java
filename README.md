@@ -539,7 +539,8 @@ GetCosCredResult cred = api.getCosCred(false, rtx);
 
 // 查询剩余配额
 UserQuota quota = api.getUserQuota();
-System.out.println(quota.getQuota(),rtx); // 剩余次数
+System.out.println(quota.getModelQuota(),rtx); // 模型剩余次数
+System.out.println(quota.getAnimationQuota(),rtx); // 动画剩余次数
 
 // 拉取模型列表
 ModelListResult result = api.getModelList(
@@ -610,7 +611,7 @@ try {
 
 ## 完整流程示例
 
-### 示例一：图片 → 高模（图生360 + 图生高模）
+### 示例一：图片 → 高模（图生360 + 图生高模，高模也支持单图直接生成）
 
 ```java
 String rtx = System.getenv("VISVISE_RTX");

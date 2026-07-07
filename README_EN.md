@@ -536,7 +536,8 @@ GetCosCredResult cred = api.getCosCred(false, rtx);
 
 // Query remaining quota
 UserQuota quota = api.getUserQuota();
-System.out.println(quota.getQuota(), rtx); // remaining count
+System.out.println(quota.getModelQuota(), rtx); // remaining model count
+System.out.println(quota.getAnimationQuota(), rtx); // remaining animation count
 
 // Fetch model list
 ModelListResult result = api.getModelList(
