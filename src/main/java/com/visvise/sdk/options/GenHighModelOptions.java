@@ -19,6 +19,8 @@ public class GenHighModelOptions {
     private Integer faceNum;
     /** optional, enable PBR material (default false) */
     private Boolean enablePbr = false;
+    /** optional, whether to force target face count; if false, adjusts by geometry error (default false) */
+    private Boolean strictMode = false;
     /** optional, back view to improve quality */
     private Object backView;
     /** optional, left view */
@@ -80,6 +82,15 @@ public class GenHighModelOptions {
 
     public GenHighModelOptions setEnablePbr(Boolean enablePbr) {
         this.enablePbr = enablePbr;
+        return this;
+    }
+
+    public Boolean getStrictMode() {
+        return strictMode;
+    }
+
+    public GenHighModelOptions setStrictMode(Boolean strictMode) {
+        this.strictMode = strictMode;
         return this;
     }
 
