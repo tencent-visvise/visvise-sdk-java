@@ -401,6 +401,9 @@ public class VisviseClient {
         if (opts.getEnablePbr() != null) {
             imgParams.put("enable_pbr", opts.getEnablePbr());
         }
+        if (opts.getStrictMode() != null) {
+            imgParams.put("strict_mode", opts.getStrictMode());
+        }
 
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("image_gen_model_params", imgParams);
