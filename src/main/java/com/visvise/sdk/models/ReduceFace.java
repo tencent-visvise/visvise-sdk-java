@@ -19,6 +19,9 @@ public class ReduceFace {
     @SerializedName("face_type")
     private FaceType faceType;  // 1: Triangle, 2: Quad
 
+    @SerializedName("project_type")
+    private String projectType = "";
+
     public ReduceFace() {
     }
 
@@ -26,6 +29,11 @@ public class ReduceFace {
         this.reduceLevel = reduceLevel;
         this.reducePercent = reducePercent;
         this.faceType = faceType;
+    }
+
+    public ReduceFace(int reduceLevel, int reducePercent, FaceType faceType, String projectType) {
+        this(reduceLevel, reducePercent, faceType);
+        this.projectType = projectType;
     }
 
     public int getReduceLevel() {
@@ -52,6 +60,14 @@ public class ReduceFace {
         this.faceType = faceType;
     }
 
+    public String getProjectType() {
+        return projectType;
+    }
+
+    public void setProjectType(String projectType) {
+        this.projectType = projectType;
+    }
+
     /**
      * Converts ReduceFace to Map for JSON serialization
      */
@@ -60,6 +76,7 @@ public class ReduceFace {
         m.put("reduce_level", reduceLevel);
         m.put("reduce_percent", reducePercent);
         m.put("face_type", faceType.getValue());
+        m.put("project_type", projectType);
         return m;
     }
 }

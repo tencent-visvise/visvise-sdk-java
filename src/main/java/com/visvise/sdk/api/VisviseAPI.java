@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.visvise.sdk.enums.StyleType;
 import com.visvise.sdk.exceptions.WeaverError;
 import com.visvise.sdk.http.HTTPClient;
 import com.visvise.sdk.http.SSEIterator;
@@ -301,6 +302,77 @@ public class VisviseAPI {
         }
         return null;
     }
+
+    /**
+     * Stylizes an input image and returns a 24-hour signed COS download URL.
+     * Preserve every query parameter when passing the result to {@link #genPreprocess}.
+     */
+    public String styleTransfer(String inputView, StyleType styleType, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("input_view", inputView);
+        body.put("style_type", styleType.getValue());
+
+        Object data = http.post("openapi/weaver/resource/style_transfer", body, rtx);
+        if (data == null || !(data instanceof JsonObject)) {
+            return null;
+        }
+
+        JsonObject m = (JsonObject) data;
+        if (m.has("result_image") && !m.get("result_image").isJsonNull()) {
+            return m.get("result_image").getAsString();
+        }
+        return null;
+    }
+
+    /**
+     * Automatically removes surface patterns and returns a 24-hour signed COS download URL.
+     * Preserve every query parameter when passing the result to {@link #genPreprocess}.
+     */
+    public String patterAutoRemove(String inputView, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("input_view", inputView);
+
+        Object data = http.post("openapi/weaver/resource/patter_auto_remove", body, rtx);
+        if (data == null || !(data instanceof JsonObject)) {
+            return null;
+        }
+
+        JsonObject m = (JsonObject) data;
+        if (m.has("result_image") && !m.get("result_image").isJsonNull()) {
+            return m.get("result_image").getAsString();
+        }
+        return null;
+    }
+
+
+
+    /**
+     * Saves a processed image as a 2D preprocess model asset.
+     */
+    public String genPreprocess(
+            String name,
+            String inputView,
+            Map<String, Object> params,
+            String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", name);
+        body.put("input_view", inputView);
+        if (params != null) {
+            body.putAll(params);
+        }
+
+        Object data = http.post("openapi/weaver/resource/gen_preprocess", body, rtx);
+        if (data == null || !(data instanceof JsonObject)) {
+            return null;
+        }
+        JsonObject m = (JsonObject) data;
+        if (m.has("model_id") && !m.get("model_id").isJsonNull()) {
+            return m.get("model_id").getAsString();
+        }
+        return null;
+    }
+
+
 
     /**
      * Batch generates poses from images (async)

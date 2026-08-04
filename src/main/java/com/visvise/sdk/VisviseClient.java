@@ -14,7 +14,9 @@ import com.visvise.sdk.enums.ModelStatus;
 import com.visvise.sdk.enums.AnimationSubType;
 import com.visvise.sdk.enums.MeshCategory;
 import com.visvise.sdk.enums.NodeType;
+import com.visvise.sdk.enums.PreprocessType;
 import com.visvise.sdk.enums.RiggingAlgoScenario;
+import com.visvise.sdk.enums.StyleType;
 import com.visvise.sdk.exceptions.ErrorFactory;
 import com.visvise.sdk.exceptions.WeaverError;
 import com.visvise.sdk.http.SSEIterator;
@@ -324,6 +326,60 @@ public class VisviseClient {
     // ════════════════════════════════════════════════════════════════════
     // High-level methods
     // ════════════════════════════════════════════════════════════════════
+
+
+
+    /**
+     * Runs a style transfer workflow and synchronously saves its result as an asset.
+     */
+    public String genStyleTransfer(Object inputView, StyleType styleType, GenStyleTransferOptions opts, String rtx) throws WeaverError {
+        if (opts == null) {
+            opts = GenStyleTransferOptions.create();
+        }
+
+        String inputUrl = resolveFile(inputView, false, rtx);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.PREPROCESS_2D, null, rtx);
+
+        String resultImage = api.styleTransfer(inputUrl, styleType, rtx);
+        if (resultImage == null || resultImage.isEmpty()) {
+            throw new WeaverError(-1, "styleTransfer returned an empty result_image");
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("preprocess_type", PreprocessType.STYLIZED.getValue());
+        if (resolvedModel != null && !resolvedModel.isEmpty()) {
+            params.put("algorithm_model", resolvedModel);
+        }
+        params.put("style_param", new StyleParam(styleType, resultImage).toMap());
+
+        return api.genPreprocess(opts.getName(), inputUrl, params, rtx);
+    }
+
+    /**
+     * Runs a pattern auto-removal workflow and synchronously saves its result as an asset.
+     */
+    public String genPatterAutoRemove(Object inputView, GenPatterAutoRemoveOptions opts, String rtx) throws WeaverError {
+        if (opts == null) {
+            opts = GenPatterAutoRemoveOptions.create();
+        }
+
+        String inputUrl = resolveFile(inputView, false, rtx);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.PREPROCESS_2D, null, rtx);
+
+        String resultImage = api.patterAutoRemove(inputUrl, rtx);
+        if (resultImage == null || resultImage.isEmpty()) {
+            throw new WeaverError(-1, "patterAutoRemove returned an empty result_image");
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("preprocess_type", PreprocessType.PATTERNED.getValue());
+        if (resolvedModel != null && !resolvedModel.isEmpty()) {
+            params.put("algorithm_model", resolvedModel);
+        }
+        params.put("remove_pattern_param", new RemovePatternParam(resultImage).toMap());
+
+        return api.genPreprocess(opts.getName(), inputUrl, params, rtx);
+    }
 
     /**
      * Generates multi-view images from an image

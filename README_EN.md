@@ -17,6 +17,7 @@ Java SDK for the VISVISE Weaver OpenAPI. It provides:
 - [Client Initialization](#client-initialization)
 - [Enum Constants](#enum-constants)
 - [High-Level Methods](#high-level-methods)
+  - [GenStyleTransfer / GenPatterAutoRemove — 2D Preprocessing](#genstyletransfer--genpatterautoremove--2d-preprocessing)
   - [Gen360 — Image to 360](#gen360--image-to-360)
   - [GenHighModel — Image to High-poly](#genhighmodel--image-to-high-poly)
   - [GenMidModel — Image to Mid-poly](#genmidmodel--image-to-mid-poly)
@@ -201,6 +202,15 @@ Environment.DEV   // Development environment
 NodeType.IMG_TO_360      // 7 - Image to 360
 NodeType.IMG_TO_3D_HIGH  // 3 - Image to High-poly
 NodeType.ANIMATION       // 4 - Animation
+NodeType.PREPROCESS_2D   // 16 - 2D preprocessing
+
+// 2D preprocessing
+PreprocessType.STYLIZED  // 1 - style transfer
+PreprocessType.PATTERNED // 2 - automatic pattern removal
+StyleType.GRAYSCALE      // 1 - grayscale
+StyleType.PIXEL          // 2 - pixel art
+StyleType.REALISTIC      // 3 - realistic
+StyleType.CARTOON        // 4 - cartoon figurine
 // ... more node types
 
 // Model status
@@ -214,7 +224,7 @@ ModelStatus.RUNNING   // 2 - Generating
 
 ## High-Level Methods
 
-High-level methods bundle "COS upload + async task creation" into a single call. Pass either a local file path or a VISVISE COS URL; each method returns a `model_id`.
+High-level methods bundle "COS upload + task creation" into a single call. Pass either a local file path or a VISVISE COS URL; each method returns a `model_id`. `genStyleTransfer` / `genPatterAutoRemove` are synchronous; other `gen*` methods usually create asynchronous tasks.
 
 All `Gen*()` methods use **Options struct** pattern with fluent API for cleaner optional parameter handling:
 
@@ -227,6 +237,35 @@ All `Gen*()` methods use **Options struct** pattern with fluent API for cleaner 
 > - **VISVISE COS URL** (`str`): pass a `https://...myqcloud.com/...` link directly; the SDK skips upload.
 > - **File type** (`File`): Pass the Fileobject directly and the SDK will upload it automatically.
 > - **Binary content** (`bytes` / `InputStream`): the SDK auto-detects the format via magic bytes (images PNG/JPEG/GIF/BMP/WebP/TIFF, 3D models FBX/OBJ/GLB/GLTF, videos MP4/MOV/WebM/AVI, ZIP) and uploads as `<uuid>.<sniffed-ext>` — no filename required from the caller.
+
+### GenStyleTransfer / GenPatterAutoRemove — 2D Preprocessing
+
+Synchronously processes an input image and saves it as a `node_type=16` asset. It returns the `model_id` directly; `waitModel()` is not required. → [Example](src/main/java/com/visvise/sdk/examples/GenPreprocessExample.java)
+
+```java
+// Style transfer
+GenStyleTransferOptions styleOpts = GenStyleTransferOptions.create()
+    .setName("styled_character")                            // optional, asset name; default "gen_style_transfer"
+    .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");             // optional, algorithm model; the first available model is selected when omitted
+
+String styledId = client.genStyleTransfer(
+    "character.png",       // required, local path, VISVISE COS URL, byte[], File, or InputStream input image
+    StyleType.GRAYSCALE,   // required, grayscale, pixel, realistic, or cartoon
+    styleOpts,
+    rtx                    // required, actual caller's RTX
+);
+
+// Automatic pattern removal
+GenPatterAutoRemoveOptions patternOpts = GenPatterAutoRemoveOptions.create()
+    .setName("pattern_removed_character")                    // optional, asset name; default "gen_patter_auto_remove"
+    .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");             // optional, algorithm model; the first available model is selected when omitted
+
+String patternedId = client.genPatterAutoRemove(
+    "character.png", // required, local path, VISVISE COS URL, byte[], File, or InputStream input image
+    patternOpts,
+    rtx              // required, actual caller's RTX
+);
+```
 
 ### Gen360 — Image to 360
 
@@ -354,9 +393,11 @@ String modelId = client.genRetopology("path/to/model.fbx", opts, rtx);
 
 Generate level-of-detail meshes (node_type=2), with multi-shot support. Default generation times is 3. → [Example](src/main/java/com/visvise/sdk/examples/GenLODExample.java)
 
+
+
 ```java
-ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);
-ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD);
+ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD, "lod_usr_full");
+ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD, "lod_usr_fast_full");
 List<ReduceFace> reduceFaces = Arrays.asList(rf1, rf2);
 
 GenLODOptions opts = GenLODOptions.create()
@@ -576,6 +617,17 @@ api.batchDeleteModel(Arrays.asList("Model2026...", "Model2026..."), rtx);
 // Remove background
 String outUrl = api.removeBackground("https://cos.../image.png", rtx);
 
+// 2D preprocessing: style transfer / automatic pattern removal
+String styledUrl = api.styleTransfer("https://cos.../image.png", StyleType.GRAYSCALE, rtx);
+String autoRemovedUrl = api.patterAutoRemove("https://cos.../image.png", rtx);
+
+// result_image is a signed URL and must be passed unchanged to the save API.
+// Save a processed image as a node_type=16 asset (use gen* high-level methods for convenience)
+Map<String, Object> params = new HashMap<>();
+params.put("preprocess_type", PreprocessType.STYLIZED.getValue());
+params.put("style_param", new StyleParam(StyleType.GRAYSCALE, styledUrl).toMap());
+String modelId = api.genPreprocess("styled_asset", "https://cos.../image.png", params, rtx);
+
 // Text-to-motion prompt suggestions
 List<String> prompts = api.getText2MotionPromptList("en", rtx);
 ```
@@ -691,8 +743,8 @@ System.out.println("Animation download URL: " + anim.getOutputModel());
 String rtx = System.getenv("VISVISE_RTX");
 VisviseClient client = new VisviseClient("...", "...", null);
 
-ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);
-ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD);
+ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD, "lod_usr_full");
+ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD, "lod_usr_fast_full");
 List<ReduceFace> reduceFaces = Arrays.asList(rf1, rf2);
 
 GenLODOptions opts = GenLODOptions.create();
