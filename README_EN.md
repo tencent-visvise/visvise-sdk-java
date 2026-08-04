@@ -17,8 +17,8 @@ Java SDK for the VISVISE Weaver OpenAPI. It provides:
 - [Client Initialization](#client-initialization)
 - [Enum Constants](#enum-constants)
 - [High-Level Methods](#high-level-methods)
-  - [GenStyleTransfer / GenPatterAutoRemove — 2D Preprocessing](#genstyletransfer--genpatterautoremove--2d-preprocessing)
   - [Gen360 — Image to 360](#gen360--image-to-360)
+  - [GenStyleTransfer / GenPatterAutoRemove — 2D Preprocessing](#genstyletransfer--genpatterautoremove--2d-preprocessing)
   - [GenHighModel — Image to High-poly](#genhighmodel--image-to-high-poly)
   - [GenMidModel — Image to Mid-poly](#genmidmodel--image-to-mid-poly)
   - [GenLowModel — Image to Low-poly](#genlowmodel--image-to-low-poly)
@@ -198,15 +198,11 @@ Environment.PROD  // Production environment
 Environment.TEST  // Test environment
 Environment.DEV   // Development environment
 
-// Node type
-NodeType.IMG_TO_360      // 7 - Image to 360
-NodeType.IMG_TO_3D_HIGH  // 3 - Image to High-poly
-NodeType.ANIMATION       // 4 - Animation
-NodeType.PREPROCESS_2D   // 16 - 2D preprocessing
-
 // 2D preprocessing
 PreprocessType.STYLIZED  // 1 - style transfer
 PreprocessType.PATTERNED // 2 - automatic pattern removal
+
+// Stylized
 StyleType.GRAYSCALE      // 1 - grayscale
 StyleType.PIXEL          // 2 - pixel art
 StyleType.REALISTIC      // 3 - realistic
@@ -238,35 +234,6 @@ All `Gen*()` methods use **Options struct** pattern with fluent API for cleaner 
 > - **File type** (`File`): Pass the Fileobject directly and the SDK will upload it automatically.
 > - **Binary content** (`bytes` / `InputStream`): the SDK auto-detects the format via magic bytes (images PNG/JPEG/GIF/BMP/WebP/TIFF, 3D models FBX/OBJ/GLB/GLTF, videos MP4/MOV/WebM/AVI, ZIP) and uploads as `<uuid>.<sniffed-ext>` — no filename required from the caller.
 
-### GenStyleTransfer / GenPatterAutoRemove — 2D Preprocessing
-
-Synchronously processes an input image and saves it as a `node_type=16` asset. It returns the `model_id` directly; `waitModel()` is not required. → [Example](src/main/java/com/visvise/sdk/examples/GenPreprocessExample.java)
-
-```java
-// Style transfer
-GenStyleTransferOptions styleOpts = GenStyleTransferOptions.create()
-    .setName("styled_character")                            // optional, asset name; default "gen_style_transfer"
-    .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");             // optional, algorithm model; the first available model is selected when omitted
-
-String styledId = client.genStyleTransfer(
-    "character.png",       // required, local path, VISVISE COS URL, byte[], File, or InputStream input image
-    StyleType.GRAYSCALE,   // required, grayscale, pixel, realistic, or cartoon
-    styleOpts,
-    rtx                    // required, actual caller's RTX
-);
-
-// Automatic pattern removal
-GenPatterAutoRemoveOptions patternOpts = GenPatterAutoRemoveOptions.create()
-    .setName("pattern_removed_character")                    // optional, asset name; default "gen_patter_auto_remove"
-    .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");             // optional, algorithm model; the first available model is selected when omitted
-
-String patternedId = client.genPatterAutoRemove(
-    "character.png", // required, local path, VISVISE COS URL, byte[], File, or InputStream input image
-    patternOpts,
-    rtx              // required, actual caller's RTX
-);
-```
-
 ### Gen360 — Image to 360
 
 Generate 360-degree multi-views from a single image. → [Example](src/main/java/com/visvise/sdk/examples/Gen360Example.java)
@@ -286,6 +253,35 @@ String modelId = client.gen360("path/to/character.png", opts, rtx);
 ```
 
 ---
+
+### GenStyleTransfer / GenPatterAutoRemove — 2D Preprocessing
+
+Synchronously processes an input image and saves it as a `node_type=16` asset. It returns the `model_id` directly; `waitModel()` is not required. → [Example](src/main/java/com/visvise/sdk/examples/GenPreprocessExample.java)
+
+```java
+// Style transfer
+GenStyleTransferOptions styleOpts = GenStyleTransferOptions.create()
+    .setName("styled_character")                            // optional, asset name; default "gen_style_transfer"
+    .setStyleType(StyleType.GRAYSCALE)                       // optional, style type; default grayscale
+    .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");             // optional, algorithm model; the first available model is selected when omitted
+
+String styledId = client.genStyleTransfer(
+    "character.png",       // required, local path, VISVISE COS URL, byte[], File, or InputStream input image
+    styleOpts,
+    rtx                    // required, actual caller's RTX
+);
+
+// Automatic pattern removal
+GenPatterAutoRemoveOptions patternOpts = GenPatterAutoRemoveOptions.create()
+    .setName("pattern_removed_character")                    // optional, asset name; default "gen_patter_auto_remove"
+    .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");             // optional, algorithm model; the first available model is selected when omitted
+
+String patternedId = client.genPatterAutoRemove(
+    "character.png", // required, local path, VISVISE COS URL, byte[], File, or InputStream input image
+    patternOpts,
+    rtx              // required, actual caller's RTX
+);
+```
 
 ### GenHighModel — Image to High-poly
 
@@ -616,17 +612,6 @@ api.batchDeleteModel(Arrays.asList("Model2026...", "Model2026..."), rtx);
 
 // Remove background
 String outUrl = api.removeBackground("https://cos.../image.png", rtx);
-
-// 2D preprocessing: style transfer / automatic pattern removal
-String styledUrl = api.styleTransfer("https://cos.../image.png", StyleType.GRAYSCALE, rtx);
-String autoRemovedUrl = api.patterAutoRemove("https://cos.../image.png", rtx);
-
-// result_image is a signed URL and must be passed unchanged to the save API.
-// Save a processed image as a node_type=16 asset (use gen* high-level methods for convenience)
-Map<String, Object> params = new HashMap<>();
-params.put("preprocess_type", PreprocessType.STYLIZED.getValue());
-params.put("style_param", new StyleParam(StyleType.GRAYSCALE, styledUrl).toMap());
-String modelId = api.genPreprocess("styled_asset", "https://cos.../image.png", params, rtx);
 
 // Text-to-motion prompt suggestions
 List<String> prompts = api.getText2MotionPromptList("en", rtx);

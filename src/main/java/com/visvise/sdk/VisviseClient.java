@@ -332,7 +332,7 @@ public class VisviseClient {
     /**
      * Runs a style transfer workflow and synchronously saves its result as an asset.
      */
-    public String genStyleTransfer(Object inputView, StyleType styleType, GenStyleTransferOptions opts, String rtx) throws WeaverError {
+    public String genStyleTransfer(Object inputView, GenStyleTransferOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenStyleTransferOptions.create();
         }
@@ -340,7 +340,7 @@ public class VisviseClient {
         String inputUrl = resolveFile(inputView, false, rtx);
         String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.PREPROCESS_2D, null, rtx);
 
-        String resultImage = api.styleTransfer(inputUrl, styleType, rtx);
+        String resultImage = api.styleTransfer(inputUrl, opts.getStyleType(), rtx);
         if (resultImage == null || resultImage.isEmpty()) {
             throw new WeaverError(-1, "styleTransfer returned an empty result_image");
         }
@@ -350,7 +350,7 @@ public class VisviseClient {
         if (resolvedModel != null && !resolvedModel.isEmpty()) {
             params.put("algorithm_model", resolvedModel);
         }
-        params.put("style_param", new StyleParam(styleType, resultImage).toMap());
+        params.put("style_param", new StyleParam(opts.getStyleType(), resultImage).toMap());
 
         return api.genPreprocess(opts.getName(), inputUrl, params, rtx);
     }

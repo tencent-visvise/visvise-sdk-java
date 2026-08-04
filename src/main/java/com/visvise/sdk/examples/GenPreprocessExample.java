@@ -30,9 +30,9 @@ public class GenPreprocessExample {
         System.out.println("[gen_preprocess] 开始原画风格化...");
         String styledId = client.genStyleTransfer(
                 ASSETS + "/preprocess.png",
-                StyleType.GRAYSCALE,
                 GenStyleTransferOptions.create()
-                        .setName("example_gen_style_transfer"),
+                        .setName("example_gen_style_transfer")
+                        .setStyleType(StyleType.GRAYSCALE),
                 RTX);
         System.out.println("[gen_preprocess] 原画风格化完成，model_id=" + styledId);
 

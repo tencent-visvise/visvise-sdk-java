@@ -38,11 +38,14 @@ public class OptionalParamsTest {
         GenStyleTransferOptions defaults = GenStyleTransferOptions.create();
         assertEquals("gen_style_transfer", defaults.getName());
         assertNull(defaults.getAlgorithmModel());
+        assertEquals(StyleType.GRAYSCALE, defaults.getStyleType());
 
         GenStyleTransferOptions opts = defaults
                 .setName("my_style")
+                .setStyleType(StyleType.CARTOON)
                 .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");
         assertEquals("my_style", opts.getName());
+        assertEquals(StyleType.CARTOON, opts.getStyleType());
         assertEquals("VISVISE-Pre2D-V1.0.0", opts.getAlgorithmModel());
 
         System.out.println("PASS: GenStyleTransferOptions chain builder works");
