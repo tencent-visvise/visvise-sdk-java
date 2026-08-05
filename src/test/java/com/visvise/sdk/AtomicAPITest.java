@@ -8,6 +8,7 @@ import com.visvise.sdk.options.ClientOptions;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -39,6 +40,25 @@ public class AtomicAPITest {
         return appId != null && !appId.isEmpty()
                 && secretKey != null && !secretKey.isEmpty()
                 && rtx != null && !rtx.isEmpty();
+    }
+
+    private String resolvePreprocessInput() throws WeaverError {
+        File inputFile = new File(ASSETS_DIR, "preprocess.png");
+        if (!inputFile.isFile()) {
+            throw new IllegalStateException("preprocess.png not found in " + ASSETS_DIR);
+        }
+        return client.upload(inputFile.getAbsolutePath(), "", false, rtx);
+    }
+
+    private void deletePreprocessModel(String modelId) {
+        if (modelId == null || modelId.isEmpty()) {
+            return;
+        }
+        try {
+            client.getAPI().deleteModel(modelId, rtx);
+        } catch (WeaverError error) {
+            System.out.println("Cleanup failed for " + modelId + ": " + error.getMessage());
+        }
     }
 
     @Test
@@ -96,6 +116,12 @@ public class AtomicAPITest {
         models = api.listAlgorithmModel(2, null, rtx);
         assertNotNull(models);
         System.out.println("PASS: list_algorithm_model node_type=2 (LOD)- first=" + models.get(0));
+
+        // Test 2D preprocess
+        models = api.listAlgorithmModel(16, null, rtx);
+        assertNotNull(models);
+        assertFalse(models.isEmpty());
+        System.out.println("PASS: list_algorithm_model node_type=16 (2D preprocess)- first=" + models.get(0));
     }
 
     @Test

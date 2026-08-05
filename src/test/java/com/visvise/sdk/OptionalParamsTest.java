@@ -34,6 +34,39 @@ public class OptionalParamsTest {
     }
 
     @Test
+    public void testGenStyleTransferOptions() {
+        GenStyleTransferOptions defaults = GenStyleTransferOptions.create();
+        assertEquals("gen_style_transfer", defaults.getName());
+        assertNull(defaults.getAlgorithmModel());
+        assertEquals(StyleType.GRAYSCALE, defaults.getStyleType());
+
+        GenStyleTransferOptions opts = defaults
+                .setName("my_style")
+                .setStyleType(StyleType.CARTOON)
+                .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");
+        assertEquals("my_style", opts.getName());
+        assertEquals(StyleType.CARTOON, opts.getStyleType());
+        assertEquals("VISVISE-Pre2D-V1.0.0", opts.getAlgorithmModel());
+
+        System.out.println("PASS: GenStyleTransferOptions chain builder works");
+    }
+
+    @Test
+    public void testGenPatterAutoRemoveOptions() {
+        GenPatterAutoRemoveOptions defaults = GenPatterAutoRemoveOptions.create();
+        assertEquals("gen_patter_auto_remove", defaults.getName());
+        assertNull(defaults.getAlgorithmModel());
+
+        GenPatterAutoRemoveOptions opts = defaults
+                .setName("my_remove")
+                .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");
+        assertEquals("my_remove", opts.getName());
+        assertEquals("VISVISE-Pre2D-V1.0.0", opts.getAlgorithmModel());
+
+        System.out.println("PASS: GenPatterAutoRemoveOptions chain builder works");
+    }
+
+    @Test
     public void testGenHighModelOptions() {
         GenHighModelOptions opts = GenHighModelOptions.create()
                 .setName("my_high_model")

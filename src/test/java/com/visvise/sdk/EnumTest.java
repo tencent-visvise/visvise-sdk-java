@@ -26,11 +26,33 @@ public class EnumTest {
         assertEquals(12, NodeType.IMG_TO_POSE.getValue());
         assertEquals(13, NodeType.IMG_TO_3D_LOW.getValue());
         assertEquals(14, NodeType.SEGMENT_2D.getValue());
+        assertEquals(16, NodeType.PREPROCESS_2D.getValue());
 
         assertEquals(NodeType.IMG_TO_360, NodeType.fromValue(7));
+        assertEquals(NodeType.PREPROCESS_2D, NodeType.fromValue(16));
         assertThrows(IllegalArgumentException.class, () -> NodeType.fromValue(99));
 
         System.out.println("PASS: NodeType enum works correctly");
+    }
+
+    @Test
+    public void testPreprocessType() {
+        assertEquals(1, PreprocessType.STYLIZED.getValue());
+        assertEquals(2, PreprocessType.PATTERNED.getValue());
+        assertEquals(PreprocessType.STYLIZED, PreprocessType.fromValue(1));
+        assertEquals(PreprocessType.PATTERNED, PreprocessType.fromValue(2));
+        assertThrows(IllegalArgumentException.class, () -> PreprocessType.fromValue(99));
+    }
+
+    @Test
+    public void testStyleType() {
+        assertEquals(1, StyleType.GRAYSCALE.getValue());
+        assertEquals(2, StyleType.PIXEL.getValue());
+        assertEquals(3, StyleType.REALISTIC.getValue());
+        assertEquals(4, StyleType.CARTOON.getValue());
+        assertEquals(StyleType.GRAYSCALE, StyleType.fromValue(1));
+        assertEquals(StyleType.CARTOON, StyleType.fromValue(4));
+        assertThrows(IllegalArgumentException.class, () -> StyleType.fromValue(99));
     }
 
     @Test

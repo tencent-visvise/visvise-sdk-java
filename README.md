@@ -18,6 +18,7 @@ VISVISE Weaver OpenAPI 的 Java SDK，提供：
 - [枚举常量](#枚举常量)
 - [高阶方法参考](#高阶方法参考)
   - [Gen360 — 图生360](#gen360--图生360)
+  - [GenPreprocess — 2D预处理](#genpreprocess--2d预处理)
   - [GenHighModel — 图生高模](#genhighmodel--图生高模)
   - [GenMidModel — 图生中模](#genmidmodel--图生中模)
   - [GenLowModel — 图生低模](#genlowmodel--图生低模)
@@ -198,11 +199,15 @@ Environment.PROD  // 生产环境
 Environment.TEST  // 测试环境
 Environment.DEV   // 开发环境
 
-// 节点类型
-NodeType.IMG_TO_360      // 7 - 图生360
-NodeType.IMG_TO_3D_HIGH  // 3 - 图生高模
-NodeType.ANIMATION       // 4 - 动画
-// ... 更多节点类型
+// 2D 预处理
+PreprocessType.STYLIZED  // 1 - 原画风格化
+PreprocessType.PATTERNED // 2 - 智能去花纹
+
+// 风格化
+StyleType.GRAYSCALE      // 1 - 灰模风
+StyleType.PIXEL          // 2 - 像素风
+StyleType.REALISTIC      // 3 - 写实风
+StyleType.CARTOON        // 4 - 卡通手办风
 
 // 模型状态
 ModelStatus.SUCCESS  // 3 - 生成成功
@@ -215,7 +220,7 @@ ModelStatus.RUNNING   // 2 - 生成中
 
 ## 高阶方法参考
 
-高阶方法封装了「COS 文件上传 + 创建异步任务」两步，传入文件路径（本地）或 COS URL 均可，返回 `model_id`。
+高阶方法封装了「COS 文件上传 + 创建任务」流程，传入文件路径（本地）或 COS URL 均可，返回 `model_id`。除 `genStyleTransfer` / `genPatterAutoRemove` 为同步处理外，其他 `gen*` 方法通常创建异步任务。
 
 所有 `Gen*()` 方法采用 **Options 结构体** 模式，支持链式调用：
 
@@ -249,6 +254,35 @@ String modelId = client.gen360("path/to/character.png", opts, rtx);
 ```
 
 ---
+
+### GenStyleTransfer / GenPatterAutoRemove — 2D预处理
+
+同步处理输入图片并保存为 `node_type=16` 资产，直接返回 `model_id`，无需调用 `waitModel()`。→ [示例代码](src/main/java/com/visvise/sdk/examples/GenPreprocessExample.java)
+
+```java
+// 原画风格化
+GenStyleTransferOptions styleOpts = GenStyleTransferOptions.create()
+    .setName("角色灰模原画")                                  // 可选，资产名称，默认 "gen_style_transfer"
+    .setStyleType(StyleType.GRAYSCALE)                       // 可选，风格类型，默认灰模风
+    .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");              // 可选，算法模型；不传自动选择首个可用模型
+
+String styledId = client.genStyleTransfer(
+    "character.png",            // 必填，输入图片：本地路径、VISVISE 平台 COS URL、byte[]、File 或 InputStream
+    styleOpts,
+    rtx                         // 必填，实际使用人的 RTX
+);
+
+// 智能去花纹
+GenPatterAutoRemoveOptions patternOpts = GenPatterAutoRemoveOptions.create()
+    .setName("角色去花纹原画")                                 // 可选，资产名称，默认 "gen_patter_auto_remove"
+    .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");              // 可选，算法模型；不传自动选择首个可用模型
+
+String patternedId = client.genPatterAutoRemove(
+    "character.png", // 必填，输入图片：本地路径、VISVISE 平台 COS URL、byte[]、File 或 InputStream
+    patternOpts,
+    rtx              // 必填，实际使用人的 RTX
+);
+```
 
 ### GenHighModel — 图生高模
 
@@ -355,6 +389,8 @@ String modelId = client.genRetopology("path/to/model.fbx", opts, rtx);
 ### GenLOD — LOD
 
 生成多级细节模型（node_type=2），支持抽卡。默认抽卡次数为 3。→ [示例代码](src/main/java/com/visvise/sdk/examples/GenLODExample.java)
+
+
 
 ```java
 ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);

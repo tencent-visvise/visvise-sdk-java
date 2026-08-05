@@ -18,6 +18,7 @@ Java SDK for the VISVISE Weaver OpenAPI. It provides:
 - [Enum Constants](#enum-constants)
 - [High-Level Methods](#high-level-methods)
   - [Gen360 — Image to 360](#gen360--image-to-360)
+  - [GenStyleTransfer / GenPatterAutoRemove — 2D Preprocessing](#genstyletransfer--genpatterautoremove--2d-preprocessing)
   - [GenHighModel — Image to High-poly](#genhighmodel--image-to-high-poly)
   - [GenMidModel — Image to Mid-poly](#genmidmodel--image-to-mid-poly)
   - [GenLowModel — Image to Low-poly](#genlowmodel--image-to-low-poly)
@@ -197,11 +198,15 @@ Environment.PROD  // Production environment
 Environment.TEST  // Test environment
 Environment.DEV   // Development environment
 
-// Node type
-NodeType.IMG_TO_360      // 7 - Image to 360
-NodeType.IMG_TO_3D_HIGH  // 3 - Image to High-poly
-NodeType.ANIMATION       // 4 - Animation
-// ... more node types
+// 2D preprocessing
+PreprocessType.STYLIZED  // 1 - style transfer
+PreprocessType.PATTERNED // 2 - automatic pattern removal
+
+// Stylized
+StyleType.GRAYSCALE      // 1 - grayscale
+StyleType.PIXEL          // 2 - pixel art
+StyleType.REALISTIC      // 3 - realistic
+StyleType.CARTOON        // 4 - cartoon figurine
 
 // Model status
 ModelStatus.SUCCESS  // 3 - Generation succeeded
@@ -214,7 +219,7 @@ ModelStatus.RUNNING   // 2 - Generating
 
 ## High-Level Methods
 
-High-level methods bundle "COS upload + async task creation" into a single call. Pass either a local file path or a VISVISE COS URL; each method returns a `model_id`.
+High-level methods bundle "COS upload + task creation" into a single call. Pass either a local file path or a VISVISE COS URL; each method returns a `model_id`. `genStyleTransfer` / `genPatterAutoRemove` are synchronous; other `gen*` methods usually create asynchronous tasks.
 
 All `Gen*()` methods use **Options struct** pattern with fluent API for cleaner optional parameter handling:
 
@@ -247,6 +252,35 @@ String modelId = client.gen360("path/to/character.png", opts, rtx);
 ```
 
 ---
+
+### GenStyleTransfer / GenPatterAutoRemove — 2D Preprocessing
+
+Synchronously processes an input image and saves it as a `node_type=16` asset. It returns the `model_id` directly; `waitModel()` is not required. → [Example](src/main/java/com/visvise/sdk/examples/GenPreprocessExample.java)
+
+```java
+// Style transfer
+GenStyleTransferOptions styleOpts = GenStyleTransferOptions.create()
+    .setName("styled_character")                            // optional, asset name; default "gen_style_transfer"
+    .setStyleType(StyleType.GRAYSCALE)                       // optional, style type; default grayscale
+    .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");             // optional, algorithm model; the first available model is selected when omitted
+
+String styledId = client.genStyleTransfer(
+    "character.png",       // required, local path, VISVISE COS URL, byte[], File, or InputStream input image
+    styleOpts,
+    rtx                    // required, actual caller's RTX
+);
+
+// Automatic pattern removal
+GenPatterAutoRemoveOptions patternOpts = GenPatterAutoRemoveOptions.create()
+    .setName("pattern_removed_character")                    // optional, asset name; default "gen_patter_auto_remove"
+    .setAlgorithmModel("VISVISE-Pre2D-V1.0.0");             // optional, algorithm model; the first available model is selected when omitted
+
+String patternedId = client.genPatterAutoRemove(
+    "character.png", // required, local path, VISVISE COS URL, byte[], File, or InputStream input image
+    patternOpts,
+    rtx              // required, actual caller's RTX
+);
+```
 
 ### GenHighModel — Image to High-poly
 
@@ -353,6 +387,8 @@ String modelId = client.genRetopology("path/to/model.fbx", opts, rtx);
 ### GenLOD — LOD
 
 Generate level-of-detail meshes (node_type=2), with multi-shot support. Default generation times is 3. → [Example](src/main/java/com/visvise/sdk/examples/GenLODExample.java)
+
+
 
 ```java
 ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);
