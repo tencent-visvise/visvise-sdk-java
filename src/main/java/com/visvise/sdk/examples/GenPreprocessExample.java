@@ -24,7 +24,7 @@ public class GenPreprocessExample {
     public static void main(String[] args) throws WeaverError {
         Environment env = "dev".equals(ENV) ? Environment.DEV : "test".equals(ENV) ? Environment.TEST : Environment.PROD;
         VisviseClient client = new VisviseClient(APP_ID, SECRET_KEY,
-                ClientOptions.create().setEnv(env));
+                ClientOptions.create().setEnv(env).setTimeout(180));
 
         // 原画风格化
         System.out.println("[gen_preprocess] 开始原画风格化...");
