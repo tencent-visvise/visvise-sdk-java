@@ -207,7 +207,6 @@ StyleType.GRAYSCALE      // 1 - grayscale
 StyleType.PIXEL          // 2 - pixel art
 StyleType.REALISTIC      // 3 - realistic
 StyleType.CARTOON        // 4 - cartoon figurine
-// ... more node types
 
 // Model status
 ModelStatus.SUCCESS  // 3 - Generation succeeded
@@ -392,8 +391,8 @@ Generate level-of-detail meshes (node_type=2), with multi-shot support. Default 
 
 
 ```java
-ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD, "lod_usr_full");
-ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD, "lod_usr_fast_full");
+ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);
+ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD);
 List<ReduceFace> reduceFaces = Arrays.asList(rf1, rf2);
 
 GenLODOptions opts = GenLODOptions.create()
@@ -728,8 +727,8 @@ System.out.println("Animation download URL: " + anim.getOutputModel());
 String rtx = System.getenv("VISVISE_RTX");
 VisviseClient client = new VisviseClient("...", "...", null);
 
-ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD, "lod_usr_full");
-ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD, "lod_usr_fast_full");
+ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);
+ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD);
 List<ReduceFace> reduceFaces = Arrays.asList(rf1, rf2);
 
 GenLODOptions opts = GenLODOptions.create();

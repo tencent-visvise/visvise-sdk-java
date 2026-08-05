@@ -94,15 +94,12 @@ public class WorkflowTest {
     @Test
     public void testLODWorkflow() {
         // Simulate LOD generation with multi-shot
-        ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD, "lod_usr_full");
-        ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD, "lod_usr_fast_full");
+        ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);
+        ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD);
 
         assertEquals(1, rf1.getReduceLevel());
         assertEquals(50, rf1.getReducePercent());
         assertEquals(FaceType.QUAD, rf1.getFaceType());
-        assertEquals("lod_usr_full", rf1.getProjectType());
-        assertEquals("lod_usr_fast_full", rf2.toMap().get("project_type"));
-        assertEquals("", new ReduceFace(3, 13, FaceType.QUAD).toMap().get("project_type"));
 
         GenLODOptions opts = GenLODOptions.create()
                 .setAlgorithmModel("VISVISE-LOD-V1.0.0")

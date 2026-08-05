@@ -38,9 +38,9 @@ public class GenLODExample {
         System.out.println("[gen_lod] 开始 LOD 减面...");
 
         List<ReduceFace> reduceFaces = Arrays.asList(
-                new ReduceFace(1, 50, FaceType.QUAD, "lod_usr_full"),
-                new ReduceFace(2, 25, FaceType.QUAD, "lod_usr_fast_full"),
-                new ReduceFace(3, 13, FaceType.QUAD, "lod_usr_fast_full")
+                new ReduceFace(1, 50, FaceType.QUAD),
+                new ReduceFace(2, 25, FaceType.QUAD),
+                new ReduceFace(3, 13, FaceType.QUAD)
         );
 
         List<String> modelIds = client.genLOD(MODEL_PATH, reduceFaces,

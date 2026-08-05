@@ -208,7 +208,6 @@ StyleType.GRAYSCALE      // 1 - 灰模风
 StyleType.PIXEL          // 2 - 像素风
 StyleType.REALISTIC      // 3 - 写实风
 StyleType.CARTOON        // 4 - 卡通手办风
-// ... 更多节点类型
 
 // 模型状态
 ModelStatus.SUCCESS  // 3 - 生成成功
@@ -394,8 +393,8 @@ String modelId = client.genRetopology("path/to/model.fbx", opts, rtx);
 
 
 ```java
-ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD, "lod_usr_full");
-ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD, "lod_usr_fast_full");
+ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);
+ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD);
 List<ReduceFace> reduceFaces = Arrays.asList(rf1, rf2);
 
 GenLODOptions opts = GenLODOptions.create()
@@ -731,8 +730,8 @@ System.out.println("动画下载地址: " + anim.getOutputModel());
 String rtx = System.getenv("VISVISE_RTX");
 VisviseClient client = new VisviseClient("...", "...", null);
 
-ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD, "lod_usr_full");
-ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD, "lod_usr_fast_full");
+ReduceFace rf1 = new ReduceFace(1, 50, FaceType.QUAD);
+ReduceFace rf2 = new ReduceFace(2, 25, FaceType.QUAD);
 List<ReduceFace> reduceFaces = Arrays.asList(rf1, rf2);
 
 GenLODOptions opts = GenLODOptions.create();
