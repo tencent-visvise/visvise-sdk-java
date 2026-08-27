@@ -46,7 +46,7 @@ public class GenTextMotionExample {
                 new MotionSegment("向前走两步").setNumFrames(90).setOverlapFramesWithPrev(10),
                 new MotionSegment("转身并挥手告别").setNumFrames(60).setOverlapFramesWithPrev(10)
         );
-        List<String> modelIds = client.genTextMotion(MODEL_PATH, null,
+        List<String> modelIds = client.genTextMotion(MODEL_PATH,
                 GenTextMotionOptions.create()
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setSegments(segments)

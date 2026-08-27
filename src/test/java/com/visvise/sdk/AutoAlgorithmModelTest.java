@@ -412,7 +412,7 @@ public class AutoAlgorithmModelTest {
         try {
             GenTextMotionOptions opts = GenTextMotionOptions.create();
 
-            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), "一个人在原地踏步", opts, rtx);
+            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), opts.setPrompt("一个人在原地踏步"), rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.println("PASS: gen_text_motion (no algorithm_model) - model_ids=" + modelIds);
         } catch (Exception e) {

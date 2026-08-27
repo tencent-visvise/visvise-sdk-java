@@ -837,7 +837,7 @@ public class VisviseClient {
      * Supports single-segment (prompt) and multi-segment (segments) modes;
      * non-empty segments take priority over prompt.
      */
-    public List<String> genTextMotion(Object modelPath, String prompt, GenTextMotionOptions opts, String rtx) throws WeaverError {
+    public List<String> genTextMotion(Object modelPath, GenTextMotionOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
             opts = GenTextMotionOptions.create();
         }
@@ -860,10 +860,10 @@ public class VisviseClient {
             }
             framingParams.put("segments", segmentMaps);
         } else {
-            if (prompt == null || prompt.isEmpty()) {
+            if (opts.getPrompt() == null || opts.getPrompt().isEmpty()) {
                 throw new WeaverError(-1, "gen_text_motion requires either prompt (single-segment) or segments (multi-segment)");
             }
-            framingParams.put("prompt", prompt);
+            framingParams.put("prompt", opts.getPrompt());
             // duration 仅在单段 prompt 模式下生效
             if (opts.getDuration() != null) {
                 framingParams.put("duration", opts.getDuration());

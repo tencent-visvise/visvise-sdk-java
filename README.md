@@ -503,7 +503,7 @@ String modelId = client.genVideoMotion("path/to/model.fbx", "path/to/dance.mp4",
 通过提示词生成动画，一次返回 4 个模型供抽卡（node_type=4）。支持单段 `prompt` 与多段 `segments` 两种模式（`segments` 非空时以多段为准）。→ [示例代码](src/main/java/com/visvise/sdk/examples/GenTextMotionExample.java)
 
 ```java
-// 方式一：多段提示词 segments（1~15 段），prompt 传 null
+// 方式一：多段提示词 segments（1~15 段），无需 prompt
 List<MotionSegment> segments = Arrays.asList(
     new MotionSegment("从站立姿势开始，缓缓抬起右手").setNumFrames(60),
     new MotionSegment("向前走两步").setNumFrames(90).setOverlapFramesWithPrev(10)
@@ -518,12 +518,12 @@ GenTextMotionOptions opts = GenTextMotionOptions.create()
     .setEnableLoop(false)                                // 可选，是否循环播放
     .setLoopFrames(5)                                    // 可选，循环帧数（1~20）
 
-List<String> modelIds = client.genTextMotion("path/to/model.fbx", null, opts, rtx);
+List<String> modelIds = client.genTextMotion("path/to/model.fbx", opts, rtx);
 // modelIds 包含 4 个 ID，等待其中你需要的那个即可
 
 // 方式二：单段提示词 prompt（segments 为空时回退使用）
-List<String> modelIds2 = client.genTextMotion("path/to/model.fbx", "一个人在跳街舞",
-    GenTextMotionOptions.create().setName("my_text_motion"), rtx);
+List<String> modelIds2 = client.genTextMotion("path/to/model.fbx",
+    GenTextMotionOptions.create().setName("my_text_motion").setPrompt("一个人在跳街舞"), rtx);
 ```
 
 ---

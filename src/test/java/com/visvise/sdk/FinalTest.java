@@ -262,7 +262,7 @@ public class FinalTest {
                     .setName("opt_tm_a_final");
 
             List<String> modelIds = client.genTextMotion(
-                    animModelFile.getAbsolutePath(), "一个人在挥手打招呼", opts3, rtx);
+                    animModelFile.getAbsolutePath(), opts3.setPrompt("一个人在挥手打招呼"), rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.printf("Submitted [tm prompt=挥手] -> %s%n", modelIds);
         } catch (Exception e) {
@@ -278,7 +278,7 @@ public class FinalTest {
                     .setName("opt_tm_b_final");
 
             List<String> modelIds = client.genTextMotion(
-                    animModelFile.getAbsolutePath(), "一个人在原地踏步", opts4, rtx);
+                    animModelFile.getAbsolutePath(), opts4.setPrompt("一个人在原地踏步"), rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.printf("Submitted [tm prompt=踏步 glb] -> %s%n", modelIds);
         } catch (Exception e) {

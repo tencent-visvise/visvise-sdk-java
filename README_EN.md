@@ -501,7 +501,7 @@ String modelId = client.genVideoMotion("path/to/model.fbx", "path/to/dance.mp4",
 Generate animation from text prompts; returns 4 candidate models (node_type=4). Supports single `prompt` and multi-segment `segments` (segments take priority when non-empty). → [Example](src/main/java/com/visvise/sdk/examples/GenTextMotionExample.java)
 
 ```java
-// Mode 1: multi-segment segments (1~15 segments); pass null prompt
+// Mode 1: multi-segment segments (1~15 segments); no prompt needed
 List<MotionSegment> segments = Arrays.asList(
     new MotionSegment("Raise the right hand slowly").setNumFrames(60),
     new MotionSegment("Walk two steps forward").setNumFrames(90).setOverlapFramesWithPrev(10)
@@ -516,12 +516,12 @@ GenTextMotionOptions opts = GenTextMotionOptions.create()
     .setEnableLoop(false)                               // optional, loop playback
     .setLoopFrames(5)                                   // optional, loop frames (1~20)
 
-List<String> modelIds = client.genTextMotion("path/to/model.fbx", null, opts, rtx);
+List<String> modelIds = client.genTextMotion("path/to/model.fbx", opts, rtx);
 // modelIds contains 4 IDs, wait for whichever you prefer
 
 // Mode 2: single prompt (fallback when segments is empty)
-List<String> modelIds2 = client.genTextMotion("path/to/model.fbx", "a person breakdancing",
-    GenTextMotionOptions.create().setName("my_text_motion"), rtx);
+List<String> modelIds2 = client.genTextMotion("path/to/model.fbx",
+    GenTextMotionOptions.create().setName("my_text_motion").setPrompt("a person breakdancing"), rtx);
 ```
 
 ---

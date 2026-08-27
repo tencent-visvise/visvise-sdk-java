@@ -17,6 +17,8 @@ public class GenTextMotionOptions {
     private ModelFormat modelFormat = ModelFormat.FBX;
     /** optional, multi-segment timeline (takes priority over prompt) */
     private List<MotionSegment> segments;
+    /** optional, single-segment prompt (ignored when segments is non-empty) */
+    private String prompt;
     /** optional, enable rewrite option (default true) */
     private Boolean enableRewrite;
     /** optional, animation duration in seconds (single-segment prompt mode only) */
@@ -62,6 +64,15 @@ public class GenTextMotionOptions {
 
     public GenTextMotionOptions setSegments(List<MotionSegment> segments) {
         this.segments = segments;
+        return this;
+    }
+
+    public String getPrompt() {
+        return prompt;
+    }
+
+    public GenTextMotionOptions setPrompt(String prompt) {
+        this.prompt = prompt;
         return this;
     }
 

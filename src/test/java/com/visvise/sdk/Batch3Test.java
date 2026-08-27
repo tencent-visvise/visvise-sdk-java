@@ -131,7 +131,7 @@ public class Batch3Test {
             GenTextMotionOptions opts = GenTextMotionOptions.create()
                     .setAlgorithmModel("VISVISE-TextMotion-V1.1.0");
 
-            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), "一个人在挥手打招呼", opts, rtx);
+            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), opts.setPrompt("一个人在挥手打招呼"), rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.println("PASS: tm prompt=挥手 - model_ids=" + modelIds);
 
@@ -163,7 +163,7 @@ public class Batch3Test {
                     .setAlgorithmModel("VISVISE-TextMotion-V1.1.0")
                     .setOutputModelFormat(ModelFormat.GLB);
 
-            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), "一个人在原地踏步", opts, rtx);
+            List<String> modelIds = client.genTextMotion(modelFile.getAbsolutePath(), opts.setPrompt("一个人在原地踏步"), rtx);
             assertNotNull("Model IDs should not be null", modelIds);
             System.out.println("PASS: tm prompt=踏步 glb - model_ids=" + modelIds);
 
