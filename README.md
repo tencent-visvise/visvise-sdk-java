@@ -312,6 +312,7 @@ GenMidModelOptions opts = GenMidModelOptions.create()
     .setName("my_mid_model")                             // 可选，默认 "gen_mid_model"
     .setOutputModelFormat(ModelFormat.FBX)               // 可选，输出格式
     .setFaceType(FaceType.TRIANGLE)                      // 可选，面数类型
+    .setFaceNum(30000)                                   // 可选，目标面数（0~30000，0=默认）
     .setSegmentModelId("Model2026...")                   // 可选，2D 分割资产 ID
     .setModelId360("Model2026...")                       // 可选，图生360 资产 ID
 
@@ -354,6 +355,7 @@ GenMeshRefineOptions opts = GenMeshRefineOptions.create()
     .setName("my_mesh_refine")                          // 可选，默认 "gen_mesh_refine"
     .setInputModelFormat(ModelFormat.FBX)                // 可选，输入模型格式（默认 fbx）
     .setMode(MeshRefineMode.OPTIMIZE)                   // 可选，布线优化模式
+    .setFaceNum(50000)                                   // 可选，目标面数（仅布线优化 mode=1 生效，0~50000，0=不设置）
     .setColorModel(colorModelPath)                       // 可选，色彩模型（本地路径或 COS URL）
 
 String modelId = client.genMeshRefine("path/to/model.fbx", opts, rtx);
@@ -498,15 +500,30 @@ String modelId = client.genVideoMotion("path/to/model.fbx", "path/to/dance.mp4",
 
 ### GenTextMotion — 文本生动画
 
-通过提示词生成动画，一次返回 4 个模型供抽卡（node_type=4）。→ [示例代码](src/main/java/com/visvise/sdk/examples/GenTextMotionExample.java)
+通过提示词生成动画，一次返回 4 个模型供抽卡（node_type=4）。支持单段 `prompt` 与多段 `segments` 两种模式（`segments` 非空时以多段为准）。→ [示例代码](src/main/java/com/visvise/sdk/examples/GenTextMotionExample.java)
 
 ```java
+// 方式一：多段提示词 segments（1~15 段），无需 prompt
+List<MotionSegment> segments = Arrays.asList(
+    new MotionSegment("从站立姿势开始，缓缓抬起右手").setNumFrames(60),
+    new MotionSegment("向前走两步").setNumFrames(90).setOverlapFramesWithPrev(10)
+);
+
 GenTextMotionOptions opts = GenTextMotionOptions.create()
     .setName("my_text_motion")                           // 可选，默认 "gen_text_motion"
     .setOutputModelFormat(ModelFormat.FBX)               // 可选，输出格式
+    .setSegments(segments)                               // 可选，多段时间轴（非空时优先于 prompt）
+    .setEnableRewrite(true)                              // 可选，是否开启 rewrite（默认 true）
+    .setDuration(10)                                     // 可选，动画时长（仅单段 prompt 模式生效）
+    .setEnableLoop(false)                                // 可选，是否循环播放
+    .setLoopFrames(5)                                    // 可选，循环帧数（1~20）
 
-List<String> modelIds = client.genTextMotion("path/to/model.fbx", "一个人在跳街舞", opts, rtx);
+List<String> modelIds = client.genTextMotion("path/to/model.fbx", opts, rtx);
 // modelIds 包含 4 个 ID，等待其中你需要的那个即可
+
+// 方式二：单段提示词 prompt（segments 为空时回退使用）
+List<String> modelIds2 = client.genTextMotion("path/to/model.fbx",
+    GenTextMotionOptions.create().setName("my_text_motion").setPrompt("一个人在跳街舞"), rtx);
 ```
 
 ---

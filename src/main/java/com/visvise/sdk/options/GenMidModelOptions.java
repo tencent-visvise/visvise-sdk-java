@@ -15,6 +15,8 @@ public class GenMidModelOptions {
     private ModelFormat modelFormat = ModelFormat.FBX;
     /** optional, face type (default triangle) */
     private FaceType faceType = FaceType.TRIANGLE;
+    /** optional, target face count (0-30000, 0 = auto) */
+    private Integer faceNum;
     /** optional, 2D segmentation asset ID */
     private String segmentModelId;
     /** optional, 360 model asset ID */
@@ -56,6 +58,15 @@ public class GenMidModelOptions {
 
     public GenMidModelOptions setFaceType(FaceType faceType) {
         this.faceType = faceType;
+        return this;
+    }
+
+    public Integer getFaceNum() {
+        return faceNum;
+    }
+
+    public GenMidModelOptions setFaceNum(Integer faceNum) {
+        this.faceNum = faceNum;
         return this;
     }
 

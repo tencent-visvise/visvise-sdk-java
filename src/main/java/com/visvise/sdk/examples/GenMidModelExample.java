@@ -60,6 +60,7 @@ public class GenMidModelExample {
                 GenMidModelOptions.create()
                         .setOutputModelFormat(ModelFormat.FBX)
                         .setFaceType(FaceType.TRIANGLE)
+                        .setFaceNum(30000)
                         .setName("example_gen_mid_model"),
                 RTX);
         System.out.println("[gen_mid_model] 任务已创建，model_id=" + modelId);
