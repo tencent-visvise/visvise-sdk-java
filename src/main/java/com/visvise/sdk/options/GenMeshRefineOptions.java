@@ -15,6 +15,8 @@ public class GenMeshRefineOptions {
     private ModelFormat inputModelFormat = ModelFormat.FBX;
     /** optional, MeshRefineMode.OPTIMIZE(1) or MeshRefineMode.DENSIFY(2) */
     private MeshRefineMode mode;
+    /** optional, target face count for optimize mode (0-50000, 0 = not set) */
+    private Integer faceNum;
     /** optional, color model for texture preservation */
     private Object colorModel;
 
@@ -54,6 +56,15 @@ public class GenMeshRefineOptions {
 
     public GenMeshRefineOptions setMode(MeshRefineMode mode) {
         this.mode = mode;
+        return this;
+    }
+
+    public Integer getFaceNum() {
+        return faceNum;
+    }
+
+    public GenMeshRefineOptions setFaceNum(Integer faceNum) {
+        this.faceNum = faceNum;
         return this;
     }
 

@@ -506,6 +506,9 @@ public class VisviseClient {
         if (opts.getModelId360() != null && !opts.getModelId360().isEmpty()) {
             imgParams.put("model_id_360", opts.getModelId360());
         }
+        if (opts.getFaceNum() != null) {
+            imgParams.put("face_num", opts.getFaceNum());
+        }
 
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("image_gen_model_params", imgParams);
@@ -564,6 +567,9 @@ public class VisviseClient {
         params.put("input_model_format", opts.getInputModelFormat().getValue());
         if (opts.getMode() != null) {
             params.put("mode", opts.getMode().getValue());
+        }
+        if (opts.getFaceNum() != null) {
+            params.put("face_num", opts.getFaceNum());
         }
         if (opts.getColorModel() != null) {
             String colorUrl = resolveModelFile(opts.getColorModel(), false, rtx);
@@ -827,7 +833,9 @@ public class VisviseClient {
     }
 
     /**
-     * Generates animation from text prompts
+     * Generates animation from text prompts.
+     * Supports single-segment (prompt) and multi-segment (segments) modes;
+     * non-empty segments take priority over prompt.
      */
     public List<String> genTextMotion(Object modelPath, String prompt, GenTextMotionOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
@@ -842,7 +850,34 @@ public class VisviseClient {
         Map<String, Object> framingParams = new HashMap<>();
         framingParams.put("algorithm_model", resolvedModel);
         framingParams.put("output_model_format", opts.getOutputModelFormat().getValue());
-        framingParams.put("prompt", prompt);
+
+        List<MotionSegment> segments = opts.getSegments();
+        if (segments != null && !segments.isEmpty()) {
+            // segments 优先：以多段为准，忽略 prompt
+            List<Map<String, Object>> segmentMaps = new ArrayList<>();
+            for (MotionSegment seg : segments) {
+                segmentMaps.add(seg.toMap());
+            }
+            framingParams.put("segments", segmentMaps);
+        } else {
+            if (prompt == null || prompt.isEmpty()) {
+                throw new WeaverError(-1, "gen_text_motion requires either prompt (single-segment) or segments (multi-segment)");
+            }
+            framingParams.put("prompt", prompt);
+            // duration 仅在单段 prompt 模式下生效
+            if (opts.getDuration() != null) {
+                framingParams.put("duration", opts.getDuration());
+            }
+        }
+        if (opts.getEnableRewrite() != null) {
+            framingParams.put("enable_rewrite", opts.getEnableRewrite());
+        }
+        if (opts.getEnableLoop() != null) {
+            framingParams.put("enable_loop", opts.getEnableLoop());
+        }
+        if (opts.getLoopFrames() != null) {
+            framingParams.put("loop_frames", opts.getLoopFrames());
+        }
 
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("framing_ai_params", framingParams);

@@ -2,6 +2,7 @@ package com.visvise.sdk.examples;
 
 import com.visvise.sdk.VisviseClient;
 import com.visvise.sdk.enums.Environment;
+import com.visvise.sdk.enums.MeshRefineMode;
 import com.visvise.sdk.enums.ModelFormat;
 import com.visvise.sdk.exceptions.WeaverError;
 import com.visvise.sdk.models.ModelInfo;
@@ -31,9 +32,12 @@ public class GenMeshRefineExample {
 
         System.out.println("[gen_mesh_refine] 开始重布线...");
 
+        // 布线优化 mode=1（默认），face_num 0~50000，0=不设置
         String modelId = client.genMeshRefine(MODEL_PATH,
                 GenMeshRefineOptions.create()
                         .setInputModelFormat(ModelFormat.FBX)
+                        .setMode(MeshRefineMode.OPTIMIZE)
+                        .setFaceNum(50000)
                         .setName("example_gen_mesh_refine"),
                 RTX);
         System.out.println("[gen_mesh_refine] 任务已创建，model_id=" + modelId);

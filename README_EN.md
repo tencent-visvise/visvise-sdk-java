@@ -310,6 +310,7 @@ GenMidModelOptions opts = GenMidModelOptions.create()
     .setName("my_mid_model")                             // optional, default "gen_mid_model"
     .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
     .setFaceType(FaceType.TRIANGLE)                      // optional, face type
+    .setFaceNum(30000)                                   // optional, target face count (0-30000, 0 = default)
     .setSegmentModelId("Model2026...")                   // optional, 2D segmentation asset ID
     .setModelId360("Model2026...")                       // optional, 360 model asset ID
 
@@ -352,6 +353,7 @@ GenMeshRefineOptions opts = GenMeshRefineOptions.create()
     .setName("my_mesh_refine")                          // optional, default "gen_mesh_refine"
     .setInputModelFormat(ModelFormat.FBX)                // optional, input format (default fbx)
     .setMode(MeshRefineMode.OPTIMIZE)                  // optional, refine mode
+    .setFaceNum(50000)                                   // optional, target face count (optimize mode only, 0-50000, 0 = unset)
     .setColorModel(colorModelPath)                       // optional, color model (local path or COS URL)
 
 String modelId = client.genMeshRefine("path/to/model.fbx", opts, rtx);
@@ -496,15 +498,30 @@ String modelId = client.genVideoMotion("path/to/model.fbx", "path/to/dance.mp4",
 
 ### GenTextMotion — Text to Animation
 
-Generate animation from a text prompt; returns 4 candidate models (node_type=4). → [Example](src/main/java/com/visvise/sdk/examples/GenTextMotionExample.java)
+Generate animation from text prompts; returns 4 candidate models (node_type=4). Supports single `prompt` and multi-segment `segments` (segments take priority when non-empty). → [Example](src/main/java/com/visvise/sdk/examples/GenTextMotionExample.java)
 
 ```java
+// Mode 1: multi-segment segments (1~15 segments); pass null prompt
+List<MotionSegment> segments = Arrays.asList(
+    new MotionSegment("Raise the right hand slowly").setNumFrames(60),
+    new MotionSegment("Walk two steps forward").setNumFrames(90).setOverlapFramesWithPrev(10)
+);
+
 GenTextMotionOptions opts = GenTextMotionOptions.create()
     .setName("my_text_motion")                          // optional, default "gen_text_motion"
     .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
+    .setSegments(segments)                              // optional, multi-segment timeline (priority over prompt)
+    .setEnableRewrite(true)                             // optional, enable rewrite (default true)
+    .setDuration(10)                                    // optional, duration in seconds (single-prompt mode only)
+    .setEnableLoop(false)                               // optional, loop playback
+    .setLoopFrames(5)                                   // optional, loop frames (1~20)
 
-List<String> modelIds = client.genTextMotion("path/to/model.fbx", "a person breakdancing", opts, rtx);
+List<String> modelIds = client.genTextMotion("path/to/model.fbx", null, opts, rtx);
 // modelIds contains 4 IDs, wait for whichever you prefer
+
+// Mode 2: single prompt (fallback when segments is empty)
+List<String> modelIds2 = client.genTextMotion("path/to/model.fbx", "a person breakdancing",
+    GenTextMotionOptions.create().setName("my_text_motion"), rtx);
 ```
 
 ---
