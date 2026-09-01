@@ -76,7 +76,7 @@ public class FinalTest {
             String id = m[1];
             try {
                 VisviseAPI.ModelListResult result = api.getModelList(
-                        Collections.singletonList(id), null, null, "", 10, 1, rtx);
+                        Collections.singletonList(id), null, null, "", 10, 1, null, null, null, rtx);
                 if (!result.getModels().isEmpty()) {
                     ModelInfo model = result.getModels().get(0);
                     System.out.printf("PASS: [%s] model_id=%s status=%d time_cost=%d%n",

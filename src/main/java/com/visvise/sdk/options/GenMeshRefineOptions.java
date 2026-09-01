@@ -19,6 +19,8 @@ public class GenMeshRefineOptions {
     private Integer faceNum;
     /** optional, color model for texture preservation */
     private Object colorModel;
+    /** optional, base color image for texture preservation */
+    private Object baseColorImage;
 
     public GenMeshRefineOptions() {
     }
@@ -74,6 +76,15 @@ public class GenMeshRefineOptions {
 
     public GenMeshRefineOptions setColorModel(Object colorModel) {
         this.colorModel = colorModel;
+        return this;
+    }
+
+    public Object getBaseColorImage() {
+        return baseColorImage;
+    }
+
+    public GenMeshRefineOptions setBaseColorImage(Object baseColorImage) {
+        this.baseColorImage = baseColorImage;
         return this;
     }
 

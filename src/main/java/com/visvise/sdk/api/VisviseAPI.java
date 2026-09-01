@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.visvise.sdk.enums.SegmentViewType;
 import com.visvise.sdk.enums.StyleType;
 import com.visvise.sdk.exceptions.WeaverError;
 import com.visvise.sdk.http.HTTPClient;
@@ -30,10 +31,13 @@ public class VisviseAPI {
     /**
      * Retrieves COS temporary credentials for direct file upload
      */
-    public GetCosCredResult getCosCred(boolean isTemp, String rtx) throws WeaverError {
+    public GetCosCredResult getCosCred(boolean isTemp, boolean isPublic, String rtx) throws WeaverError {
         Map<String, Object> body = new HashMap<>();
         if (isTemp) {
             body.put("is_temp", true);
+        }
+        if (isPublic) {
+            body.put("is_public", true);
         }
 
         Object data = http.post("openapi/weaver/resource/get_cos_cred", body, rtx);
@@ -101,6 +105,9 @@ public class VisviseAPI {
         }
         if (m.has("server_ts") && !m.get("server_ts").isJsonNull()) {
             quota.setServerTs(m.get("server_ts").getAsLong());
+        }
+        if (m.has("image_processing_quota") && !m.get("image_processing_quota").isJsonNull()) {
+            quota.setImageProcessingQuota(m.get("image_processing_quota").getAsInt());
         }
         return quota;
     }
@@ -184,6 +191,9 @@ public class VisviseAPI {
             String keyword,
             int limit,
             int page,
+            Long lastTs,
+            List<Integer> modelTypeList,
+            Sorter sorter,
             String rtx) throws WeaverError {
 
         Map<String, Object> body = new HashMap<>();
@@ -201,6 +211,15 @@ public class VisviseAPI {
         }
         if (keyword != null && !keyword.isEmpty()) {
             body.put("keyword", keyword);
+        }
+        if (modelTypeList != null && !modelTypeList.isEmpty()) {
+            body.put("model_type_list", modelTypeList);
+        }
+        if (lastTs != null && lastTs > 0) {
+            body.put("last_ts", lastTs);
+        }
+        if (sorter != null && sorter.getName() != null && !sorter.getName().isEmpty()) {
+            body.put("sorter", sorter);
         }
 
         Object data = http.post("openapi/weaver/resource/get_model_list", body, rtx);
@@ -466,6 +485,190 @@ public class VisviseAPI {
         }
 
         return http.postSSE("openapi/weaver/component/init_segment", body, readTimeout, rtx);
+    }
+
+    /**
+     * Enters the segment state and specifies the component to split.
+     */
+    public OperatorResult beginSegment(String clientId, int componentLabel, SegmentViewType viewType, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("client_id", clientId);
+        body.put("view_type", viewType.getValue());
+        body.put("component_label", componentLabel);
+
+        Object data = http.post("openapi/weaver/component/begin_segment", body, rtx);
+        if (data == null) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, OperatorResult.class);
+    }
+
+    /**
+     * Marks the region to split out in the segment state (repeatable).
+     * add_pixels / remove_pixels / rects jointly define the split region.
+     */
+    public OperatorResult segmentComponent(String clientId, SegmentViewType viewType, List<Pixel> addPixels, List<Pixel> removePixels, List<Rect> rects, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("client_id", clientId);
+        body.put("view_type", viewType.getValue());
+        if (addPixels != null && !addPixels.isEmpty()) {
+            body.put("add_pixels", addPixels);
+        }
+        if (removePixels != null && !removePixels.isEmpty()) {
+            body.put("remove_pixels", removePixels);
+        }
+        if (rects != null && !rects.isEmpty()) {
+            body.put("rects", rects);
+        }
+
+        Object data = http.post("openapi/weaver/component/segment", body, rtx);
+        if (data == null) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, OperatorResult.class);
+    }
+
+    /**
+     * Finalizes the current segmentation result.
+     */
+    public OperatorResult confirmSegment(String clientId, SegmentViewType viewType, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("client_id", clientId);
+        body.put("view_type", viewType.getValue());
+
+        Object data = http.post("openapi/weaver/component/confirm_segment", body, rtx);
+        if (data == null) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, OperatorResult.class);
+    }
+
+    /**
+     * Cancels the current segmentation and reverts to the pre-segment state.
+     */
+    public OperatorResult cancelSegment(String clientId, SegmentViewType viewType, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("client_id", clientId);
+        body.put("view_type", viewType.getValue());
+
+        Object data = http.post("openapi/weaver/component/cancel_segment", body, rtx);
+        if (data == null) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, OperatorResult.class);
+    }
+
+    /**
+     * Merges multiple components into one connected component.
+     */
+    public MultiViewSegmentResult mergeComponent(String clientId, List<Integer> componentLabels, SegmentViewType viewType, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("client_id", clientId);
+        body.put("component_labels", componentLabels);
+        body.put("view_type", viewType.getValue());
+
+        Object data = http.post("openapi/weaver/component/merge", body, rtx);
+        if (data == null) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, MultiViewSegmentResult.class);
+    }
+
+    /**
+     * Automatically merges all adjacent connected components.
+     */
+    public MultiViewSegmentResult autoMergeComponent(String clientId, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("client_id", clientId);
+
+        Object data = http.post("openapi/weaver/component/auto_merge", body, rtx);
+        if (data == null) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, MultiViewSegmentResult.class);
+    }
+
+    /**
+     * Adjusts a component boundary via a painted mask region.
+     */
+    public OperatorResult boundaryAdjust(String clientId, SegmentViewType viewType, int componentLabel, String paintMask, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("client_id", clientId);
+        body.put("view_type", viewType.getValue());
+        body.put("paint_mask", paintMask);
+        body.put("component_label", componentLabel);
+
+        Object data = http.post("openapi/weaver/component/boundary_adjust", body, rtx);
+        if (data == null) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, OperatorResult.class);
+    }
+
+    /**
+     * Renames a component, syncing across all views in the four-view stage.
+     */
+    public MultiViewSegmentResult renameComponent(String clientId, SegmentViewType viewType, int componentLabel, String newName, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("client_id", clientId);
+        body.put("view_type", viewType.getValue());
+        body.put("component_label", componentLabel);
+        body.put("new_name", newName);
+
+        Object data = http.post("openapi/weaver/component/part_rename", body, rtx);
+        if (data == null) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, MultiViewSegmentResult.class);
+    }
+
+    /**
+     * Persists the current segmentation result as a standalone 2D split asset (node_type=14).
+     */
+    public ModelInfo saveSegment(String clientId, String name, String algorithmModel, String openedModelId, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("client_id", clientId);
+        body.put("name", name);
+        body.put("algorithm_model", algorithmModel);
+        if (openedModelId != null && !openedModelId.isEmpty()) {
+            body.put("opened_model_id", openedModelId);
+        }
+
+        Object data = http.post("openapi/weaver/component/save_segment", body, rtx);
+        if (data == null) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, ModelInfo.class);
+    }
+
+    /**
+     * Opens a saved 2D split asset for re-editing, returning a new client_id.
+     */
+    public MultiViewSegmentResult openSegment(String modelId, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("model_id", modelId);
+
+        Object data = http.post("openapi/weaver/component/open_segment", body, rtx);
+        if (data == null) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, MultiViewSegmentResult.class);
+    }
+
+    /**
+     * Regenerates a model asset in place.
+     * Only 2UV assets (node_type=15, AUTO_LUV) are supported; other node types
+     * will be rejected by the server. Regeneration does not return a new model_id —
+     * it overwrites in place and increments redo_count.
+     */
+    public void regenerateModel(String modelId, Map<String, Object> params, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("model_id", modelId);
+        if (params != null) {
+            body.put("params", params);
+        }
+
+        http.post("openapi/weaver/resource/regenerate_model", body, rtx);
     }
 
     /**

@@ -611,7 +611,7 @@ System.out.println(quota.getAnimationQuota(), rtx); // remaining animation count
 // Fetch model list
 ModelListResult result = api.getModelList(
     Collections.singletonList("Model2026..."),
-    null, null, "", 10, 1, rtx
+    null, null, "", 10, 1, null, null, null, rtx
 );
 
 // Fetch algorithm models for a node type

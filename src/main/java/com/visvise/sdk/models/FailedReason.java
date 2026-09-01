@@ -10,6 +10,9 @@ public class FailedReason {
 
     private String reason;
 
+    @SerializedName("real_reason")
+    private String realReason;
+
     public int getCode() {
         return code;
     }
@@ -24,5 +27,13 @@ public class FailedReason {
 
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    public String getRealReason() {
+        return realReason;
+    }
+
+    public void setRealReason(String realReason) {
+        this.realReason = realReason;
     }
 }

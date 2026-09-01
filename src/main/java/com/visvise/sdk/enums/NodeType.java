@@ -18,6 +18,7 @@ public enum NodeType {
     IMG_TO_POSE(12, "Image to Pose"),
     IMG_TO_3D_LOW(13, "Image to 3D (Low)"),
     SEGMENT_2D(14, "2D Segmentation"),
+    AUTO_LUV(15, "Auto LUV / 2UV"),
     PREPROCESS_2D(16, "2D Preprocess");
 
     private final int value;

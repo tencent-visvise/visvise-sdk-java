@@ -16,6 +16,7 @@ import com.visvise.sdk.enums.MeshCategory;
 import com.visvise.sdk.enums.NodeType;
 import com.visvise.sdk.enums.PreprocessType;
 import com.visvise.sdk.enums.RiggingAlgoScenario;
+import com.visvise.sdk.enums.SegmentViewType;
 import com.visvise.sdk.enums.StyleType;
 import com.visvise.sdk.exceptions.ErrorFactory;
 import com.visvise.sdk.exceptions.WeaverError;
@@ -183,7 +184,7 @@ public class VisviseClient {
     }
 
     private String uploadFile(String path, String filename, boolean isTemp, String rtx) throws WeaverError {
-        GetCosCredResult cred = api.getCosCred(isTemp, rtx);
+        GetCosCredResult cred = api.getCosCred(isTemp, false, rtx);
         if (cred == null) {
             throw new WeaverError(-1, "Failed to get COS credentials");
         }
@@ -200,7 +201,7 @@ public class VisviseClient {
         if (filename == null || filename.isEmpty()) {
             filename = genRandomFilename(FileTypeUtil.sniffExtension(data, ".bin"));
         }
-        GetCosCredResult cred = api.getCosCred(isTemp, rtx);
+        GetCosCredResult cred = api.getCosCred(isTemp, false, rtx);
         if (cred == null) {
             throw new WeaverError(-1, "Failed to get COS credentials");
         }
@@ -288,7 +289,7 @@ public class VisviseClient {
             }
 
             VisviseAPI.ModelListResult result = api.getModelList(
-                    Collections.singletonList(modelId), null, null, "", 10, 1, rtx);
+                    Collections.singletonList(modelId), null, null, "", 10, 1, null, null, null, rtx);
 
             if (result.getModels().isEmpty()) {
                 logger.info("Model {} not found, continuing to wait...", modelId);
@@ -460,6 +461,12 @@ public class VisviseClient {
         if (opts.getStrictMode() != null) {
             imgParams.put("strict_mode", opts.getStrictMode());
         }
+        if (opts.getSegmentModelId() != null && !opts.getSegmentModelId().isEmpty()) {
+            imgParams.put("segment_model_id", opts.getSegmentModelId());
+        }
+        if (opts.getComponentLabel() != null) {
+            imgParams.put("component_label", opts.getComponentLabel());
+        }
 
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("image_gen_model_params", imgParams);
@@ -506,8 +513,20 @@ public class VisviseClient {
         if (opts.getModelId360() != null && !opts.getModelId360().isEmpty()) {
             imgParams.put("model_id_360", opts.getModelId360());
         }
+        if (opts.getComponentLabel() != null) {
+            imgParams.put("component_label", opts.getComponentLabel());
+        }
         if (opts.getFaceNum() != null) {
             imgParams.put("face_num", opts.getFaceNum());
+        }
+        if (opts.getGroupIds() != null) {
+            imgParams.put("group_ids", resolveFile(opts.getGroupIds(), false, rtx));
+        }
+        if (opts.getPartMeshPath() != null) {
+            imgParams.put("part_mesh_path", resolveFile(opts.getPartMeshPath(), false, rtx));
+        }
+        if (opts.getLabelToId() != null) {
+            imgParams.put("label_to_id", resolveFile(opts.getLabelToId(), false, rtx));
         }
 
         Map<String, Object> genParams = new HashMap<>();
@@ -574,6 +593,10 @@ public class VisviseClient {
         if (opts.getColorModel() != null) {
             String colorUrl = resolveModelFile(opts.getColorModel(), false, rtx);
             params.put("color_model", colorUrl);
+        }
+        if (opts.getBaseColorImage() != null) {
+            String imageUrl = resolveFile(opts.getBaseColorImage(), false, rtx);
+            params.put("basecolor_image", imageUrl);
         }
 
         Map<String, Object> genParams = new HashMap<>();
@@ -758,6 +781,9 @@ public class VisviseClient {
         if (opts.getTemplateSkeleton() != null) {
             String skeletonUrl = resolveModelFile(opts.getTemplateSkeleton(), false, rtx);
             riggingParams.put("template_skeleton", skeletonUrl);
+        }
+        if (opts.getEnableAutoSkinning() != null) {
+            riggingParams.put("enable_auto_skinning", opts.getEnableAutoSkinning());
         }
 
         Map<String, Object> genParams = new HashMap<>();
@@ -1013,6 +1039,91 @@ public class VisviseClient {
             throw ErrorFactory.newModelGenerationError("2D segmentation did not return model_id", -1, "", "");
         }
         return newModelId;
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // 2D split re-edit operations
+    // ════════════════════════════════════════════════════════════════════
+
+    /**
+     * Enters the segment state and specifies the component to split.
+     */
+    public OperatorResult beginSegment(String clientId, int componentLabel, SegmentViewType viewType, String rtx) throws WeaverError {
+        return api.beginSegment(clientId, componentLabel, viewType, rtx);
+    }
+
+    /**
+     * Marks the region to split out in the segment state (repeatable).
+     */
+    public OperatorResult segmentComponent(String clientId, SegmentViewType viewType, List<Pixel> addPixels, List<Pixel> removePixels, List<Rect> rects, String rtx) throws WeaverError {
+        return api.segmentComponent(clientId, viewType, addPixels, removePixels, rects, rtx);
+    }
+
+    /**
+     * Finalizes the current segmentation result.
+     */
+    public OperatorResult confirmSegment(String clientId, SegmentViewType viewType, String rtx) throws WeaverError {
+        return api.confirmSegment(clientId, viewType, rtx);
+    }
+
+    /**
+     * Cancels the current segmentation and reverts to the pre-segment state.
+     */
+    public OperatorResult cancelSegment(String clientId, SegmentViewType viewType, String rtx) throws WeaverError {
+        return api.cancelSegment(clientId, viewType, rtx);
+    }
+
+    /**
+     * Merges multiple components into one connected component.
+     */
+    public MultiViewSegmentResult mergeComponent(String clientId, List<Integer> componentLabels, SegmentViewType viewType, String rtx) throws WeaverError {
+        return api.mergeComponent(clientId, componentLabels, viewType, rtx);
+    }
+
+    /**
+     * Automatically merges all adjacent connected components.
+     */
+    public MultiViewSegmentResult autoMergeComponent(String clientId, String rtx) throws WeaverError {
+        return api.autoMergeComponent(clientId, rtx);
+    }
+
+    /**
+     * Adjusts a component boundary via a painted mask region.
+     */
+    public OperatorResult boundaryAdjust(String clientId, SegmentViewType viewType, int componentLabel, String paintMask, String rtx) throws WeaverError {
+        return api.boundaryAdjust(clientId, viewType, componentLabel, paintMask, rtx);
+    }
+
+    /**
+     * Renames a component, syncing across all views in the four-view stage.
+     */
+    public MultiViewSegmentResult renameComponent(String clientId, SegmentViewType viewType, int componentLabel, String newName, String rtx) throws WeaverError {
+        return api.renameComponent(clientId, viewType, componentLabel, newName, rtx);
+    }
+
+    /**
+     * Persists the current segmentation result as a standalone 2D split asset
+     * (node_type=14). If algorithmModel is empty, the first available 2D split
+     * model is auto-selected.
+     */
+    public ModelInfo saveSegment(String clientId, String name, String algorithmModel, String openedModelId, String rtx) throws WeaverError {
+        String resolvedModel = resolveAlgorithmModel(algorithmModel, NodeType.SEGMENT_2D, null, rtx);
+        return api.saveSegment(clientId, name, resolvedModel, openedModelId, rtx);
+    }
+
+    /**
+     * Opens a saved 2D split asset for re-editing, returning a new client_id.
+     */
+    public MultiViewSegmentResult openSegment(String modelId, String rtx) throws WeaverError {
+        return api.openSegment(modelId, rtx);
+    }
+
+    /**
+     * Regenerates a model asset in place (2UV only, node_type=15 AUTO_LUV).
+     * Regeneration overwrites in place and increments redo_count; no new model_id is returned.
+     */
+    public void regenerateModel(String modelId, Map<String, Object> params, String rtx) throws WeaverError {
+        api.regenerateModel(modelId, params, rtx);
     }
 
     /**

@@ -21,6 +21,14 @@ public class GenMidModelOptions {
     private String segmentModelId;
     /** optional, 360 model asset ID */
     private String modelId360;
+    /** optional, single component label of the 2D segmentation asset (used with segment_model_id) */
+    private Integer componentLabel;
+    /** optional, custom component grouping NPZ file (local path, COS URL, File, bytes, or InputStream) */
+    private Object groupIds;
+    /** optional, OBJ file containing all components (local path, COS URL, File, bytes, or InputStream) */
+    private Object partMeshPath;
+    /** optional, part_name to part_id mapping JSON file (local path, COS URL, File, bytes, or InputStream) */
+    private Object labelToId;
 
     public GenMidModelOptions() {
     }
@@ -85,6 +93,42 @@ public class GenMidModelOptions {
 
     public GenMidModelOptions setModelId360(String modelId360) {
         this.modelId360 = modelId360;
+        return this;
+    }
+
+    public Integer getComponentLabel() {
+        return componentLabel;
+    }
+
+    public GenMidModelOptions setComponentLabel(Integer componentLabel) {
+        this.componentLabel = componentLabel;
+        return this;
+    }
+
+    public Object getGroupIds() {
+        return groupIds;
+    }
+
+    public GenMidModelOptions setGroupIds(Object groupIds) {
+        this.groupIds = groupIds;
+        return this;
+    }
+
+    public Object getPartMeshPath() {
+        return partMeshPath;
+    }
+
+    public GenMidModelOptions setPartMeshPath(Object partMeshPath) {
+        this.partMeshPath = partMeshPath;
+        return this;
+    }
+
+    public Object getLabelToId() {
+        return labelToId;
+    }
+
+    public GenMidModelOptions setLabelToId(Object labelToId) {
+        this.labelToId = labelToId;
         return this;
     }
 
