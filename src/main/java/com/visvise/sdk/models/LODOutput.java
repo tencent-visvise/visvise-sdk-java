@@ -13,6 +13,12 @@ public class LODOutput {
     @SerializedName("zip_file")
     private String zipFile;
 
+    @SerializedName("del_times")
+    private int delTimes;
+
+    @SerializedName("del_card_indexs")
+    private List<Integer> delCardIndexs;
+
     public List<LODFile> getLodFiles() {
         return lodFiles;
     }
@@ -27,5 +33,21 @@ public class LODOutput {
 
     public void setZipFile(String zipFile) {
         this.zipFile = zipFile;
+    }
+
+    public int getDelTimes() {
+        return delTimes;
+    }
+
+    public void setDelTimes(int delTimes) {
+        this.delTimes = delTimes;
+    }
+
+    public List<Integer> getDelCardIndexs() {
+        return delCardIndexs;
+    }
+
+    public void setDelCardIndexs(List<Integer> delCardIndexs) {
+        this.delCardIndexs = delCardIndexs;
     }
 }

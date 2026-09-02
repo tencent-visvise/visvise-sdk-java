@@ -27,6 +27,8 @@ public class GenRiggingOptions {
     private double temperature = -1;
     /** optional, number of beams (default -1 means not set) */
     private int numBeams = -1;
+    /** optional, whether to enable one-click skeleton + skinning (algo_scenario=4) */
+    private Boolean enableAutoSkinning;
 
     public GenRiggingOptions() {
     }
@@ -115,6 +117,15 @@ public class GenRiggingOptions {
 
     public GenRiggingOptions setNumBeams(int numBeams) {
         this.numBeams = numBeams;
+        return this;
+    }
+
+    public Boolean getEnableAutoSkinning() {
+        return enableAutoSkinning;
+    }
+
+    public GenRiggingOptions setEnableAutoSkinning(Boolean enableAutoSkinning) {
+        this.enableAutoSkinning = enableAutoSkinning;
         return this;
     }
 

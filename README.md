@@ -614,7 +614,7 @@ System.out.println(quota.getAnimationQuota(),rtx); // 动画剩余次数
 // 拉取模型列表
 ModelListResult result = api.getModelList(
     Collections.singletonList("Model2026..."),
-    null, null, "", 10, 1,rtx
+    null, null, "", 10, 1, null, null, null, rtx
 );
 
 // 获取算法模型列表

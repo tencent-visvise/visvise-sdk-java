@@ -15,6 +15,9 @@ public class UserQuota {
     @SerializedName("server_ts")
     private long serverTs;
 
+    @SerializedName("image_processing_quota")
+    private int imageProcessingQuota;
+
     public int getModelQuota() {
         return modelQuota;
     }
@@ -37,5 +40,13 @@ public class UserQuota {
 
     public void setServerTs(long serverTs) {
         this.serverTs = serverTs;
+    }
+
+    public int getImageProcessingQuota() {
+        return imageProcessingQuota;
+    }
+
+    public void setImageProcessingQuota(int imageProcessingQuota) {
+        this.imageProcessingQuota = imageProcessingQuota;
     }
 }

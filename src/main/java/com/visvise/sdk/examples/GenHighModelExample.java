@@ -49,7 +49,7 @@ public class GenHighModelExample {
 
         VisviseAPI.ModelListResult result = client.getAPI().getModelList(
                 java.util.Collections.singletonList(MV_360_MODEL_ID), null, java.util.Collections.singletonList(ModelStatus.SUCCESS.getValue()),
-                "", 10, 1, RTX);
+                "", 10, 1, null, null, null, RTX);
             View out = result.getModels().get(0).getImageGen360Output().getOutputView();
             mainView  = stripSign(out.getMainView());
             backView  = stripSign(out.getBackView());

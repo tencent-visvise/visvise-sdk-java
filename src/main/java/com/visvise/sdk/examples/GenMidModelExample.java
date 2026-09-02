@@ -42,7 +42,7 @@ public class GenMidModelExample {
         if (mvModelId != null && !mvModelId.isEmpty()) {
             System.out.println("[gen_mid_model] 从 gen_360 输出提取四视图 (model_id=" + mvModelId + ")");
             VisviseAPI.ModelListResult result = client.getAPI().getModelList(
-                    java.util.Collections.singletonList(mvModelId), null, null, "", 10, 1, RTX);
+                    java.util.Collections.singletonList(mvModelId), null, null, "", 10, 1, null, null, null, RTX);
             View out = result.getModels().get(0).getImageGen360Output().getOutputView();
             mainView  = stripSign(out.getMainView());
             backView  = stripSign(out.getBackView());

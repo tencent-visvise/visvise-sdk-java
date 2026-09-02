@@ -12,6 +12,12 @@ public class ImageGen360Output {
     @SerializedName("horizontal_view_video")
     private String horizontalViewVideo;
 
+    @SerializedName("vertical_view_video")
+    private String verticalViewVideo;
+
+    @SerializedName("horizontal_view_video_frames")
+    private String horizontalViewVideoFrames;
+
     public View getOutputView() {
         return outputView;
     }
@@ -26,5 +32,21 @@ public class ImageGen360Output {
 
     public void setHorizontalViewVideo(String horizontalViewVideo) {
         this.horizontalViewVideo = horizontalViewVideo;
+    }
+
+    public String getVerticalViewVideo() {
+        return verticalViewVideo;
+    }
+
+    public void setVerticalViewVideo(String verticalViewVideo) {
+        this.verticalViewVideo = verticalViewVideo;
+    }
+
+    public String getHorizontalViewVideoFrames() {
+        return horizontalViewVideoFrames;
+    }
+
+    public void setHorizontalViewVideoFrames(String horizontalViewVideoFrames) {
+        this.horizontalViewVideoFrames = horizontalViewVideoFrames;
     }
 }

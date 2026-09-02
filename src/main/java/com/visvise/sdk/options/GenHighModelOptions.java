@@ -21,6 +21,10 @@ public class GenHighModelOptions {
     private Boolean enablePbr = false;
     /** optional, whether to force target face count; if false, adjusts by geometry error (default false) */
     private Boolean strictMode = false;
+    /** optional, 2D segmentation asset ID to generate high model from */
+    private String segmentModelId;
+    /** optional, single component label of the 2D segmentation asset (used with segment_model_id) */
+    private Integer componentLabel;
     /** optional, back view to improve quality */
     private Object backView;
     /** optional, left view */
@@ -91,6 +95,24 @@ public class GenHighModelOptions {
 
     public GenHighModelOptions setStrictMode(Boolean strictMode) {
         this.strictMode = strictMode;
+        return this;
+    }
+
+    public String getSegmentModelId() {
+        return segmentModelId;
+    }
+
+    public GenHighModelOptions setSegmentModelId(String segmentModelId) {
+        this.segmentModelId = segmentModelId;
+        return this;
+    }
+
+    public Integer getComponentLabel() {
+        return componentLabel;
+    }
+
+    public GenHighModelOptions setComponentLabel(Integer componentLabel) {
+        this.componentLabel = componentLabel;
         return this;
     }
 

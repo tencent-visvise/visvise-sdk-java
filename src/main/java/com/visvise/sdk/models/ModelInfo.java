@@ -3,6 +3,8 @@ package com.visvise.sdk.models;
 import com.google.gson.annotations.SerializedName;
 import com.visvise.sdk.enums.ModelStatus;
 
+import java.util.List;
+
 /**
  * ModelInfo represents the model asset information
  */
@@ -10,7 +12,13 @@ public class ModelInfo {
     @SerializedName("model_id")
     private String modelId;
 
+    @SerializedName("parent_model_id")
+    private String parentModelId;
+
     private String name;
+
+    @SerializedName("works_id")
+    private String worksId;
 
     private int status;
 
@@ -59,6 +67,18 @@ public class ModelInfo {
     @SerializedName("algorithm_model")
     private String algorithmModel;
 
+    @SerializedName("preview_model")
+    private String previewModel;
+
+    @SerializedName("feedbacks")
+    private List<FeedbackItem> feedbacks;
+
+    @SerializedName("model_type")
+    private int modelType;
+
+    @SerializedName("rewrite_prompts")
+    private List<String> rewritePrompts;
+
     // Getters and setters
     public String getModelId() {
         return modelId;
@@ -68,12 +88,28 @@ public class ModelInfo {
         this.modelId = modelId;
     }
 
+    public String getParentModelId() {
+        return parentModelId;
+    }
+
+    public void setParentModelId(String parentModelId) {
+        this.parentModelId = parentModelId;
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getWorksId() {
+        return worksId;
+    }
+
+    public void setWorksId(String worksId) {
+        this.worksId = worksId;
     }
 
     public int getStatus() {
@@ -202,6 +238,38 @@ public class ModelInfo {
 
     public void setAlgorithmModel(String algorithmModel) {
         this.algorithmModel = algorithmModel;
+    }
+
+    public String getPreviewModel() {
+        return previewModel;
+    }
+
+    public void setPreviewModel(String previewModel) {
+        this.previewModel = previewModel;
+    }
+
+    public List<FeedbackItem> getFeedbacks() {
+        return feedbacks;
+    }
+
+    public void setFeedbacks(List<FeedbackItem> feedbacks) {
+        this.feedbacks = feedbacks;
+    }
+
+    public int getModelType() {
+        return modelType;
+    }
+
+    public void setModelType(int modelType) {
+        this.modelType = modelType;
+    }
+
+    public List<String> getRewritePrompts() {
+        return rewritePrompts;
+    }
+
+    public void setRewritePrompts(List<String> rewritePrompts) {
+        this.rewritePrompts = rewritePrompts;
     }
 
     /**
