@@ -354,7 +354,7 @@ GenMeshRefineOptions opts = GenMeshRefineOptions.create()
     .setName("my_mesh_refine")                          // optional, default "gen_mesh_refine"
     .setInputModelFormat(ModelFormat.FBX)                // optional, input format (default fbx)
     .setMode(MeshRefineMode.OPTIMIZE)                  // optional, refine mode
-    .setFaceNum(50000)                                   // optional, target face count (optimize mode only, 0-50000, 0 = unset)
+    .setFaceNum(50000)                                   // optional, target face count (optimize mode only, (0,50000], 0 = auto)
     .setColorModel(colorModelPath)                       // optional, color model (local path or COS URL)
 
 String modelId = client.genMeshRefine("path/to/model.fbx", opts, rtx);

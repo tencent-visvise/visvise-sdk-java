@@ -32,7 +32,7 @@ public class GenMeshRefineExample {
 
         System.out.println("[gen_mesh_refine] 开始重布线...");
 
-        // 布线优化 mode=1（默认），face_num 0~50000，0=不设置
+        // 布线优化 mode=1（默认），face_num 取值范围 (0,50000]，0 表示自动面数
         String modelId = client.genMeshRefine(MODEL_PATH,
                 GenMeshRefineOptions.create()
                         .setInputModelFormat(ModelFormat.FBX)

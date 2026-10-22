@@ -356,7 +356,7 @@ GenMeshRefineOptions opts = GenMeshRefineOptions.create()
     .setName("my_mesh_refine")                          // 可选，默认 "gen_mesh_refine"
     .setInputModelFormat(ModelFormat.FBX)                // 可选，输入模型格式（默认 fbx）
     .setMode(MeshRefineMode.OPTIMIZE)                   // 可选，布线优化模式
-    .setFaceNum(50000)                                   // 可选，目标面数（仅布线优化 mode=1 生效，0~50000，0=不设置）
+    .setFaceNum(50000)                                   // 可选，目标面数（仅布线优化 mode=1 生效，(0,50000]，0 表示自动面数）
     .setColorModel(colorModelPath)                       // 可选，色彩模型（本地路径或 COS URL）
 
 String modelId = client.genMeshRefine("path/to/model.fbx", opts, rtx);
