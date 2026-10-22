@@ -23,6 +23,8 @@ public class SSEIterator implements Closeable {
     private final HttpURLConnection conn;
     private final BufferedReader reader;
     private String leftover = "";
+    /** 已完整接收的事件帧数 */
+    private int received = 0;
 
     public SSEIterator(HTTPClient httpClient, String path, Object body, int readTimeout, String rtx) throws WeaverError {
         String bodyStr = body == null ? "{}" : new com.google.gson.Gson().toJson(body);
@@ -91,6 +93,7 @@ public class SSEIterator implements Closeable {
                 if (line == null) {
                     // EOF
                     if (dataBuilder.length() > 0 || !event.isEmpty()) {
+                        received++;
                         return new SSEResult(event, parseData(dataBuilder.toString()));
                     }
                     return null;
@@ -101,6 +104,7 @@ public class SSEIterator implements Closeable {
                 if (line.isEmpty()) {
                     // Empty line indicates end of frame
                     if (!event.isEmpty() || dataBuilder.length() > 0) {
+                        received++;
                         return new SSEResult(event, parseData(dataBuilder.toString()));
                     }
                     continue;
@@ -128,6 +132,16 @@ public class SSEIterator implements Closeable {
                 if (dataBuilder().length() > 0 || !currentEvent().isEmpty()) {
                     return new SSEResult(currentEvent(), parseData(dataBuilder().toString()));
                 }
+                return null;
+            }
+            // 流被中断：网关空闲读超时 / 服务端重启 / 网络抖动。
+            // 已收到过至少一帧就当作流正常结束 —— 服务端任务仍在跑，
+            // 调用方可以拿 pre_create 里的 model_id 调 waitModel 轮询最终结果。
+            if (received > 0) {
+                httpLogger.warn("SSE 流在收到 {} 帧后被中断（{}）。服务端任务可能仍在执行，"
+                        + "建议用已获取的 model_id 调用 waitModel 轮询最终结果；"
+                        + "常见原因是中间网关空闲读超时（SSE 链路无心跳）。",
+                        received, e.getMessage());
                 return null;
             }
             throw ErrorFactory.newNetworkError(String.format("SSE read error: %s", e.getMessage()));

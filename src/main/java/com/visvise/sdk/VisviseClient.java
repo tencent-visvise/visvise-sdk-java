@@ -937,6 +937,11 @@ public class VisviseClient {
 
     /**
      * Performs 2D segmentation (SSE streaming interface)
+     *
+     * <p>Note: the returned model id only guarantees the asset was pre-created, not that the
+     * segmentation finished. If the SSE stream is interrupted (gateway idle read timeout,
+     * server restart, ...), this returns before the "reply" event while the task keeps running
+     * on the server — call {@code waitModel} to confirm the status before using it.
      */
     public String genSegment2D(String modelId360, GenSegment2DOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
