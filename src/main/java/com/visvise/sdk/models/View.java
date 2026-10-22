@@ -20,6 +20,12 @@ public class View {
     @SerializedName("right_view")
     private String rightView;
 
+    @SerializedName("top_view")
+    private String topView;
+
+    @SerializedName("bottom_view")
+    private String bottomView;
+
     public View() {
     }
 
@@ -79,6 +85,32 @@ public class View {
         return this;
     }
 
+    public String getTopView() {
+        return topView;
+    }
+
+    public void setTopView(String topView) {
+        this.topView = topView;
+    }
+
+    public String getBottomView() {
+        return bottomView;
+    }
+
+    public void setBottomView(String bottomView) {
+        this.bottomView = bottomView;
+    }
+
+    public View withTopView(String topView) {
+        this.topView = topView;
+        return this;
+    }
+
+    public View withBottomView(String bottomView) {
+        this.bottomView = bottomView;
+        return this;
+    }
+
     /**
      * Converts View to Map for JSON serialization
      */
@@ -95,6 +127,12 @@ public class View {
         }
         if (rightView != null && !rightView.isEmpty()) {
             m.put("right_view", rightView);
+        }
+        if (topView != null && !topView.isEmpty()) {
+            m.put("top_view", topView);
+        }
+        if (bottomView != null && !bottomView.isEmpty()) {
+            m.put("bottom_view", bottomView);
         }
         return m;
     }

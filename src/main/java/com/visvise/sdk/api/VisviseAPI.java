@@ -463,6 +463,31 @@ public class VisviseAPI {
             String prompt,
             int readTimeout,
             String rtx) throws WeaverError {
+        return initSegment(name, algorithmModel, modelId, inputView, splitType, granularity,
+                prompt, null, null, null, readTimeout, rtx);
+    }
+
+    /**
+     * Initializes 2D segmentation (SSE streaming interface) with the full parameter set.
+     *
+     * @param skip360Preprocess    skip the 360 preprocess and split input_view directly
+     * @param skipRemoveBackground skip background removal (only effective when skip360Preprocess=true);
+     *                             when true the raw input images are sent to the algorithm as-is
+     * @param decompositionPlan    COS URL of the decomposition plan json; empty means not sent
+     */
+    public SSEIterator initSegment(
+            String name,
+            String algorithmModel,
+            String modelId,
+            View inputView,
+            Integer splitType,
+            Integer granularity,
+            String prompt,
+            Boolean skip360Preprocess,
+            Boolean skipRemoveBackground,
+            String decompositionPlan,
+            int readTimeout,
+            String rtx) throws WeaverError {
 
         Map<String, Object> body = new HashMap<>();
         body.put("name", name);
@@ -482,6 +507,15 @@ public class VisviseAPI {
         }
         if (prompt != null && !prompt.isEmpty()) {
             body.put("prompt", prompt);
+        }
+        if (skip360Preprocess != null) {
+            body.put("skip_360_preprocess", skip360Preprocess);
+        }
+        if (skipRemoveBackground != null) {
+            body.put("skip_remove_background", skipRemoveBackground);
+        }
+        if (decompositionPlan != null && !decompositionPlan.isEmpty()) {
+            body.put("decomposition_plan", decompositionPlan);
         }
 
         return http.postSSE("openapi/weaver/component/init_segment", body, readTimeout, rtx);

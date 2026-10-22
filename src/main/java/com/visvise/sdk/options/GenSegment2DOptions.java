@@ -18,6 +18,13 @@ public class GenSegment2DOptions {
     private SegmentSplitType splitType;
     /** optional, granularity */
     private SegmentGranularity granularity;
+    /** optional, skip the 360 preprocess and split input_view directly (default false) */
+    private Boolean skip360Preprocess;
+    /** optional, skip background removal, only effective when skip360Preprocess=true.
+     *  When true the raw input images are sent to the algorithm as-is (default false) */
+    private Boolean skipRemoveBackground;
+    /** optional, decomposition plan: local json path (auto-uploaded), or an uploaded COS URL */
+    private String decompositionPlan;
     /** optional, natural language prompt */
     private String prompt;
     /** optional, callback for thinking events */
@@ -70,6 +77,33 @@ public class GenSegment2DOptions {
 
     public GenSegment2DOptions setGranularity(SegmentGranularity granularity) {
         this.granularity = granularity;
+        return this;
+    }
+
+    public Boolean getSkip360Preprocess() {
+        return skip360Preprocess;
+    }
+
+    public GenSegment2DOptions setSkip360Preprocess(Boolean skip360Preprocess) {
+        this.skip360Preprocess = skip360Preprocess;
+        return this;
+    }
+
+    public Boolean getSkipRemoveBackground() {
+        return skipRemoveBackground;
+    }
+
+    public GenSegment2DOptions setSkipRemoveBackground(Boolean skipRemoveBackground) {
+        this.skipRemoveBackground = skipRemoveBackground;
+        return this;
+    }
+
+    public String getDecompositionPlan() {
+        return decompositionPlan;
+    }
+
+    public GenSegment2DOptions setDecompositionPlan(String decompositionPlan) {
+        this.decompositionPlan = decompositionPlan;
         return this;
     }
 
