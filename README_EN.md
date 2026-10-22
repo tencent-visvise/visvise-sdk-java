@@ -33,6 +33,7 @@ Java SDK for the VISVISE Weaver OpenAPI. It provides:
   - [GenTextMotion — Text to Animation](#gentextmotion--text-to-animation)
   - [GenPose — Image to Pose](#genpose--image-to-pose)
   - [GenSegment2D — 2D Segmentation](#gensegment2d--2d-segmentation)
+  - [GenSegment2DZip — Get the output zip_path](#gensegment2dzip--get-the-output-zip_path)
   - [WaitModel — Wait for Completion](#waitmodel--wait-for-completion)
 - [Atomic API Methods](#atomic-api-methods)
 - [Errors](#errors)
@@ -353,7 +354,7 @@ GenMeshRefineOptions opts = GenMeshRefineOptions.create()
     .setName("my_mesh_refine")                          // optional, default "gen_mesh_refine"
     .setInputModelFormat(ModelFormat.FBX)                // optional, input format (default fbx)
     .setMode(MeshRefineMode.OPTIMIZE)                  // optional, refine mode
-    .setFaceNum(50000)                                   // optional, target face count (optimize mode only, 0-50000, 0 = unset)
+    .setFaceNum(50000)                                   // optional, target face count (optimize mode only, (0,50000], 0 = auto)
     .setColorModel(colorModelPath)                       // optional, color model (local path or COS URL)
 
 String modelId = client.genMeshRefine("path/to/model.fbx", opts, rtx);
@@ -555,14 +556,72 @@ ThinkingCallback onThinking = content -> {
 
 GenSegment2DOptions opts = GenSegment2DOptions.create()
     .setName("my_segment")                              // optional, default "gen_segment_2d"
+    .setInputView(new View()                            // optional, raw views (either this or model_id)
+        .withMainView("path/to/main_view.png")          // main view is required
+        .withBackView("path/to/back_view.png")          // optional six views; pass as many as you have
+        .withTopView("path/to/top_view.png")
+        .withBottomView("path/to/bottom_view.png"))
     .setSplitType(SegmentSplitType.FRONT_VIEW)          // optional, split type
     .setGranularity(SegmentGranularity.MEDIUM)           // optional, granularity
+    .setSkip360Preprocess(true)                          // optional, skip the 360 preprocess
+    .setSkipRemoveBackground(true)                       // optional, only effective when skip360=true
+    .setDecompositionPlan("path/to/plan.json")           // optional, local json is auto-uploaded
     .setPrompt("segment by body parts")                 // optional, natural language prompt
     .setOnThinking(onThinking)                           // optional, thinking callback
     .setReadTimeout(120);                               // optional, read timeout
 
 String segModelId = client.genSegment2D("Model2026...", opts, rtx);
 // Use the result as segmentModelID for GenMidModel
+```
+
+---
+
+### GenSegment2DZip — Get the output zip_path
+
+Uploads local six views directly (`src/test/resources/assets` by default, override with
+`SEG_ASSETS_DIR`), skips the 360 preprocess and background removal, and shows two ways to
+get `zip_path`:
+
+1. `genSegment2D` + `waitModel` → `ModelInfo.getSegmentOutput().getZipPath()`
+   (recommended; also gives per-view components / npz / color preview images)
+2. low-level `getAPI().initSegment` and walk the SSE frames yourself, reading `zip_path`
+   from the `reply` frame (available the moment generation finishes, no extra query)
+
+`zip_path` is the algorithm-side output archive; the backend only stores the path and never
+parses it, and presigns it on read ⇒ it can be downloaded directly (browser / curl / code)
+with no auth header, valid for 24h.
+→ [Example](src/main/java/com/visvise/sdk/examples/GenSegment2DZipExample.java)
+
+```java
+// Way 1: high-level method (local files are uploaded by the SDK automatically)
+String segModelId = client.genSegment2D("",
+        GenSegment2DOptions.create()
+                .setSplitType(SegmentSplitType.FOUR_VIEW)
+                .setSkip360Preprocess(true)
+                .setSkipRemoveBackground(true)
+                .setInputView(inputView),
+        rtx);
+
+ModelInfo info = client.waitModel(segModelId, WaitOptions.create().setTimeout(600), rtx);
+System.out.println(info.getSegmentOutput().getZipPath());
+
+// Way 2: consume the SSE stream yourself (upload the local images to COS first)
+try (SSEIterator iter = client.getAPI().initSegment(
+        "my_segment", algorithmModel, "", cosView,
+        SegmentSplitType.FOUR_VIEW.getValue(), null, null,
+        true,   // skip_360_preprocess
+        true,   // skip_remove_background
+        null,   // decomposition_plan
+        0, rtx)) {
+    SSEResult event;
+    while ((event = iter.next()) != null) {
+        if ("reply".equals(event.getEvent())) {
+            JsonObject data = (JsonObject) event.getData();
+            System.out.println(data.get("zip_path").getAsString());
+            break;
+        }
+    }
+}
 ```
 
 ---

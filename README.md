@@ -33,6 +33,7 @@ VISVISE Weaver OpenAPI 的 Java SDK，提供：
   - [GenTextMotion — 文本生动画](#gentextmotion--文本生动画)
   - [GenPose — 图生Pose](#genpose--图生pose)
   - [GenSegment2D — 2D 拆分](#gensegment2d--2d-拆分)
+  - [GenSegment2DZip — 获取拆分产物 zip_path](#gensegment2dzip--获取拆分产物-zip_path)
   - [WaitModel — 等待完成](#waitmodel--等待完成)
 - [原子 API 方法参考](#原子-api-方法参考)
 - [错误说明](#错误说明)
@@ -355,7 +356,7 @@ GenMeshRefineOptions opts = GenMeshRefineOptions.create()
     .setName("my_mesh_refine")                          // 可选，默认 "gen_mesh_refine"
     .setInputModelFormat(ModelFormat.FBX)                // 可选，输入模型格式（默认 fbx）
     .setMode(MeshRefineMode.OPTIMIZE)                   // 可选，布线优化模式
-    .setFaceNum(50000)                                   // 可选，目标面数（仅布线优化 mode=1 生效，0~50000，0=不设置）
+    .setFaceNum(50000)                                   // 可选，目标面数（仅布线优化 mode=1 生效，(0,50000]，0 表示自动面数）
     .setColorModel(colorModelPath)                       // 可选，色彩模型（本地路径或 COS URL）
 
 String modelId = client.genMeshRefine("path/to/model.fbx", opts, rtx);
@@ -558,14 +559,70 @@ ThinkingCallback onThinking = content -> {
 GenSegment2DOptions opts = GenSegment2DOptions.create()
     .setName("my_segment")                               // 可选，默认 "gen_segment_2d"
     .setAlgorithmModel("VISVISE-Seg2D-V1.0.0")          // 可选
-    .setSplitType(SegmentSplitType.FRONT_VIEW)          // 可选，正视图/四视图拆分
+    .setInputView(new View()                            // 可选，直接传视图原画（与 model_id 二选一）
+        .withMainView("path/to/main_view.png")          // 正视图必传
+        .withBackView("path/to/back_view.png")          // 可选，六视图按需传，传几张拆几张
+        .withTopView("path/to/top_view.png")
+        .withBottomView("path/to/bottom_view.png"))
+    .setSplitType(SegmentSplitType.FRONT_VIEW)          // 可选，正视图/多视图拆分
     .setGranularity(SegmentGranularity.MEDIUM)           // 可选，颗粒度
+    .setSkip360Preprocess(true)                          // 可选，跳过图生360前置，直接用 inputView 拆分
+    .setSkipRemoveBackground(true)                       // 可选，跳过去背景（仅 skip360=true 时生效）
+    .setDecompositionPlan("path/to/plan.json")           // 可选，拆解 plan（本地 json 自动上传）
     .setPrompt("segment by body parts")                 // 可选，自然语言描述拆分规则
     .setOnThinking(onThinking)                           // 可选，处理 thinking 事件的回调
     .setReadTimeout(120);                               // 可选，读取超时时间
 
 String segModelId = client.genSegment2D("Model2026...", opts, rtx);
 // 后续可作为 segmentModelID 传给 GenMidModel
+```
+
+---
+
+### GenSegment2DZip — 获取拆分产物 zip_path
+
+直接上传本地六视图原画（默认 `src/test/resources/assets`，可用 `SEG_ASSETS_DIR` 覆盖），
+跳过 360 前置与去背景预处理，演示两种取 `zip_path` 的方式：
+
+1. `genSegment2D` + `waitModel` → `ModelInfo.getSegmentOutput().getZipPath()`
+   （推荐，可同时拿到各视图部件表 / npz / 彩色预览图）
+2. 底层 `getAPI().initSegment` 自己遍历 SSE 帧，从 `reply` 帧直接取 `zip_path`
+   （生成瞬间拿到，不用再查一次）
+
+`zip_path` 是算法侧产出的拆分结果压缩包，后端只落库不解析，返回时自动加临时签名 ⇒
+浏览器打开 / curl / 代码 GET 都能直接下载，无需鉴权头，24h 内有效。
+→ [示例代码](src/main/java/com/visvise/sdk/examples/GenSegment2DZipExample.java)
+
+```java
+// 方式一：高层方法（本地文件由 SDK 自动上传）
+String segModelId = client.genSegment2D("",
+        GenSegment2DOptions.create()
+                .setSplitType(SegmentSplitType.FOUR_VIEW)
+                .setSkip360Preprocess(true)
+                .setSkipRemoveBackground(true)
+                .setInputView(inputView),
+        rtx);
+
+ModelInfo info = client.waitModel(segModelId, WaitOptions.create().setTimeout(600), rtx);
+System.out.println(info.getSegmentOutput().getZipPath());
+
+// 方式二：自己消费 SSE，reply 帧里直接取（需要先把本地图上传成平台 COS URL）
+try (SSEIterator iter = client.getAPI().initSegment(
+        "my_segment", algorithmModel, "", cosView,
+        SegmentSplitType.FOUR_VIEW.getValue(), null, null,
+        true,   // skip_360_preprocess
+        true,   // skip_remove_background
+        null,   // decomposition_plan
+        0, rtx)) {
+    SSEResult event;
+    while ((event = iter.next()) != null) {
+        if ("reply".equals(event.getEvent())) {
+            JsonObject data = (JsonObject) event.getData();
+            System.out.println(data.get("zip_path").getAsString());
+            break;
+        }
+    }
+}
 ```
 
 ---

@@ -64,6 +64,10 @@ public class ModelInfo {
     @SerializedName("framing_ai_output")
     private FramingAIOutput framingAIOutput;
 
+    /** 2D split output, only present for node_type=14 assets */
+    @SerializedName("segment_output")
+    private SegmentOutput segmentOutput;
+
     @SerializedName("algorithm_model")
     private String algorithmModel;
 
@@ -222,6 +226,14 @@ public class ModelInfo {
 
     public void setImageGen360Output(ImageGen360Output imageGen360Output) {
         this.imageGen360Output = imageGen360Output;
+    }
+
+    public SegmentOutput getSegmentOutput() {
+        return segmentOutput;
+    }
+
+    public void setSegmentOutput(SegmentOutput segmentOutput) {
+        this.segmentOutput = segmentOutput;
     }
 
     public FramingAIOutput getFramingAIOutput() {

@@ -937,6 +937,11 @@ public class VisviseClient {
 
     /**
      * Performs 2D segmentation (SSE streaming interface)
+     *
+     * <p>Note: the returned model id only guarantees the asset was pre-created, not that the
+     * segmentation finished. If the SSE stream is interrupted (gateway idle read timeout,
+     * server restart, ...), this returns before the "reply" event while the task keeps running
+     * on the server — call {@code waitModel} to confirm the status before using it.
      */
     public String genSegment2D(String modelId360, GenSegment2DOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
@@ -962,16 +967,29 @@ public class VisviseClient {
             if (opts.getInputView().getRightView() != null && !opts.getInputView().getRightView().isEmpty()) {
                 resolvedView.setRightView(resolveFile(opts.getInputView().getRightView(), false, rtx));
             }
+            if (opts.getInputView().getTopView() != null && !opts.getInputView().getTopView().isEmpty()) {
+                resolvedView.setTopView(resolveFile(opts.getInputView().getTopView(), false, rtx));
+            }
+            if (opts.getInputView().getBottomView() != null && !opts.getInputView().getBottomView().isEmpty()) {
+                resolvedView.setBottomView(resolveFile(opts.getInputView().getBottomView(), false, rtx));
+            }
         }
 
         String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.SEGMENT_2D, null, rtx);
+
+        // 拆解 plan：本地 json 路径自动上传，COS URL 直接透传
+        String resolvedPlan = null;
+        if (opts.getDecompositionPlan() != null && !opts.getDecompositionPlan().isEmpty()) {
+            resolvedPlan = resolveFile(opts.getDecompositionPlan(), false, rtx);
+        }
 
         Integer splitType = opts.getSplitType() != null ? opts.getSplitType().getValue() : null;
         Integer granularity = opts.getGranularity() != null ? opts.getGranularity().getValue() : null;
 
         SSEIterator iter = api.initSegment(opts.getName(), resolvedModel, modelId360,
                 resolvedView, splitType, granularity,
-                opts.getPrompt(), opts.getReadTimeout(), rtx);
+                opts.getPrompt(), opts.getSkip360Preprocess(), opts.getSkipRemoveBackground(),
+                resolvedPlan, opts.getReadTimeout(), rtx);
 
         String newModelId = null;
 
