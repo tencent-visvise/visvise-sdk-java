@@ -656,6 +656,7 @@ public class VisviseClient {
         lodParams.put("output_model_format", opts.getOutputModelFormat().getValue());
         lodParams.put("reduce_faces", reduceFacesData);
         lodParams.put("gen_times", opts.getGenTimes());
+        lodParams.put("enable_qc", opts.isEnableQC());
 
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("lod_params", lodParams);
