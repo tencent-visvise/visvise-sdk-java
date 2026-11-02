@@ -15,6 +15,13 @@ public class LODFile {
     @SerializedName("preview_img")
     private String previewImg;
 
+    /**
+     * 候选标识 version1/version2/...，按算法返回的原始次序编号；
+     * 与 LODOutput.qcBestVersion 对应，用于定位质检选中了哪个候选
+     */
+    @SerializedName("version")
+    private String version;
+
     public int getReduceLevel() {
         return reduceLevel;
     }
@@ -37,5 +44,13 @@ public class LODFile {
 
     public void setPreviewImg(String previewImg) {
         this.previewImg = previewImg;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

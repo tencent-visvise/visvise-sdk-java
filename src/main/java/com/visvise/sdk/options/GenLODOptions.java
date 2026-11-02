@@ -14,6 +14,8 @@ public class GenLODOptions {
     private ModelFormat modelFormat = ModelFormat.FBX;
     /** optional, number of generations (default 3) */
     private int genTimes = 3;
+    /** optional, enable LOD quality check and pick the best candidate (default false) */
+    private boolean enableQC = false;
 
     public GenLODOptions() {
     }
@@ -51,6 +53,15 @@ public class GenLODOptions {
 
     public GenLODOptions setGenTimes(int genTimes) {
         this.genTimes = genTimes;
+        return this;
+    }
+
+    public boolean isEnableQC() {
+        return enableQC;
+    }
+
+    public GenLODOptions setEnableQC(boolean enableQC) {
+        this.enableQC = enableQC;
         return this;
     }
 
