@@ -21,6 +21,8 @@ public class GenLowModelOptions {
     private Object leftView;
     /** optional, right view */
     private Object rightView;
+    /** optional, target face count (100-60000, 0 = auto) */
+    private Integer faceNum;
 
     public GenLowModelOptions() {
     }
@@ -58,6 +60,15 @@ public class GenLowModelOptions {
 
     public GenLowModelOptions setFaceType(FaceType faceType) {
         this.faceType = faceType;
+        return this;
+    }
+
+    public Integer getFaceNum() {
+        return faceNum;
+    }
+
+    public GenLowModelOptions setFaceNum(Integer faceNum) {
+        this.faceNum = faceNum;
         return this;
     }
 

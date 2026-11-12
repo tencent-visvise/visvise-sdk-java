@@ -12,6 +12,7 @@ import com.visvise.sdk.http.HTTPClient;
 import com.visvise.sdk.enums.Environment;
 import com.visvise.sdk.enums.ModelStatus;
 import com.visvise.sdk.enums.AnimationSubType;
+import com.visvise.sdk.enums.ImageCutoutMode;
 import com.visvise.sdk.enums.MeshCategory;
 import com.visvise.sdk.enums.NodeType;
 import com.visvise.sdk.enums.PreprocessType;
@@ -934,6 +935,26 @@ public class VisviseClient {
         params.put("output_model_format", opts.getOutputModelFormat().getValue());
 
         return api.batchGenPose(opts.getName(), modelUrl, uploadedImages, params, rtx);
+    }
+
+    /**
+     * Removes the background of the given images and returns the processed images.
+     * images 支持本地路径 / VISVISE 平台 COS URL / byte[] / File / InputStream，
+     * 本地文件自动上传到当前账号的 COS 目录。
+     * 同步接口，不创建模型资产；参数校验由服务端完成（图片 1~6 张）。
+     */
+    public ImageCutoutResult imageCutout(List<?> images, ImageCutoutMode mode,
+                                         String backgroundColor, String rtx) throws WeaverError {
+        if (images == null || images.isEmpty()) {
+            throw new WeaverError(-1, "image_cutout requires at least one image");
+        }
+
+        List<String> uploadedImages = new ArrayList<>();
+        for (Object image : images) {
+            uploadedImages.add(resolveFile(image, false, rtx));
+        }
+
+        return api.imageCutout(uploadedImages, mode, backgroundColor, rtx);
     }
 
     /**
