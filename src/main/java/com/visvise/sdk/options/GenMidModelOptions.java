@@ -29,6 +29,8 @@ public class GenMidModelOptions {
     private Object partMeshPath;
     /** optional, part_name to part_id mapping JSON file (local path, COS URL, File, bytes, or InputStream) */
     private Object labelToId;
+    /** optional, model size (model_size), Float type, not sent if null */
+    private Float modelSize;
 
     public GenMidModelOptions() {
     }
@@ -129,6 +131,18 @@ public class GenMidModelOptions {
 
     public GenMidModelOptions setLabelToId(Object labelToId) {
         this.labelToId = labelToId;
+        return this;
+    }
+
+    public Float getModelSize() {
+        return modelSize;
+    }
+
+    /**
+     * setModelSize sets the optional model size of the mid model generation
+     */
+    public GenMidModelOptions setModelSize(Float modelSize) {
+        this.modelSize = modelSize;
         return this;
     }
 

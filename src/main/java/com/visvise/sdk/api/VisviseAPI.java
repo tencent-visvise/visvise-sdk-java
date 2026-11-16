@@ -690,6 +690,51 @@ public class VisviseAPI {
     }
 
     /**
+     * 裸模拆分：将原始模型中的指定部件替换为对应的裸模，并输出合并后的模型。
+     * 同步接口，不创建模型资产；服务端算法最长执行 5 分钟，客户端超时需放大（建议 >= 300 秒）。
+     */
+    public CondPartAutofitResult condPartAutofit(String originalPartMeshPath,
+                                                 String refMeshPath,
+                                                 Map<String, String> replacePartNames,
+                                                 String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("original_part_mesh_path", originalPartMeshPath);
+        body.put("ref_mesh_path", refMeshPath);
+        if (replacePartNames != null && !replacePartNames.isEmpty()) {
+            body.put("replace_part_names", replacePartNames);
+        }
+
+        Object data = http.post("openapi/weaver/resource/cond_part_autofit", body, rtx);
+        if (data == null || !(data instanceof JsonObject)) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, CondPartAutofitResult.class);
+    }
+
+    /**
+     * 模型自动合并：将拆分得到的多个部件 mesh 合并为一个完整模型，
+     * 并可使用参考模型补齐原始部件包中缺失的部件。同步接口，不创建模型资产。
+     * originalPartMeshPath 服务端要求为 .zip 结尾的部件 mesh 压缩包路径。
+     */
+    public ModelAutoMergeResult modelAutoMerge(String originalPartMeshPath,
+                                               String refMeshPath,
+                                               boolean supportRotate,
+                                               String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("original_part_mesh_path", originalPartMeshPath);
+        body.put("support_rotate", supportRotate);
+        if (refMeshPath != null && !refMeshPath.isEmpty()) {
+            body.put("ref_mesh_path", refMeshPath);
+        }
+
+        Object data = http.post("openapi/weaver/model_auto_merge", body, rtx);
+        if (data == null || !(data instanceof JsonObject)) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, ModelAutoMergeResult.class);
+    }
+
+    /**
      * Regenerates a model asset in place.
      * Only 2UV assets (node_type=15, AUTO_LUV) are supported; other node types
      * will be rejected by the server. Regeneration does not return a new model_id —

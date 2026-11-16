@@ -34,6 +34,8 @@ VISVISE Weaver OpenAPI 的 Java SDK，提供：
   - [GenPose — 图生Pose](#genpose--图生pose)
   - [GenSegment2D — 2D 拆分](#gensegment2d--2d-拆分)
   - [GenSegment2DZip — 获取拆分产物 zip_path](#gensegment2dzip--获取拆分产物-zip_path)
+  - [CondPartAutofit — 裸模拆分](#condpartautofit--裸模拆分)
+  - [ModelAutoMerge — 模型自动合并](#modelautomerge--模型自动合并)
   - [WaitModel — 等待完成](#waitmodel--等待完成)
 - [原子 API 方法参考](#原子-api-方法参考)
 - [错误说明](#错误说明)
@@ -314,6 +316,7 @@ GenMidModelOptions opts = GenMidModelOptions.create()
     .setOutputModelFormat(ModelFormat.FBX)               // 可选，输出格式
     .setFaceType(FaceType.TRIANGLE)                      // 可选，面数类型
     .setFaceNum(30000)                                   // 可选，目标面数（0~30000，0=默认）
+    .setModelSize(1.0f)                                  // 可选，model_size（Float，为空不传）
     .setSegmentModelId("Model2026...")                   // 可选，2D 分割资产 ID
     .setModelId360("Model2026...")                       // 可选，图生360 资产 ID
 
@@ -627,6 +630,50 @@ try (SSEIterator iter = client.getAPI().initSegment(
 
 ---
 
+### CondPartAutofit — 裸模拆分
+
+将原始模型中的指定部件替换为对应的裸模，输出合并后的模型。**同步原子接口，不创建模型资产**，直接返回结果。
+服务端算法最长执行 5 分钟，必须把客户端超时调大（建议 `setTimeout(360)`）。→ [示例代码](src/main/java/com/visvise/sdk/examples/CondPartAutofitExample.java)
+
+```java
+// originalPartMesh / refMesh 支持本地路径（SDK 自动上传）、COS URL、byte[]、File 或 InputStream
+CondPartAutofitResult result = client.condPartAutofit(
+    "path/to/original_model.obj",       // 必填，原始模型
+    "path/to/ref_model.obj",            // 必填，参考模型
+    null,                               // 可选，Map<部件名, 裸模文件名>，不传表示全部替换
+    rtx
+);
+System.out.println(result.getOutputObjPath());    // 输出 obj 的 COS 路径（24h 签名有效）
+System.out.println(result.getBackgroundColor());  // 最终使用的底色
+```
+
+原子层等价调用：`client.getAPI().condPartAutofit(originalObjUrl, refObjUrl, replacePartNames, rtx)`（只接收 COS 路径）。
+
+---
+
+### ModelAutoMerge — 模型自动合并
+
+将拆分得到的多个部件 mesh 合并为一个完整模型（中模 / 高模），可用参考模型补齐缺失部件。**同步原子接口，不创建模型资产**。
+`originalPartMesh` 服务端要求为 `.zip` 结尾的部件 mesh 压缩包路径；服务端算法最长执行 5 分钟，必须调大超时（建议 `setTimeout(360)`）。→ [示例代码](src/main/java/com/visvise/sdk/examples/ModelAutoMergeExample.java)
+
+```java
+// refMesh 传 null 表示只做部件合并，不使用参考模型补齐缺失部件
+ModelAutoMergeResult result = client.modelAutoMerge(
+    "path/to/parts.zip",                // 必填，部件 mesh 压缩包（.zip）
+    null,                               // 可选，参考模型
+    false,                              // 是否支持旋转
+    rtx
+);
+System.out.println(result.getOutputObjPath());  // 合并后模型的 COS 路径（24h 签名有效）
+System.out.println(result.getElapsedTime());    // 算法耗时（秒）
+System.out.println(result.getMeanBboxIou());    // 平均 bbox IoU
+System.out.println(result.getRefFilledParts()); // 参考模型补齐的部件名列表
+```
+
+原子层等价调用：`client.getAPI().modelAutoMerge(partsZipUrl, refUrl, supportRotate, rtx)`（只接收 COS 路径）。
+
+---
+
 ### WaitModel — 等待完成
 
 轮询等待异步任务完成，返回 `ModelInfo`。
@@ -688,6 +735,12 @@ api.batchDeleteModel(Arrays.asList("Model2026...", "Model2026..."), rtx);
 
 // 去除背景
 String outUrl = api.removeBackground("https://cos.../image.png", rtx);
+
+// 裸模拆分（同步长耗时，建议 setTimeout(360)）
+CondPartAutofitResult autofit = api.condPartAutofit(originalObjUrl, refObjUrl, null, rtx);
+
+// 模型自动合并（original_part_mesh_path 需为 .zip）
+ModelAutoMergeResult merged = api.modelAutoMerge(partsZipUrl, refObjUrl, false, rtx);
 
 // 文生动画提示词列表
 List<String> prompts = api.getText2MotionPromptList("zh", rtx);

@@ -519,6 +519,9 @@ public class VisviseClient {
         if (opts.getFaceNum() != null) {
             imgParams.put("face_num", opts.getFaceNum());
         }
+        if (opts.getModelSize() != null) {
+            imgParams.put("model_size", opts.getModelSize());
+        }
         if (opts.getGroupIds() != null) {
             imgParams.put("group_ids", resolveFile(opts.getGroupIds(), false, rtx));
         }
@@ -1150,6 +1153,37 @@ public class VisviseClient {
      */
     public String upload(String path, String filename, boolean isTemp, String rtx) throws WeaverError {
         return uploadFile(path, filename, isTemp, rtx);
+    }
+
+    /**
+     * 裸模拆分：把原始模型中的指定部件替换为对应的裸模，输出合并后的模型。
+     * originalPartMesh / refMesh 支持本地路径（自动上传到当前账号 COS 目录）、COS URL 或二进制内容。
+     * 同步接口，服务端算法最长 5 分钟，请把客户端超时调大（建议 setTimeout(360)）。
+     */
+    public CondPartAutofitResult condPartAutofit(Object originalPartMesh,
+                                                 Object refMesh,
+                                                 Map<String, String> replacePartNames,
+                                                 String rtx) throws WeaverError {
+        String originalUrl = resolveFile(originalPartMesh, false, rtx);
+        String refUrl = resolveFile(refMesh, false, rtx);
+        return api.condPartAutofit(originalUrl, refUrl, replacePartNames, rtx);
+    }
+
+    /**
+     * 模型自动合并：将拆分得到的多个部件 mesh 合并为一个完整模型（中模 / 高模）。
+     * originalPartMesh 服务端要求为 .zip 结尾的部件 mesh 压缩包（本地路径自动上传）。
+     * refMesh 可选，为空时只做部件合并，不使用参考模型补齐缺失部件。
+     */
+    public ModelAutoMergeResult modelAutoMerge(Object originalPartMesh,
+                                               Object refMesh,
+                                               boolean supportRotate,
+                                               String rtx) throws WeaverError {
+        String originalUrl = resolveFile(originalPartMesh, false, rtx);
+        String refUrl = "";
+        if (refMesh != null && !(refMesh instanceof String && ((String) refMesh).isEmpty())) {
+            refUrl = resolveFile(refMesh, false, rtx);
+        }
+        return api.modelAutoMerge(originalUrl, refUrl, supportRotate, rtx);
     }
 
     // ════════════════════════════════════════════════════════════════════

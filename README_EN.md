@@ -34,6 +34,8 @@ Java SDK for the VISVISE Weaver OpenAPI. It provides:
   - [GenPose — Image to Pose](#genpose--image-to-pose)
   - [GenSegment2D — 2D Segmentation](#gensegment2d--2d-segmentation)
   - [GenSegment2DZip — Get the output zip_path](#gensegment2dzip--get-the-output-zip_path)
+  - [CondPartAutofit — Part Mesh Autofit](#condpartautofit--part-mesh-autofit)
+  - [ModelAutoMerge — Model Auto Merge](#modelautomerge--model-auto-merge)
   - [WaitModel — Wait for Completion](#waitmodel--wait-for-completion)
 - [Atomic API Methods](#atomic-api-methods)
 - [Errors](#errors)
@@ -312,6 +314,7 @@ GenMidModelOptions opts = GenMidModelOptions.create()
     .setOutputModelFormat(ModelFormat.FBX)               // optional, output format
     .setFaceType(FaceType.TRIANGLE)                      // optional, face type
     .setFaceNum(30000)                                   // optional, target face count (0-30000, 0 = default)
+    .setModelSize(1.0f)                                  // optional, model_size (Float, not sent if null)
     .setSegmentModelId("Model2026...")                   // optional, 2D segmentation asset ID
     .setModelId360("Model2026...")                       // optional, 360 model asset ID
 
@@ -626,6 +629,50 @@ try (SSEIterator iter = client.getAPI().initSegment(
 
 ---
 
+### CondPartAutofit — Part Mesh Autofit
+
+Replaces specified parts of an original model with their nude meshes and outputs the merged model. **Synchronous atomic API, does not create a model asset** — the result is returned directly.
+The server-side algorithm may run up to 5 minutes, so the client timeout must be raised (recommend `setTimeout(360)`). → [Example](src/main/java/com/visvise/sdk/examples/CondPartAutofitExample.java)
+
+```java
+// originalPartMesh / refMesh accept a local path (auto-uploaded), COS URL, byte[], File, or InputStream
+CondPartAutofitResult result = client.condPartAutofit(
+    "path/to/original_model.obj",       // required, original model
+    "path/to/ref_model.obj",            // required, reference model
+    null,                               // optional, Map<part name, nude mesh filename>; omit to replace all parts
+    rtx
+);
+System.out.println(result.getOutputObjPath());    // output obj COS path (signed, valid for 24h)
+System.out.println(result.getBackgroundColor());  // final background color
+```
+
+Atomic equivalent: `client.getAPI().condPartAutofit(originalObjUrl, refObjUrl, replacePartNames, rtx)` (COS paths only).
+
+---
+
+### ModelAutoMerge — Model Auto Merge
+
+Merges multiple part meshes (from a split) into one complete model (mid/high-poly); missing parts can be filled from a reference model. **Synchronous atomic API, does not create a model asset**.
+`originalPartMesh` must be a `.zip` part-mesh archive path per the server; the algorithm may run up to 5 minutes, so raise the timeout (recommend `setTimeout(360)`). → [Example](src/main/java/com/visvise/sdk/examples/ModelAutoMergeExample.java)
+
+```java
+// Pass null refMesh to merge parts only, without filling missing parts from a reference model
+ModelAutoMergeResult result = client.modelAutoMerge(
+    "path/to/parts.zip",                // required, part mesh archive (.zip)
+    null,                               // optional, reference model
+    false,                              // support rotation
+    rtx
+);
+System.out.println(result.getOutputObjPath());  // merged model COS path (signed, valid for 24h)
+System.out.println(result.getElapsedTime());    // algorithm elapsed time (seconds)
+System.out.println(result.getMeanBboxIou());    // mean bbox IoU
+System.out.println(result.getRefFilledParts()); // part names filled from the reference model
+```
+
+Atomic equivalent: `client.getAPI().modelAutoMerge(partsZipUrl, refUrl, supportRotate, rtx)` (COS paths only).
+
+---
+
 ### WaitModel — Wait for Completion
 
 Poll until an async task finishes; returns `ModelInfo`.
@@ -687,6 +734,12 @@ api.batchDeleteModel(Arrays.asList("Model2026...", "Model2026..."), rtx);
 
 // Remove background
 String outUrl = api.removeBackground("https://cos.../image.png", rtx);
+
+// Part mesh autofit (synchronous, long-running; recommend setTimeout(360))
+CondPartAutofitResult autofit = api.condPartAutofit(originalObjUrl, refObjUrl, null, rtx);
+
+// Model auto merge (original_part_mesh_path must be a .zip)
+ModelAutoMergeResult merged = api.modelAutoMerge(partsZipUrl, refObjUrl, false, rtx);
 
 // Text-to-motion prompt suggestions
 List<String> prompts = api.getText2MotionPromptList("en", rtx);
