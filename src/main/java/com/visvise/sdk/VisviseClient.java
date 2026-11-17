@@ -522,6 +522,12 @@ public class VisviseClient {
         if (opts.getModelSize() != null) {
             imgParams.put("model_size", opts.getModelSize());
         }
+        if (opts.getSkip360Preprocess() != null) {
+            imgParams.put("skip_360_preprocess", opts.getSkip360Preprocess());
+        }
+        if (opts.getSkipRemoveBackground() != null) {
+            imgParams.put("skip_remove_background", opts.getSkipRemoveBackground());
+        }
         if (opts.getGroupIds() != null) {
             imgParams.put("group_ids", resolveFile(opts.getGroupIds(), false, rtx));
         }

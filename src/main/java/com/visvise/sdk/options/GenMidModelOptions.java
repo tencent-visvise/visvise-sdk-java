@@ -32,6 +32,12 @@ public class GenMidModelOptions {
     /** optional, model size (model_size), Float type, not sent if null */
     private Float modelSize;
 
+    /** optional, skip 360 preprocess */
+    private Boolean skip360Preprocess;
+
+    /** optional, skip remove background */
+    private Boolean skipRemoveBackground;
+
     public GenMidModelOptions() {
     }
 
@@ -143,6 +149,25 @@ public class GenMidModelOptions {
      */
     public GenMidModelOptions setModelSize(Float modelSize) {
         this.modelSize = modelSize;
+        return this;
+    }
+
+
+    public Boolean getSkip360Preprocess() {
+        return skip360Preprocess;
+    }
+
+    public GenMidModelOptions setSkip360Preprocess(Boolean skip360Preprocess) {
+        this.skip360Preprocess = skip360Preprocess;
+        return this;
+    }
+
+    public Boolean getSkipRemoveBackground() {
+        return skipRemoveBackground;
+    }
+
+    public GenMidModelOptions setSkipRemoveBackground(Boolean skipRemove) {
+        this.skipRemoveBackground = skipRemove;
         return this;
     }
 
