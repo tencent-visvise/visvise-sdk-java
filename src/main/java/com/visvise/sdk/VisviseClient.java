@@ -185,6 +185,9 @@ public class VisviseClient {
     }
 
     private String uploadFile(String path, String filename, boolean isTemp, String rtx) throws WeaverError {
+        if (filename == null || filename.isEmpty()) {
+            filename = Paths.get(path).getFileName().toString();
+        }
         GetCosCredResult cred = api.getCosCred(isTemp, false, rtx);
         if (cred == null) {
             throw new WeaverError(-1, "Failed to get COS credentials");
@@ -211,8 +214,12 @@ public class VisviseClient {
 
     private String uploadWithCred(GetCosCredResult cred, byte[] data, String filename, boolean isTemp) throws WeaverError {
         if (filename == null || filename.isEmpty()) {
-            filename = String.format("upload_%d.bin", System.currentTimeMillis() % 1000000);
+            filename = "upload.bin";
         }
+        int dot = filename.lastIndexOf('.');
+        String stem = dot > 0 ? filename.substring(0, dot) : filename;
+        String extension = dot > 0 ? filename.substring(dot) : "";
+        filename = stem + "_" + UUID.randomUUID().toString().replace("-", "").substring(0, 24) + extension;
 
         String cosKey = cred.getPathPrefix().replaceAll("/$", "") + "/" + filename;
 
