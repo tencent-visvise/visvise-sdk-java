@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.visvise.sdk.enums.ImageCutoutMode;
 import com.visvise.sdk.enums.SegmentViewType;
 import com.visvise.sdk.enums.StyleType;
 import com.visvise.sdk.exceptions.WeaverError;
@@ -320,6 +321,41 @@ public class VisviseAPI {
             return m.get("image_url").getAsString();
         }
         return null;
+    }
+
+    /**
+     * Removes the background of the given images and returns the processed images.
+     * 同步接口，不创建模型资产；imageList 为待抠图图片的 COS URL 数组（1~6 张）。
+     * 参数校验由服务端完成（image_list 1~6 张、mode 1~3、background_color 非空）。
+     * 需要传入本地图片时，请使用 {@link com.visvise.sdk.VisviseClient#imageCutout}，
+     * 由 SDK 自动上传到当前账号的 COS 目录。
+     */
+    public ImageCutoutResult imageCutout(List<String> imageList, ImageCutoutMode mode,
+                                         String backgroundColor, String rtx) throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("image_list", imageList);
+        body.put("mode", mode != null ? mode.getValue() : 0);
+        body.put("background_color", backgroundColor);
+
+        Object data = http.post("openapi/weaver/resource/image_cutout", body, rtx);
+        if (data == null || !(data instanceof JsonObject)) {
+            return null;
+        }
+
+        JsonObject m = (JsonObject) data;
+        ImageCutoutResult result = new ImageCutoutResult();
+        if (m.has("background_color") && !m.get("background_color").isJsonNull()) {
+            result.setBackgroundColor(m.get("background_color").getAsString());
+        }
+        if (m.has("image_list") && !m.get("image_list").isJsonNull()) {
+            JsonArray array = m.getAsJsonArray("image_list");
+            List<String> images = new ArrayList<>();
+            for (JsonElement element : array) {
+                images.add(element.getAsString());
+            }
+            result.setImageList(images);
+        }
+        return result;
     }
 
     /**
