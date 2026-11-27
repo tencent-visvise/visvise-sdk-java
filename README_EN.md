@@ -24,6 +24,7 @@ Java SDK for the VISVISE Weaver OpenAPI. It provides:
   - [GenLowModel — Image to Low-poly](#genlowmodel--image-to-low-poly)
   - [GenMeshRefine — Mesh Refinement](#genmeshrefine--mesh-refinement)
   - [GenRetopology — Retopology](#genretopology--retopology)
+  - [GenRTPConnected — Re-topology Connected Component (two-stage VISVISE)](#genrtpconnected--re-topology-connected-component-two-stage-visvise)
   - [GenLOD — LOD](#genlod--lod)
   - [GenUV — UV Unwrap](#genuv--uv-unwrap)
   - [GenTexture — Texture Generation](#gentexture--texture-generation)
@@ -247,6 +248,19 @@ Gen360Options opts = Gen360Options.create()
     .setFaceType(FaceType.TRIANGLE)                       // optional, face type (default triangle)
     .setEnableAPose(true)                                 // optional, enable A-Pose
     .setStyle(ImageGen360Style.GRAY_MODEL.getValue())     // optional, style (VISVISE proprietary models only). Must be one of ImageGen360Style: GRAY_MODEL/PHOTOREAL/Q_TOON/PIXEL — any other value will be rejected
+    .setPrompt("a cute cartoon cat")                      // optional, text prompt
+    .setEnableHeadRefinement(true)                        // optional, enable head refinement
+    .setAspectRatio("1:1")                                // optional, aspect ratio, e.g. 1:1 / 16:9
+    .setEnableBackgroundRemoval(true)                     // optional, enable background removal
+    .setSeed(42L)                                         // optional, random seed (auto-generated when omitted)
+    .setEnable15Deg(true)                                 // optional, perspective correction
+    .setExtraReferences(Arrays.asList(                    // optional, reference images (auto-uploaded)
+        new ImageGen360ExtraReference("path/to/ref.png").setPrompt("reference hairstyle")))
+    .setRevision(                                         // optional, revision parameters (views auto-uploaded)
+        new ImageGen360Revision()
+            .setCaption("<full caption from the previous run>") // caption returned last time, passed back as-is
+            .setPrompt("turn the hair red")                // edit instruction for this run
+            .setViews(new ImageGen360RevisionViews().setMainView("path/to/main_view.png")))
     .setBackView(backViewPath)                            // optional, back view (local path or COS URL)
     .setLeftView(leftViewPath)                            // optional, left view
     .setRightView(rightViewPath)                          // optional, right view
@@ -384,8 +398,45 @@ GenRetopologyOptions opts = GenRetopologyOptions.create()
 GenRetopologyOptions opts2 = GenRetopologyOptions.create()
     .setAlgorithmModel("VISVISE-RTP-V1.0.0")
     .setFaceNum(50000)                                 // optional, for VISVISE models
+    .setSmoothStrength(1.0)                            // optional, smooth strength (0.0 none / 1.0 full, default 1.0)
 
 String modelId = client.genRetopology("path/to/model.fbx", opts, rtx);
+```
+
+---
+
+### GenRTPConnected — Re-topology Connected Component (two-stage VISVISE)
+
+Full flow of the two-stage VISVISE (VV) re-topology → [Example](src/main/java/com/visvise/sdk/examples/GenRTPConnectedExample.java):
+
+1. `genRTPConnected`: create the connected-component grouping task (node_type=19); after it finishes, download the grouping artifact zip from `output_model`
+2. Edit the connected-component grouping on the frontend, re-pack the edited result into a zip and upload it to your account's COS directory
+3. `saveRTPConnected`: save the artifact (synchronous); returns a new connected-component asset ID (node_type=19, status=3), no polling needed
+4. `genRetopology`: start the second-stage re-topology (node_type=1) with the saved `model_id` as `parentModelId`
+
+```java
+// Stage 1: re-topology connected component (node_type=19)
+GenRTPConnectedOptions connectedOpts = GenRTPConnectedOptions.create()
+    .setName("my_rtp_connected")                        // optional, default "gen_rtp_connected"
+    .setAlgorithmModel("VISVISE-RTP-V1.0.0");           // optional, auto-selected when omitted
+
+String connectedId = client.genRTPConnected("path/to/model.fbx", connectedOpts, rtx);
+ModelInfo connected = client.waitModel(connectedId,
+    WaitOptions.create().setTimeout(900), rtx);
+System.out.println("Connected-component artifact: " + connected.getOutputModel());
+
+// Save the edited connected-component artifact (synchronous, returns the new asset ID)
+String savedId = client.saveRTPConnected(connectedId, "path/to/edited_rtp_connected.zip",
+    "my_rtp_connected_saved", rtx);
+
+// Stage 2: re-topology (parentModelId points to the saved connected-component asset)
+GenRetopologyOptions opts2 = GenRetopologyOptions.create()
+    .setAlgorithmModel("VISVISE-RTP-V1.0.0")
+    .setFaceNum(50000)
+    .setSmoothStrength(1.0)
+    .setParentModelId(savedId);                         // required for two-stage VISVISE re-topology
+
+String modelId = client.genRetopology("path/to/edited_rtp_connected.zip", opts2, rtx);
 ```
 
 ---
@@ -722,6 +773,18 @@ ModelListResult result = api.getModelList(
 
 // Fetch algorithm models for a node type
 List<String> algModels = api.listAlgorithmModel(NodeType.ANIMATION.getValue(), null, rtx);
+
+// Create a 3D generation task (recommended: Gen3DModelRequest supports parent_model_id)
+Gen3DModelRequest req = new Gen3DModelRequest();
+req.setName("my_asset");
+req.setNodeType(NodeType.RE_TOPOLOGY.getValue());
+req.setParams(genParams);
+req.setParentModelId("Model2026...");
+req.setInputModel(modelZipUrl);
+List<String> modelIds = api.gen3DModel(req, rtx);
+
+// Save the re-topology connected-component artifact (synchronous, returns the new asset ID)
+SaveRTPConnectedResult saved = api.saveRTPConnected(connectedModelId, outputZipUrl, "name", rtx);
 
 // Get download URL
 String url = api.downloadModel("Model2026...", rtx);

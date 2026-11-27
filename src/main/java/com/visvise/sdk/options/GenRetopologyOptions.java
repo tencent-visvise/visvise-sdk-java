@@ -20,6 +20,13 @@ public class GenRetopologyOptions {
     private DetailLevel detailLevel;
     /** optional, for VISVISE models: target face count */
     private Integer faceNum;
+    /** optional, 平滑强度，当前只支持 0.0（不平滑）/ 1.0（完全平滑），不传默认 1.0 */
+    private Double smoothStrength;
+    /**
+     * optional, 父模型资产 ID：两段式自研（VV）重拓扑必传，
+     * 指向第一段「重拓扑-连通体」资产（node_type=19）的 model_id
+     */
+    private String parentModelId;
 
     public GenRetopologyOptions() {
     }
@@ -75,6 +82,24 @@ public class GenRetopologyOptions {
 
     public GenRetopologyOptions setFaceNum(Integer faceNum) {
         this.faceNum = faceNum;
+        return this;
+    }
+
+    public Double getSmoothStrength() {
+        return smoothStrength;
+    }
+
+    public GenRetopologyOptions setSmoothStrength(Double smoothStrength) {
+        this.smoothStrength = smoothStrength;
+        return this;
+    }
+
+    public String getParentModelId() {
+        return parentModelId;
+    }
+
+    public GenRetopologyOptions setParentModelId(String parentModelId) {
+        this.parentModelId = parentModelId;
         return this;
     }
 

@@ -19,7 +19,9 @@ public enum NodeType {
     IMG_TO_3D_LOW(13, "Image to 3D (Low)"),
     SEGMENT_2D(14, "2D Segmentation"),
     AUTO_LUV(15, "Auto LUV / 2UV"),
-    PREPROCESS_2D(16, "2D Preprocess");
+    PREPROCESS_2D(16, "2D Preprocess"),
+    /** 重拓扑-连通体：两段式自研重拓扑的第一段，产出连通体分组数据 */
+    RE_TOPOLOGY_CONNECTED(19, "重拓扑-连通体");
 
     private final int value;
     private final String description;

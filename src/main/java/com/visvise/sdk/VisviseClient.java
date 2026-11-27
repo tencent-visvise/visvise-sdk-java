@@ -416,13 +416,100 @@ public class VisviseClient {
         if (opts.getEnableAPose() != null) {
             img360.put("enable_a_pose", opts.getEnableAPose());
         }
+        if (opts.getPrompt() != null && !opts.getPrompt().isEmpty()) {
+            img360.put("prompt", opts.getPrompt());
+        }
         if (opts.getStyle() != null && !opts.getStyle().isEmpty()) {
             img360.put("style", opts.getStyle());
+        }
+        if (opts.getEnableHeadRefinement() != null) {
+            img360.put("enable_head_refinement", opts.getEnableHeadRefinement());
+        }
+        if (opts.getAspectRatio() != null && !opts.getAspectRatio().isEmpty()) {
+            img360.put("aspect_ratio", opts.getAspectRatio());
+        }
+        if (opts.getEnableBackgroundRemoval() != null) {
+            img360.put("enable_background_removal", opts.getEnableBackgroundRemoval());
+        }
+        if (opts.getSeed() != null) {
+            img360.put("seed", opts.getSeed());
+        }
+        if (opts.getEnable15Deg() != null) {
+            img360.put("enable_15deg", opts.getEnable15Deg());
+        }
+        if (opts.getExtraReferences() != null && !opts.getExtraReferences().isEmpty()) {
+            img360.put("extra_references", resolveExtraReferences(opts.getExtraReferences(), rtx));
+        }
+        if (opts.getRevision() != null) {
+            img360.put("revision", resolveRevision(opts.getRevision(), rtx));
         }
 
         Map<String, Object> params = new HashMap<>();
         params.put("image_gen_360_params", img360);
         return api.genMultiViews(opts.getName(), view, params, rtx);
+    }
+
+    /**
+     * Uploads the image-to-360 reference images and returns the parameter list ready to be sent.
+     */
+    private List<Map<String, Object>> resolveExtraReferences(List<ImageGen360ExtraReference> refs, String rtx)
+            throws WeaverError {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (ImageGen360ExtraReference ref : refs) {
+            String path = resolveFile(ref.getPath(), false, rtx);
+            Map<String, Object> item = new HashMap<>();
+            item.put("path", path);
+            if (ref.getPrompt() != null && !ref.getPrompt().isEmpty()) {
+                item.put("prompt", ref.getPrompt());
+            }
+            result.add(item);
+        }
+        return result;
+    }
+
+    /**
+     * Uploads the views of the image-to-360 revision parameters and returns the parameter object.
+     */
+    private Map<String, Object> resolveRevision(ImageGen360Revision revision, String rtx) throws WeaverError {
+        Map<String, Object> result = new HashMap<>();
+        if (revision.getCaption() != null && !revision.getCaption().isEmpty()) {
+            result.put("caption", revision.getCaption());
+        }
+        if (revision.getPrompt() != null && !revision.getPrompt().isEmpty()) {
+            result.put("prompt", revision.getPrompt());
+        }
+        ImageGen360RevisionViews views = revision.getViews();
+        if (views == null) {
+            return result;
+        }
+
+        Map<String, Object> viewMap = new HashMap<>();
+        putResolvedView(viewMap, "main_view", views.getMainView(), rtx);
+        putResolvedView(viewMap, "back_view", views.getBackView(), rtx);
+        putResolvedView(viewMap, "left_view", views.getLeftView(), rtx);
+        putResolvedView(viewMap, "right_view", views.getRightView(), rtx);
+        putResolvedView(viewMap, "top_view", views.getTopView(), rtx);
+        putResolvedView(viewMap, "bottom_view", views.getBottomView(), rtx);
+        putResolvedView(viewMap, "front_view", views.getFrontView(), rtx);
+        putResolvedView(viewMap, "front_left_view", views.getFrontLeftView(), rtx);
+        putResolvedView(viewMap, "front_right_view", views.getFrontRightView(), rtx);
+        if (!viewMap.isEmpty()) {
+            result.put("views", viewMap);
+        }
+        return result;
+    }
+
+    /**
+     * Resolves a single revision view file and puts it into the target map when present.
+     */
+    private void putResolvedView(Map<String, Object> target, String key, Object source, String rtx) throws WeaverError {
+        if (source == null) {
+            return;
+        }
+        if (source instanceof String && ((String) source).isEmpty()) {
+            return;
+        }
+        target.put(key, resolveFile(source, false, rtx));
     }
 
     /**
@@ -617,7 +704,8 @@ public class VisviseClient {
     }
 
     /**
-     * Performs re-topology on a model
+     * Performs re-topology on a model.
+     * parentModelId 用于两段式自研（VV）重拓扑：指向第一段「重拓扑-连通体」资产（node_type=19）。
      */
     public String genRetopology(Object modelPath, GenRetopologyOptions opts, String rtx) throws WeaverError {
         if (opts == null) {
@@ -637,12 +725,68 @@ public class VisviseClient {
         if (opts.getFaceNum() != null) {
             params.put("face_num", opts.getFaceNum());
         }
+        if (opts.getSmoothStrength() != null) {
+            params.put("smooth_strength", opts.getSmoothStrength());
+        }
 
         Map<String, Object> genParams = new HashMap<>();
         genParams.put("re_topology_params", params);
-        List<String> modelIds = api.gen3DModel(opts.getName(), NodeType.RE_TOPOLOGY.getValue(),
-                genParams, null, cosUrl, "", "", rtx);
+
+        Gen3DModelRequest req = new Gen3DModelRequest();
+        req.setName(opts.getName());
+        req.setNodeType(NodeType.RE_TOPOLOGY.getValue());
+        req.setParams(genParams);
+        req.setParentModelId(opts.getParentModelId());
+        req.setInputModel(cosUrl);
+
+        List<String> modelIds = api.gen3DModel(req, rtx);
         return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
+    }
+
+    /**
+     * Creates a re-topology connected-component task (node_type=19).
+     * It is the first stage of the two-stage VISVISE (VV) re-topology flow: the task produces the
+     * connected-component meshes and the grouping data files (the artifact is returned in the asset's
+     * output_model zip).
+     *
+     * After the artifact is edited on the frontend, call saveRTPConnected to save it and use the
+     * returned model_id as the parent_model_id of genRetopology (second stage).
+     */
+    public String genRTPConnected(Object modelPath, GenRTPConnectedOptions opts, String rtx) throws WeaverError {
+        if (opts == null) {
+            opts = GenRTPConnectedOptions.create();
+        }
+
+        String cosUrl = resolveModelFile(modelPath, false, rtx);
+        String resolvedModel = resolveAlgorithmModel(opts.getAlgorithmModel(), NodeType.RE_TOPOLOGY_CONNECTED, null, rtx);
+
+        Map<String, Object> genParams = new HashMap<>();
+        genParams.put("algorithm_model", resolvedModel);
+
+        Gen3DModelRequest req = new Gen3DModelRequest();
+        req.setName(opts.getName());
+        req.setNodeType(NodeType.RE_TOPOLOGY_CONNECTED.getValue());
+        req.setParams(genParams);
+        req.setInputModel(cosUrl);
+
+        List<String> modelIds = api.gen3DModel(req, rtx);
+        return modelIds != null && !modelIds.isEmpty() ? modelIds.get(0) : null;
+    }
+
+    /**
+     * Saves the edited connected-component artifact as a new re-topology connected-component asset
+     * (node_type=19). It is a synchronous interface: on success a new model_id is returned and the asset
+     * is created in the generated state (status=3), no polling needed.
+     *
+     * modelId: the first-stage (connected-component grouping) asset ID.
+     * outputModel: the connected-component artifact zip; a local path is uploaded to the current
+     * account's COS directory automatically, a COS URL is used as is.
+     * name: the name of the new asset.
+     */
+    public String saveRTPConnected(String modelId, Object outputModel, String name, String rtx) throws WeaverError {
+        String outputUrl = resolveFile(outputModel, false, rtx);
+        SaveRTPConnectedResult result = api.saveRTPConnected(modelId, outputUrl, name, rtx);
+        return result == null ? null : result.getModelId();
     }
 
     /**

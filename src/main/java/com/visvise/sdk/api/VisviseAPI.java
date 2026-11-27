@@ -114,34 +114,29 @@ public class VisviseAPI {
     }
 
     /**
-     * Creates a 3D generation task (async)
+     * Creates a 3D generation task (async).
+     * parentModelId 用于两段式重拓扑：指向第一段「重拓扑-连通体」资产（node_type=19）的 model_id。
      */
-    public List<String> gen3DModel(
-            String name,
-            int nodeType,
-            Map<String, Object> params,
-            View inputView,
-            String inputModel,
-            String inputModelFormat,
-            String inputVideo,
-            String rtx) throws WeaverError {
-
+    public List<String> gen3DModel(Gen3DModelRequest req, String rtx) throws WeaverError {
         Map<String, Object> body = new HashMap<>();
-        body.put("name", name);
-        body.put("node_type", nodeType);
-        body.put("params", params);
+        body.put("name", req.getName());
+        body.put("node_type", req.getNodeType());
+        body.put("params", req.getParams());
 
-        if (inputView != null) {
-            body.put("input_view", inputView.toMap());
+        if (req.getParentModelId() != null && !req.getParentModelId().isEmpty()) {
+            body.put("parent_model_id", req.getParentModelId());
         }
-        if (inputModel != null && !inputModel.isEmpty()) {
-            body.put("input_model", inputModel);
+        if (req.getInputView() != null) {
+            body.put("input_view", req.getInputView().toMap());
         }
-        if (inputModelFormat != null && !inputModelFormat.isEmpty()) {
-            body.put("input_model_format", inputModelFormat);
+        if (req.getInputModel() != null && !req.getInputModel().isEmpty()) {
+            body.put("input_model", req.getInputModel());
         }
-        if (inputVideo != null && !inputVideo.isEmpty()) {
-            body.put("input_video", inputVideo);
+        if (req.getInputModelFormat() != null && !req.getInputModelFormat().isEmpty()) {
+            body.put("input_model_format", req.getInputModelFormat());
+        }
+        if (req.getInputVideo() != null && !req.getInputVideo().isEmpty()) {
+            body.put("input_video", req.getInputVideo());
         }
 
         Object data = http.post("openapi/weaver/resource/gen_3d_model", body, rtx);
@@ -159,6 +154,52 @@ public class VisviseAPI {
             return result;
         }
         return null;
+    }
+
+    /**
+     * Creates a 3D generation task (async).
+     * Legacy overload: does not support parent_model_id.
+     */
+    public List<String> gen3DModel(
+            String name,
+            int nodeType,
+            Map<String, Object> params,
+            View inputView,
+            String inputModel,
+            String inputModelFormat,
+            String inputVideo,
+            String rtx) throws WeaverError {
+
+        Gen3DModelRequest req = new Gen3DModelRequest();
+        req.setName(name);
+        req.setNodeType(nodeType);
+        req.setParams(params);
+        req.setInputView(inputView);
+        req.setInputModel(inputModel);
+        req.setInputModelFormat(inputModelFormat);
+        req.setInputVideo(inputVideo);
+        return gen3DModel(req, rtx);
+    }
+
+    /**
+     * 保存前端编辑后的连通体产物为新的 rtp-连通体资产（node_type=19）。
+     * 同步接口：调用成功后即创建一个生成成功（status=3）的模型资产，并返回新的 model_id，无需轮询。
+     * modelId 为第一段（连通体分组）资产 ID；
+     * outputModel 为前端回传的连通体产物 zip 包 COS 地址（需位于调用账号自己的 COS 目录下）；
+     * name 为新资产名称。
+     */
+    public SaveRTPConnectedResult saveRTPConnected(String modelId, String outputModel, String name, String rtx)
+            throws WeaverError {
+        Map<String, Object> body = new HashMap<>();
+        body.put("model_id", modelId);
+        body.put("output_model", outputModel);
+        body.put("name", name);
+
+        Object data = http.post("openapi/weaver/resource/save_rtp_connected", body, rtx);
+        if (data == null || !(data instanceof JsonObject)) {
+            return null;
+        }
+        return gson.fromJson((JsonElement) data, SaveRTPConnectedResult.class);
     }
 
     /**

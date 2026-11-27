@@ -24,6 +24,7 @@ VISVISE Weaver OpenAPI 的 Java SDK，提供：
   - [GenLowModel — 图生低模](#genlowmodel--图生低模)
   - [GenMeshRefine — 重布线](#genmeshrefine--重布线)
   - [GenRetopology — 重拓扑](#genretopology--重拓扑)
+  - [GenRTPConnected — 重拓扑-连通体（两段式自研）](#genrtpconnected--重拓扑-连通体两段式自研)
   - [GenLOD — LOD](#genlod--lod)
   - [GenUV — UV展开](#genuv--uv展开)
   - [GenTexture — 贴图纹理](#gentexture--贴图纹理)
@@ -249,6 +250,19 @@ Gen360Options opts = Gen360Options.create()
     .setFaceType(FaceType.TRIANGLE)                       // 可选，面数类型（默认三角面）
     .setEnableAPose(true)                                 // 可选，是否开启 A-Pose
     .setStyle(ImageGen360Style.GRAY_MODEL.getValue())     // # 可选，风格类型（仅 VISVISE 自研模型支持），只接受 ImageGen360Style 枚举：GRAY_MODEL/PHOTOREAL/Q_TOON/PIXEL，传其他值会报错
+    .setPrompt("a cute cartoon cat")                      // 可选，文本提示词
+    .setEnableHeadRefinement(true)                        // 可选，是否开启脸部增强
+    .setAspectRatio("1:1")                                // 可选，画面比例，如 1:1 / 16:9
+    .setEnableBackgroundRemoval(true)                     // 可选，是否开启去背景
+    .setSeed(42L)                                         // 可选，随机种子（不传由算法随机生成）
+    .setEnable15Deg(true)                                 // 可选，是否矫正透视
+    .setExtraReferences(Arrays.asList(                    // 可选，参考图列表（自动上传）
+        new ImageGen360ExtraReference("path/to/ref.png").setPrompt("参考发型")))
+    .setRevision(                                         // 可选，续改参数（views 图片自动上传）
+        new ImageGen360Revision()
+            .setCaption("<上次返回的 caption 全文>")        // 上一次返回的 caption 原样回传
+            .setPrompt("把头发改成红色")                    // 本次修改指令
+            .setViews(new ImageGen360RevisionViews().setMainView("path/to/main_view.png")))
     .setBackView(backViewPath)                            // 可选，背视图（本地路径或 COS URL）
     .setLeftView(leftViewPath)                            // 可选，左视图
     .setRightView(rightViewPath)                          // 可选，右视图
@@ -386,8 +400,45 @@ GenRetopologyOptions opts = GenRetopologyOptions.create()
 GenRetopologyOptions opts2 = GenRetopologyOptions.create()
     .setAlgorithmModel("VISVISE-RTP-V1.0.0")
     .setFaceNum(50000)                                   // 可选，VISVISE 自研模型
+    .setSmoothStrength(1.0)                              // 可选，平滑强度（0.0 不平滑 / 1.0 完全平滑，默认 1.0）
 
 String modelId = client.genRetopology("path/to/model.fbx", opts, rtx);
+```
+
+---
+
+### GenRTPConnected — 重拓扑-连通体（两段式自研）
+
+两段式自研（VV）重拓扑的完整链路 → [示例代码](src/main/java/com/visvise/sdk/examples/GenRTPConnectedExample.java)：
+
+1. `genRTPConnected`：创建连通体分组任务（node_type=19），等待完成后从 `output_model` 下载连通体分组产物 zip
+2. 在前端编辑连通体分组，把编辑结果重新打包成 zip 上传到当前账号的 COS 目录
+3. `saveRTPConnected`：保存该产物（同步接口），得到新的连通体资产 ID（node_type=19，status=3），无需轮询
+4. `genRetopology`：以保存得到的 `model_id` 作为 `parentModelId` 发起第二段重拓扑（node_type=1）
+
+```java
+// 第一段：重拓扑-连通体（node_type=19）
+GenRTPConnectedOptions connectedOpts = GenRTPConnectedOptions.create()
+    .setName("my_rtp_connected")                         // 可选，默认 "gen_rtp_connected"
+    .setAlgorithmModel("VISVISE-RTP-V1.0.0");            // 可选，不传自动选择首个可用模型
+
+String connectedId = client.genRTPConnected("path/to/model.fbx", connectedOpts, rtx);
+ModelInfo connected = client.waitModel(connectedId,
+    WaitOptions.create().setTimeout(900), rtx);
+System.out.println("连通体分组产物: " + connected.getOutputModel());
+
+// 保存前端编辑后的连通体产物（同步，返回新资产 ID）
+String savedId = client.saveRTPConnected(connectedId, "path/to/edited_rtp_connected.zip",
+    "my_rtp_connected_saved", rtx);
+
+// 第二段：重拓扑（parentModelId 指向保存后的连通体资产）
+GenRetopologyOptions opts2 = GenRetopologyOptions.create()
+    .setAlgorithmModel("VISVISE-RTP-V1.0.0")
+    .setFaceNum(50000)
+    .setSmoothStrength(1.0)
+    .setParentModelId(savedId);                          // 两段式自研重拓扑必传
+
+String modelId = client.genRetopology("path/to/edited_rtp_connected.zip", opts2, rtx);
 ```
 
 ---
@@ -723,6 +774,18 @@ ModelListResult result = api.getModelList(
 
 // 获取算法模型列表
 List<String> algModels = api.listAlgorithmModel(NodeType.ANIMATION.getValue(), null, rtx);
+
+// 创建 3D 生成任务（推荐：Gen3DModelRequest 支持 parent_model_id）
+Gen3DModelRequest req = new Gen3DModelRequest();
+req.setName("my_asset");
+req.setNodeType(NodeType.RE_TOPOLOGY.getValue());
+req.setParams(genParams);
+req.setParentModelId("Model2026...");
+req.setInputModel(modelZipUrl);
+List<String> modelIds = api.gen3DModel(req, rtx);
+
+// 保存重拓扑-连通体产物（同步，返回新资产 ID）
+SaveRTPConnectedResult saved = api.saveRTPConnected(connectedModelId, outputZipUrl, "name", rtx);
 
 // 获取下载链接
 String url = api.downloadModel("Model2026...", rtx);
